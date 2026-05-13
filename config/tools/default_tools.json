@@ -1,0 +1,60 @@
+{
+  "tools": [
+    {
+      "name": "transfer_call",
+      "description": "Transfiere la llamada telefónica actual a la extensión de un empleado o departamento específico. Usa esta función cuando el usuario pida hablar con alguien o ser transferido.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_name": {
+            "type": "string",
+            "description": "Nombre de la persona o departamento al que se desea transferir la llamada"
+          }
+        },
+        "required": ["target_name"]
+      }
+    },
+    {
+      "name": "lookup_extension",
+      "description": "Busca la extensión telefónica de un empleado o departamento en el directorio corporativo. Usa esta función para consultar información de contacto.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Nombre o departamento a buscar en el directorio"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "lookup_inventory",
+      "description": "Consulta el inventario de productos de la empresa. Busca por nombre de producto para obtener precio, stock y descripción.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_query": {
+            "type": "string",
+            "description": "Nombre o descripción del producto a buscar"
+          }
+        },
+        "required": ["product_query"]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "Finaliza la llamada telefónica actual. Usa esta función solo cuando el usuario se despida o pida explícitamente colgar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Razón por la que se finaliza la llamada"
+          }
+        },
+        "required": ["reason"]
+      }
+    }
+  ]
+}

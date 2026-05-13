@@ -1,0 +1,52 @@
+; ===================================================================
+; Ejemplo de configuración Asterisk para Nova Voice Agent
+; Archivo: /etc/asterisk/extensions.conf
+; ===================================================================
+
+[nova-agent]
+; Cuando alguien marca *999, enviar al AudioSocket de Nova
+exten => *999,1,NoOp(Iniciando Nova Voice Agent)
+ same => n,Answer()
+ same => n,Wait(0.5)
+ same => n,AudioSocket(${NOVA_UUID},${NOVA_HOST}:${NOVA_PORT})
+ same => n,Hangup()
+
+; ===================================================================
+; Variables globales (configurar en globals o dialplan)
+; NOVA_HOST = IP del servidor Python Nova
+; NOVA_PORT = Puerto AudioSocket (default: 9092)
+; NOVA_UUID = UUID único para identificar la sesión
+; ===================================================================
+
+[globals]
+NOVA_HOST=192.168.1.100
+NOVA_PORT=9092
+
+; ===================================================================
+; Ejemplo de configuración SIP Trunk para UCM63xx
+; Archivo: /etc/asterisk/pjsip.conf (sección relevante)
+; ===================================================================
+;
+; [ucm63xx-trunk]
+; type=endpoint
+; transport=transport-udp
+; context=from-ucm
+; disallow=all
+; allow=ulaw
+; allow=alaw
+; aors=ucm63xx-trunk
+; outbound_auth=ucm63xx-auth
+;
+; [ucm63xx-trunk]
+; type=aor
+; contact=sip:IP_DEL_UCM:5060
+;
+; [ucm63xx-auth]
+; type=auth
+; auth_type=userpass
+; username=nova_trunk
+; password=trunk_password
+;
+; [from-ucm]
+; exten => *999,1,Goto(nova-agent,*999,1)
+; ===================================================================
