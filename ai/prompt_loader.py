@@ -4,10 +4,26 @@ from config.settings import get_settings
 
 
 class PromptLoader:
-    def __init__(self):
+    def __init__(self, db=None):
         self.prompts_dir = get_settings().prompts_dir
+        self.db = db
 
-    def load(self, prompt_name: str = "nova_default") -> str:
+    def set_db(self, db):
+        """Inyectar la BD después de inicializar"""
+        self.db = db
+
+    async def load(self, prompt_name: str = "nova_default") -> str:
+        # Primero intenta cargar de BD si está disponible
+        if self.db:
+            try:
+                prompt_data = await self.db.get_prompt(prompt_name)
+                if prompt_data:
+                    logger.info(f"System prompt cargado desde BD: {prompt_name} ({len(prompt_data['system_prompt'])} chars)")
+                    return prompt_data["system_prompt"]
+            except Exception as e:
+                logger.warning(f"Error al cargar prompt de BD: {e}, usando archivo por defecto")
+
+        # Fallback a archivos
         filepath_yaml = os.path.join(self.prompts_dir, f"{prompt_name}.yaml")
         filepath_md = os.path.join(self.prompts_dir, f"{prompt_name}.md")
         
@@ -20,7 +36,7 @@ class PromptLoader:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        logger.info(f"System prompt cargado: {filepath} ({len(content)} chars)")
+        logger.info(f"System prompt cargado desde archivo: {filepath} ({len(content)} chars)")
         return content
 
     def list_prompts(self) -> list[str]:

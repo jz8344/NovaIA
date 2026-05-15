@@ -3,15 +3,870 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova — Panel de Administración</title>
-    <meta name="description" content="Panel de administración para configurar extensiones, inventario, prompts y monitoreo de Nova Voice Agent">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Nova — Panel Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --secondary: #c084fc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+
+        * {
+            color-scheme: dark;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(129, 140, 248, 0.2);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary) !important;
+            font-size: 1.5rem;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid rgba(129, 140, 248, 0.2);
+        }
+
+        .nav-tabs .nav-link {
+            color: #94a3b8;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background: transparent;
+            border-bottom-color: var(--primary);
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(129, 140, 248, 0.4);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            border: none;
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .form-control, .form-select, textarea {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            color: #e2e8f0;
+        }
+
+        .form-control:focus, .form-select:focus, textarea:focus {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: var(--primary);
+            color: #e2e8f0;
+            box-shadow: 0 0 0 0.2rem rgba(129, 140, 248, 0.25);
+        }
+
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .table {
+            color: #e2e8f0;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid rgba(129, 140, 248, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid rgba(129, 140, 248, 0.1);
+            transition: all 0.2s;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(129, 140, 248, 0.1);
+        }
+
+        .badge-status {
+            padding: 0.35rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-available {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .badge-unavailable {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #64748b;
+        }
+
+        .sort-icon {
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+        }
+
+        .sort-icon:hover {
+            opacity: 1;
+        }
+
+        .alert-custom {
+            border-left: 4px solid var(--primary);
+            background: rgba(129, 140, 248, 0.1);
+            color: #cbd5e1;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-microphone-alt"></i> Nova Admin
+            </span>
+            <a href="/" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-phone"></i> Volver a Voz
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-2"><i class="fas fa-sliders-h"></i> Panel de Configuración</h2>
+                <p class="text-muted mb-0">Administra extensiones, inventario, prompts y monitorea sesiones</p>
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div id="alertContainer" class="row mb-3" style="display: none;">
+            <div class="col-12">
+                <div class="alert alert-custom alert-dismissible fade show" role="alert" id="alertMessage">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    <span id="alertText"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="adminTabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-tab="extensions">
+                    <i class="fas fa-address-book"></i> Extensiones
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="inventory">
+                    <i class="fas fa-boxes"></i> Inventario
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="prompts">
+                    <i class="fas fa-brain"></i> System Prompt
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="sessions">
+                    <i class="fas fa-chart-line"></i> Sesiones
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-tab="logs">
+                    <i class="fas fa-history"></i> Logs
+                </a>
+            </li>
+        </ul>
+
+        <!-- EXTENSIONS TAB -->
+        <div id="panel-extensions" class="tab-panel active">
+            <div class="row mb-4">
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Agregar Extensión</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formAddExtension">
+                                <div class="mb-3">
+                                    <label for="extName" class="form-label">Nombre *</label>
+                                    <input type="text" class="form-control" id="extName" placeholder="Luis García" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="extNumber" class="form-label">Extensión *</label>
+                                    <input type="text" class="form-control" id="extNumber" placeholder="104" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="extDept" class="form-label">Departamento</label>
+                                    <input type="text" class="form-control" id="extDept" placeholder="Ventas">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="extEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="extEmail" placeholder="luis@empresa.com">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-check"></i> Agregar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> Directorio</h5>
+                            <input type="search" class="form-control form-control-sm" id="filterExtensions" placeholder="Filtrar..." style="max-width: 200px;">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="cursor: pointer;" onclick="sortTable('extensions', 'name')">Nombre <span class="sort-icon"></span></th>
+                                        <th style="cursor: pointer;" onclick="sortTable('extensions', 'extension')">Ext <span class="sort-icon"></span></th>
+                                        <th style="cursor: pointer;" onclick="sortTable('extensions', 'department')">Depto <span class="sort-icon"></span></th>
+                                        <th>Email</th>
+                                        <th>Estado</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="extensionsBody">
+                                    <tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY TAB -->
+        <div id="panel-inventory" class="tab-panel">
+            <div class="row mb-4">
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Agregar Producto</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formAddProduct">
+                                <div class="mb-3">
+                                    <label for="prodName" class="form-label">Producto *</label>
+                                    <input type="text" class="form-control" id="prodName" placeholder="Laptop ProBook" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="prodCategory" class="form-label">Categoría</label>
+                                    <input type="text" class="form-control" id="prodCategory" placeholder="Computadoras">
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label for="prodPrice" class="form-label">Precio (MXN)</label>
+                                        <input type="number" class="form-control" id="prodPrice" step="0.01" placeholder="18500">
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label for="prodStock" class="form-label">Stock</label>
+                                        <input type="number" class="form-control" id="prodStock" placeholder="15">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="prodDesc" class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="prodDesc" rows="2" placeholder="Detalles del producto..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-check"></i> Agregar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> Inventario</h5>
+                            <input type="search" class="form-control form-control-sm" id="filterInventory" placeholder="Filtrar..." style="max-width: 200px;">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="cursor: pointer;" onclick="sortTable('inventory', 'product_name')">Producto <span class="sort-icon"></span></th>
+                                        <th style="cursor: pointer;" onclick="sortTable('inventory', 'category')">Categoría <span class="sort-icon"></span></th>
+                                        <th style="cursor: pointer;" onclick="sortTable('inventory', 'price')">Precio <span class="sort-icon"></span></th>
+                                        <th style="cursor: pointer;" onclick="sortTable('inventory', 'stock')">Stock <span class="sort-icon"></span></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryBody">
+                                    <tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROMPTS TAB -->
+        <div id="panel-prompts" class="tab-panel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-brain"></i> System Prompt del Agente</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="promptName" class="form-label">Nombre del Prompt</label>
+                                    <input type="text" class="form-control" id="promptName" placeholder="ej: nova_default" value="nova_default">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="promptDesc" class="form-label">Descripción</label>
+                                    <input type="text" class="form-control" id="promptDesc" placeholder="Descripción del prompt">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="promptEditor" class="form-label">Contenido (Markdown)</label>
+                                <textarea class="form-control" id="promptEditor" rows="15" style="font-family: 'Courier New', monospace; font-size: 0.9rem;" placeholder="Escribe el system prompt aquí..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="btnSavePrompt">
+                                <i class="fas fa-save"></i> Guardar Prompt
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-history"></i> Prompts Guardados</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Última Actualización</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="promptsBody">
+                                    <tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSIONS TAB -->
+        <div id="panel-sessions" class="tab-panel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-headset"></i> Sesiones Activas</h5>
+                            <button class="btn btn-sm btn-primary" id="btnRefreshSessions">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Session ID</th>
+                                        <th>Fuente</th>
+                                        <th>Caller ID</th>
+                                        <th>Duración</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sessionsBody">
+                                    <tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS TAB -->
+        <div id="panel-logs" class="tab-panel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-file-lines"></i> Últimos Registros</h5>
+                            <select class="form-select form-select-sm" id="logsLimit" style="max-width: 100px;">
+                                <option value="20">Últimos 20</option>
+                                <option value="50" selected>Últimos 50</option>
+                                <option value="100">Últimos 100</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Session ID</th>
+                                        <th>Caller ID</th>
+                                        <th>Fuente</th>
+                                        <th>Duración</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsBody">
+                                    <tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales para estado de tablas
+        let tablesState = {
+            extensions: { data: [], sortField: 'name', sortDir: 'asc' },
+            inventory: { data: [], sortField: 'product_name', sortDir: 'asc' }
+        };
+
+        // Mostrar/ocultar tabs
+        document.querySelectorAll('#adminTabs .nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tab = link.dataset.tab;
+                
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector(`#panel-${tab}`).classList.add('active');
+
+                document.querySelectorAll('#adminTabs .nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                if (tab === 'extensions') loadExtensions();
+                if (tab === 'inventory') loadInventory();
+                if (tab === 'prompts') loadPrompts();
+                if (tab === 'sessions') loadSessions();
+                if (tab === 'logs') loadLogs();
+            });
+        });
+
+        // Mostrar alertas
+        function showAlert(msg, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alertText = document.getElementById('alertText');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            alertText.textContent = msg;
+            alertMessage.className = `alert alert-custom alert-${type} alert-dismissible fade show`;
+            container.style.display = 'block';
+            
+            setTimeout(() => container.style.display = 'none', 3000);
+        }
+
+        // ========== EXTENSIONES ==========
+        async function loadExtensions() {
+            try {
+                const res = await fetch('/api/admin/extensions');
+                const data = await res.json();
+                tablesState.extensions.data = data;
+                renderExtensions();
+            } catch (e) {
+                showAlert('Error al cargar extensiones', 'danger');
+            }
+        }
+
+        function renderExtensions() {
+            const tbody = document.getElementById('extensionsBody');
+            let filtered = tablesState.extensions.data;
+
+            const searchTerm = document.getElementById('filterExtensions')?.value.toLowerCase() || '';
+            if (searchTerm) {
+                filtered = filtered.filter(r => 
+                    r.name.toLowerCase().includes(searchTerm) ||
+                    r.extension.includes(searchTerm) ||
+                    r.department.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Aplicar sort
+            const field = tablesState.extensions.sortField;
+            const dir = tablesState.extensions.sortDir;
+            filtered.sort((a, b) => {
+                const aVal = a[field]?.toString().toLowerCase() || '';
+                const bVal = b[field]?.toString().toLowerCase() || '';
+                return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Sin resultados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr>
+                    <td>${r.name}</td>
+                    <td><strong>${r.extension}</strong></td>
+                    <td>${r.department}</td>
+                    <td>${r.email}</td>
+                    <td><span class="badge-status ${r.available ? 'badge-available' : 'badge-unavailable'}">${r.available ? 'Disponible' : 'No disponible'}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteExtension(${r.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('formAddExtension').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('extName').value,
+                extension: document.getElementById('extNumber').value,
+                department: document.getElementById('extDept').value,
+                email: document.getElementById('extEmail').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/extensions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                showAlert(result.message || 'Extensión agregada');
+                e.target.reset();
+                await loadExtensions();
+            } catch (e) {
+                showAlert('Error al agregar extensión', 'danger');
+            }
+        });
+
+        async function deleteExtension(id) {
+            if (!confirm('¿Eliminar extensión?')) return;
+            try {
+                await fetch(`/api/admin/extensions/${id}`, { method: 'DELETE' });
+                showAlert('Extensión eliminada');
+                await loadExtensions();
+            } catch (e) {
+                showAlert('Error al eliminar', 'danger');
+            }
+        }
+
+        document.getElementById('filterExtensions')?.addEventListener('input', renderExtensions);
+
+        // ========== INVENTARIO ==========
+        async function loadInventory() {
+            try {
+                const res = await fetch('/api/admin/inventory');
+                const data = await res.json();
+                tablesState.inventory.data = data;
+                renderInventory();
+            } catch (e) {
+                showAlert('Error al cargar inventario', 'danger');
+            }
+        }
+
+        function renderInventory() {
+            const tbody = document.getElementById('inventoryBody');
+            let filtered = tablesState.inventory.data;
+
+            const searchTerm = document.getElementById('filterInventory')?.value.toLowerCase() || '';
+            if (searchTerm) {
+                filtered = filtered.filter(r => 
+                    r.product_name.toLowerCase().includes(searchTerm) ||
+                    r.category.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Aplicar sort
+            const field = tablesState.inventory.sortField;
+            const dir = tablesState.inventory.sortDir;
+            filtered.sort((a, b) => {
+                const aVal = isNaN(a[field]) ? (a[field]?.toString().toLowerCase() || '') : Number(a[field]);
+                const bVal = isNaN(b[field]) ? (b[field]?.toString().toLowerCase() || '') : Number(b[field]);
+                if (typeof aVal === 'number') {
+                    return dir === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin resultados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr>
+                    <td>${r.product_name}</td>
+                    <td>${r.category}</td>
+                    <td>$${r.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                    <td>${r.stock}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteInventory(${r.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('formAddProduct').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                product_name: document.getElementById('prodName').value,
+                description: document.getElementById('prodDesc').value,
+                price: parseFloat(document.getElementById('prodPrice').value),
+                stock: parseInt(document.getElementById('prodStock').value),
+                category: document.getElementById('prodCategory').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/inventory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                showAlert(result.message || 'Producto agregado');
+                e.target.reset();
+                await loadInventory();
+            } catch (e) {
+                showAlert('Error al agregar producto', 'danger');
+            }
+        });
+
+        async function deleteInventory(id) {
+            if (!confirm('¿Eliminar producto?')) return;
+            try {
+                await fetch(`/api/admin/inventory/${id}`, { method: 'DELETE' });
+                showAlert('Producto eliminado');
+                await loadInventory();
+            } catch (e) {
+                showAlert('Error al eliminar', 'danger');
+            }
+        }
+
+        document.getElementById('filterInventory')?.addEventListener('input', renderInventory);
+
+        // ========== PROMPTS ==========
+        async function loadPrompts() {
+            try {
+                const res = await fetch('/api/admin/prompts');
+                const prompts = await res.json();
+                
+                const tbody = document.getElementById('promptsBody');
+                if (prompts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Sin prompts guardados</td></tr>';
+                } else {
+                    tbody.innerHTML = prompts.map(p => `
+                        <tr>
+                            <td>${p.name}</td>
+                            <td>${p.description || '-'}</td>
+                            <td>${new Date(p.updated_at).toLocaleString('es-MX')}</td>
+                            <td><button class="btn btn-sm btn-primary" onclick="loadPromptContent('${p.name}')"><i class="fas fa-edit"></i></button></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                showAlert('Error al cargar prompts', 'danger');
+            }
+        }
+
+        async function loadPromptContent(name) {
+            try {
+                const res = await fetch(`/api/admin/prompts/${name}`);
+                const data = await res.json();
+                document.getElementById('promptName').value = data.name;
+                document.getElementById('promptDesc').value = data.description || '';
+                document.getElementById('promptEditor').value = data.system_prompt;
+            } catch (e) {
+                showAlert('Error al cargar prompt', 'danger');
+            }
+        }
+
+        document.getElementById('btnSavePrompt').addEventListener('click', async () => {
+            const data = {
+                name: document.getElementById('promptName').value,
+                content: document.getElementById('promptEditor').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/prompts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                showAlert('Prompt guardado correctamente');
+                await loadPrompts();
+            } catch (e) {
+                showAlert('Error al guardar prompt', 'danger');
+            }
+        });
+
+        // ========== SESIONES ==========
+        async function loadSessions() {
+            try {
+                const res = await fetch('/api/admin/sessions');
+                const data = await res.json();
+                const tbody = document.getElementById('sessionsBody');
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin sesiones activas</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(s => `
+                        <tr>
+                            <td><small>${s.session_id}</small></td>
+                            <td>${s.source}</td>
+                            <td>${s.caller_id || '-'}</td>
+                            <td>${s.duration}s</td>
+                            <td><span class="badge-status badge-available">${s.active ? 'Activa' : 'Inactiva'}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                showAlert('Error al cargar sesiones', 'danger');
+            }
+        }
+
+        document.getElementById('btnRefreshSessions')?.addEventListener('click', loadSessions);
+
+        // ========== LOGS ==========
+        async function loadLogs() {
+            const limit = document.getElementById('logsLimit')?.value || 50;
+            try {
+                const res = await fetch(`/api/admin/logs?limit=${limit}`);
+                const data = await res.json();
+                const tbody = document.getElementById('logsBody');
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin registros</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(log => `
+                        <tr>
+                            <td><small>${log.session_id}</small></td>
+                            <td>${log.caller_id || '-'}</td>
+                            <td>${log.source}</td>
+                            <td>${log.duration ? log.duration.toFixed(1) : 0}s</td>
+                            <td>${new Date(log.created_at).toLocaleString('es-MX')}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                showAlert('Error al cargar logs', 'danger');
+            }
+        }
+
+        document.getElementById('logsLimit')?.addEventListener('change', loadLogs);
+
+        // ========== UTILIDADES ==========
+        function sortTable(tableType, field) {
+            const state = tablesState[tableType];
+            if (state.sortField === field) {
+                state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortField = field;
+                state.sortDir = 'asc';
+            }
+
+            if (tableType === 'extensions') renderExtensions();
+            else if (tableType === 'inventory') renderInventory();
+        }
+
+        // Cargar extensiones al iniciar
+        loadExtensions();
+    </script>
+</body>
+</html>
         <div class="ambient-bg">
             <div class="orb orb-1"></div>
             <div class="orb orb-2"></div>

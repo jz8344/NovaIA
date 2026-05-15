@@ -53,6 +53,7 @@ async def lifespan(app: FastAPI):
 
     await db.connect()
     await seed_database(db)
+    prompt_loader.set_db(db)
 
     set_lookup_ext_db(db)
     set_lookup_inv_db(db)
