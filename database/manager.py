@@ -17,36 +17,6 @@ class DatabaseManager:
         nfd = unicodedata.normalize('NFD', text)
         return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn').lower()
 
-    @staticmethod
-    def _extract_numbers(text: str) -> list[str]:
-        """Extraer números en palabras y dígitos de un texto"""
-        text_lower = text.lower()
-        
-        # Mapeo de palabras a números
-        word_to_num = {
-            'cero': '0', 'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4',
-            'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9',
-            'diez': '10', 'once': '11', 'doce': '12', 'trece': '13', 'catorce': '14',
-            'quince': '15', 'dieciséis': '16', 'diecisiete': '17', 'dieciocho': '18',
-            'diecinueve': '19', 'veinte': '20', 'treinta': '30', 'cuarenta': '40',
-            'cincuenta': '50', 'sesenta': '60', 'setenta': '70', 'ochenta': '80',
-            'noventa': '90', 'cien': '100', 'ciento': '100'
-        }
-        
-        numbers = []
-        
-        # Extraer dígitos
-        import re
-        digits = re.findall(r'\d+', text)
-        numbers.extend(digits)
-        
-        # Convertir palabras a números
-        for word, num in word_to_num.items():
-            if word in text_lower:
-                numbers.append(num)
-        
-        return numbers
-
     async def connect(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self._db = await aiosqlite.connect(self.db_path)
@@ -62,9 +32,8 @@ class DatabaseManager:
 
     async def search_extension(self, query: str) -> list[dict]:
         normalized_query = self._normalize_text(query)
-        extracted_numbers = self._extract_numbers(query)
-        
-        logger.info(f"[DEBUG] Query: '{query}' (normalizado: '{normalized_query}') | Números: {extracted_numbers}")
+        pattern = f"%{normalized_query}%"
+        logger.info(f"[DEBUG] Query: '{query}' (normalizado: '{normalized_query}') | Pattern: '{pattern}'")
         
         async with self._db.execute("SELECT * FROM extensions") as cursor:
             all_rows = await cursor.fetchall()
@@ -73,23 +42,17 @@ class DatabaseManager:
         for row in all_rows:
             normalized_name = self._normalize_text(row["name"])
             normalized_dept = self._normalize_text(row["department"])
-            
-            # Búsqueda por texto normalizado
             if normalized_query in normalized_name or normalized_query in normalized_dept:
-                results.append(row)
-            # Búsqueda por números extraídos
-            elif any(num in row["extension"] for num in extracted_numbers):
-                results.append(row)
+                results.append({
+                    "name": row["name"],
+                    "extension": row["extension"],
+                    "department": row["department"],
+                    "email": row["email"],
+                    "available": row["available"]
+                })
         
         logger.info(f"[DEBUG] Filas encontradas: {len(results)}")
-        
-        return [{
-            "name": row["name"],
-            "extension": row["extension"],
-            "department": row["department"],
-            "email": row["email"],
-            "available": row["available"]
-        } for row in results]
+        return results
 
     async def search_inventory(self, query: str) -> list[dict]:
         normalized_query = self._normalize_text(query)
@@ -163,34 +126,3 @@ class DatabaseManager:
         async with self._db.execute(sql, (limit,)) as cursor:
             rows = await cursor.fetchall()
             return [dict(row) for row in rows]
-
-    # --- Prompts ---
-    async def save_prompt(self, name: str, system_prompt: str, description: str = "") -> dict:
-        sql = """
-            INSERT INTO prompts (name, system_prompt, description, updated_at)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-            ON CONFLICT(name) DO UPDATE SET 
-                system_prompt = excluded.system_prompt,
-                description = excluded.description,
-                updated_at = CURRENT_TIMESTAMP
-        """
-        await self._db.execute(sql, (name, system_prompt, description))
-        await self._db.commit()
-        logger.info(f"Prompt guardado: {name}")
-        return {"success": True, "message": f"Prompt '{name}' guardado correctamente"}
-
-    async def get_prompt(self, name: str) -> dict | None:
-        sql = "SELECT * FROM prompts WHERE name = ?"
-        async with self._db.execute(sql, (name,)) as cursor:
-            row = await cursor.fetchone()
-            return dict(row) if row else None
-
-    async def get_all_prompts(self) -> list[dict]:
-        async with self._db.execute("SELECT id, name, description, updated_at FROM prompts ORDER BY updated_at DESC") as cursor:
-            rows = await cursor.fetchall()
-            return [dict(row) for row in rows]
-
-    async def delete_prompt(self, prompt_id: int):
-        await self._db.execute("DELETE FROM prompts WHERE id = ?", (prompt_id,))
-        await self._db.commit()
-        logger.info(f"Prompt eliminado: ID {prompt_id}")

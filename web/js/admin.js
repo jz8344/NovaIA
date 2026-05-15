@@ -1,22 +1,405 @@
 const API_BASE = '/api/admin';
 
-class NovaAdmin {
-    constructor() {
-        this.currentTab = 'extensions';
-        this.init();
+let tablesState = {
+    extensions: { data: [], sortField: 'name', sortDir: 'asc', filtered: [] },
+    inventory: { data: [], sortField: 'product_name', sortDir: 'asc', filtered: [] }
+};
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+    setupTabs();
+    setupExtensions();
+    setupInventory();
+    setupPrompts();
+    setupSessions();
+    setupLogs();
+    loadExtensions();
+});
+
+// ========== TABS ==========
+function setupTabs() {
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const panelId = `panel-${tab.dataset.tab}`;
+            const panel = document.getElementById(panelId);
+            if (panel) panel.classList.add('active');
+            
+            onTabChange(tab.dataset.tab);
+        });
+    });
+}
+
+function onTabChange(tab) {
+    switch (tab) {
+        case 'extensions': loadExtensions(); break;
+        case 'inventory': loadInventory(); break;
+        case 'prompts': loadPrompts(); break;
+        case 'sessions': loadSessions(); break;
+        case 'logs': loadLogs(); break;
+    }
+}
+
+function showAlert(msg, type = 'success') {
+    const alert = document.createElement('div');
+    alert.className = `toast ${type}`;
+    alert.textContent = msg;
+    document.body.appendChild(alert);
+    setTimeout(() => alert.remove(), 3000);
+}
+
+// ========== EXTENSIONS ==========
+function setupExtensions() {
+    document.getElementById('btnToggleExtForm').addEventListener('click', () => {
+        const container = document.getElementById('extFormContainer');
+        container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('formAddExtension').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            name: document.getElementById('extName').value,
+            extension: document.getElementById('extNumber').value,
+            department: document.getElementById('extDept').value,
+            email: document.getElementById('extEmail').value
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/extensions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            showAlert(result.message || 'Extensión agregada');
+            e.target.reset();
+            document.getElementById('extFormContainer').style.display = 'none';
+            await loadExtensions();
+        } catch (e) {
+            showAlert('Error al agregar extensión', 'error');
+        }
+    });
+
+    document.getElementById('filterExtensions')?.addEventListener('input', renderExtensions);
+}
+
+async function loadExtensions() {
+    try {
+        const res = await fetch(`${API_BASE}/extensions`);
+        tablesState.extensions.data = await res.json();
+        renderExtensions();
+    } catch (e) {
+        showAlert('Error al cargar extensiones', 'error');
+    }
+}
+
+function renderExtensions() {
+    const tbody = document.getElementById('extensionsBody');
+    let filtered = [...tablesState.extensions.data];
+
+    const searchTerm = document.getElementById('filterExtensions')?.value.toLowerCase() || '';
+    if (searchTerm) {
+        filtered = filtered.filter(r => 
+            r.name.toLowerCase().includes(searchTerm) ||
+            r.extension.includes(searchTerm) ||
+            r.department.toLowerCase().includes(searchTerm) ||
+            r.email.toLowerCase().includes(searchTerm)
+        );
     }
 
-    init() {
-        this.setupTabs();
-        this.setupExtensions();
-        this.setupInventory();
-        this.setupPrompts();
-        this.setupTools();
-        this.setupSessions();
-        this.setupLogs();
+    // Aplicar sort
+    const field = tablesState.extensions.sortField;
+    const dir = tablesState.extensions.sortDir;
+    filtered.sort((a, b) => {
+        const aVal = (a[field] || '').toString().toLowerCase();
+        const bVal = (b[field] || '').toString().toLowerCase();
+        return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
 
-        this.loadExtensions();
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Sin resultados</td></tr>';
+        return;
     }
+
+    tbody.innerHTML = filtered.map(r => `
+        <tr>
+            <td><strong>${r.name}</strong></td>
+            <td><span class="extension-badge">${r.extension}</span></td>
+            <td>${r.department}</td>
+            <td>${r.email}</td>
+            <td><span class="status-badge ${r.available ? 'active' : 'inactive'}">${r.available ? 'Disponible' : 'No disponible'}</span></td>
+            <td><button class="btn-delete" onclick="deleteExtension(${r.id})" title="Eliminar">×</button></td>
+        </tr>
+    `).join('');
+}
+
+async function deleteExtension(id) {
+    if (!confirm('¿Eliminar esta extensión?')) return;
+    try {
+        await fetch(`${API_BASE}/extensions/${id}`, { method: 'DELETE' });
+        showAlert('Extensión eliminada');
+        await loadExtensions();
+    } catch (e) {
+        showAlert('Error al eliminar', 'error');
+    }
+}
+
+function sortTable(tableType, field) {
+    const state = tablesState[tableType];
+    if (state.sortField === field) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+        state.sortField = field;
+        state.sortDir = 'asc';
+    }
+    
+    if (tableType === 'extensions') renderExtensions();
+    else if (tableType === 'inventory') renderInventory();
+}
+
+// ========== INVENTORY ==========
+function setupInventory() {
+    document.getElementById('btnToggleProdForm').addEventListener('click', () => {
+        const container = document.getElementById('prodFormContainer');
+        container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('formAddProduct').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            product_name: document.getElementById('prodName').value,
+            description: document.getElementById('prodDesc').value,
+            price: parseFloat(document.getElementById('prodPrice').value) || 0,
+            stock: parseInt(document.getElementById('prodStock').value) || 0,
+            category: document.getElementById('prodCategory').value
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/inventory`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            showAlert(result.message || 'Producto agregado');
+            e.target.reset();
+            document.getElementById('prodFormContainer').style.display = 'none';
+            await loadInventory();
+        } catch (e) {
+            showAlert('Error al agregar producto', 'error');
+        }
+    });
+
+    document.getElementById('filterInventory')?.addEventListener('input', renderInventory);
+}
+
+async function loadInventory() {
+    try {
+        const res = await fetch(`${API_BASE}/inventory`);
+        tablesState.inventory.data = await res.json();
+        renderInventory();
+    } catch (e) {
+        showAlert('Error al cargar inventario', 'error');
+    }
+}
+
+function renderInventory() {
+    const tbody = document.getElementById('inventoryBody');
+    let filtered = [...tablesState.inventory.data];
+
+    const searchTerm = document.getElementById('filterInventory')?.value.toLowerCase() || '';
+    if (searchTerm) {
+        filtered = filtered.filter(r => 
+            r.product_name.toLowerCase().includes(searchTerm) ||
+            r.category.toLowerCase().includes(searchTerm) ||
+            (r.brand && r.brand.toLowerCase().includes(searchTerm))
+        );
+    }
+
+    // Aplicar sort
+    const field = tablesState.inventory.sortField;
+    const dir = tablesState.inventory.sortDir;
+    filtered.sort((a, b) => {
+        let aVal = a[field];
+        let bVal = b[field];
+        
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return dir === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        
+        aVal = (aVal || '').toString().toLowerCase();
+        bVal = (bVal || '').toString().toLowerCase();
+        return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin resultados</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(r => `
+        <tr>
+            <td><strong>${r.product_name}</strong></td>
+            <td>${r.category}</td>
+            <td>$${r.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+            <td><span class="stock-badge ${r.stock > 5 ? 'high' : r.stock > 0 ? 'medium' : 'low'}">${r.stock}</span></td>
+            <td><button class="btn-delete" onclick="deleteInventory(${r.id})" title="Eliminar">×</button></td>
+        </tr>
+    `).join('');
+}
+
+async function deleteInventory(id) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    try {
+        await fetch(`${API_BASE}/inventory/${id}`, { method: 'DELETE' });
+        showAlert('Producto eliminado');
+        await loadInventory();
+    } catch (e) {
+        showAlert('Error al eliminar', 'error');
+    }
+}
+
+// ========== PROMPTS ==========
+function setupPrompts() {
+    document.getElementById('btnSavePrompt').addEventListener('click', async () => {
+        const data = {
+            name: document.getElementById('promptName').value || 'nova_default',
+            content: document.getElementById('promptEditor').value
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/prompts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            showAlert('Prompt guardado correctamente');
+            await loadPrompts();
+        } catch (e) {
+            showAlert('Error al guardar prompt', 'error');
+        }
+    });
+}
+
+async function loadPrompts() {
+    try {
+        const res = await fetch(`${API_BASE}/prompts`);
+        const prompts = await res.json();
+        
+        const tbody = document.getElementById('promptsBody');
+        if (prompts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Sin prompts guardados</td></tr>';
+        } else {
+            tbody.innerHTML = prompts.map(p => {
+                const date = new Date(p.updated_at).toLocaleString('es-MX');
+                return `
+                    <tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.description || '-'}</td>
+                        <td>${date}</td>
+                        <td>
+                            <button class="btn-edit" onclick="loadPromptContent('${p.name}')" title="Editar">✎</button>
+                            <button class="btn-delete" onclick="deletePrompt(${p.id})" title="Eliminar">×</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        showAlert('Error al cargar prompts', 'error');
+    }
+}
+
+async function loadPromptContent(name) {
+    try {
+        const res = await fetch(`${API_BASE}/prompts/${name}`);
+        const data = await res.json();
+        document.getElementById('promptName').value = data.name;
+        document.getElementById('promptDesc').value = data.description || '';
+        document.getElementById('promptEditor').value = data.system_prompt;
+        document.querySelector('[data-tab="prompts"]').click();
+    } catch (e) {
+        showAlert('Error al cargar prompt', 'error');
+    }
+}
+
+async function deletePrompt(id) {
+    if (!confirm('¿Eliminar este prompt?')) return;
+    try {
+        await fetch(`${API_BASE}/prompts/${id}`, { method: 'DELETE' });
+        showAlert('Prompt eliminado');
+        await loadPrompts();
+    } catch (e) {
+        showAlert('Error al eliminar', 'error');
+    }
+}
+
+// ========== SESSIONS ==========
+function setupSessions() {
+    document.getElementById('btnRefreshSessions').addEventListener('click', loadSessions);
+}
+
+async function loadSessions() {
+    try {
+        const res = await fetch(`${API_BASE}/sessions`);
+        const data = await res.json();
+        const tbody = document.getElementById('sessionsBody');
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin sesiones activas</td></tr>';
+        } else {
+            tbody.innerHTML = data.map(s => `
+                <tr>
+                    <td><code>${s.session_id.substring(0, 8)}...</code></td>
+                    <td>${s.source}</td>
+                    <td>${s.caller_id || '-'}</td>
+                    <td>${s.duration}s</td>
+                    <td><span class="status-badge active">Activa</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {
+        showAlert('Error al cargar sesiones', 'error');
+    }
+}
+
+// ========== LOGS ==========
+function setupLogs() {
+    document.getElementById('logsLimit')?.addEventListener('change', loadLogs);
+}
+
+async function loadLogs() {
+    const limit = document.getElementById('logsLimit')?.value || 50;
+    try {
+        const res = await fetch(`${API_BASE}/logs?limit=${limit}`);
+        const data = await res.json();
+        const tbody = document.getElementById('logsBody');
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin registros</td></tr>';
+        } else {
+            tbody.innerHTML = data.map(log => {
+                const date = new Date(log.created_at).toLocaleString('es-MX');
+                return `
+                    <tr>
+                        <td>${date}</td>
+                        <td><code>${log.session_id.substring(0, 8)}...</code></td>
+                        <td>${log.source}</td>
+                        <td>${log.duration ? log.duration.toFixed(1) : 0}s</td>
+                        <td>${log.actions_taken ? log.actions_taken.substring(0, 30) : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        showAlert('Error al cargar logs', 'error');
+    }
+}
 
     setupTabs() {
         document.querySelectorAll('.admin-tab').forEach(tab => {

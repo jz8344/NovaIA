@@ -44,33 +44,3 @@ async def seed_database(db: DatabaseManager):
         await db.add_inventory_item(name, desc, price, stock, cat, brand, color, weight)
 
     logger.info("Datos iniciales insertados correctamente")
-
-    # Agregar prompt por defecto si no existe
-    default_prompt = await db.get_prompt("nova_default")
-    if not default_prompt:
-        await db.save_prompt(
-            "nova_default",
-            """# Nova Voice Agent - System Prompt
-
-Eres un asistente de voz profesional e inteligente para una empresa. Tu objetivo es ayudar a los clientes de forma amable y eficiente.
-
-## Características Principales
-- Responde siempre en español y de manera clara
-- Eres cortés, profesional y paciente
-- Tienes acceso a funciones para transferencias y búsquedas
-- Puedes buscar extensiones de empleados y productos del inventario
-
-## Comportamiento
-1. Saluda al cliente de forma amable
-2. Escucha atentamente lo que necesita
-3. Usa las funciones disponibles para ayudar
-4. Proporciona información clara y concisa
-5. Ofrece alternativas si no encuentras lo que buscan
-
-## Límites
-- No compartas información confidencial
-- Siempre ofrece transferir a un humano si es necesario
-- Mantén un tono profesional en todo momento""",
-            "Prompt por defecto del agente Nova"
-        )
-        logger.info("Prompt por defecto creado")

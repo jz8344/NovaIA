@@ -92,7 +92,7 @@ class NovaVoiceApp {
             this.updateUI('recording');
             this.startTimer();
             this.startWaveformAnimation();
-            this.logEvent('system', 'Conectado a Nova. Habla ahora...');
+            this.logEvent('system', 'Conectado al Asistente Virtual. Habla ahora...');
         };
 
         this.ws.onmessage = (event) => {
@@ -193,7 +193,7 @@ class NovaVoiceApp {
                 this.stopIcon.classList.remove('hidden');
                 this.voiceVisualizer.classList.add('active');
                 this.waveformBar.classList.add('active');
-                this.voiceInstruction.textContent = 'Escuchando... Habla con Nova';
+                this.voiceInstruction.textContent = 'Escuchando... Habla con el Asistente Virtual';
                 break;
 
             case 'idle':
@@ -204,7 +204,7 @@ class NovaVoiceApp {
                 this.stopIcon.classList.add('hidden');
                 this.voiceVisualizer.classList.remove('active');
                 this.waveformBar.classList.remove('active');
-                this.voiceInstruction.textContent = 'Presiona el micrófono para hablar con Nova';
+                this.voiceInstruction.textContent = 'Presiona el micrófono para hablar con el Asistente Virtual';
                 break;
         }
     }

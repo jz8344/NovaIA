@@ -23,8 +23,8 @@ class GeminiLiveClient:
         else:
             logger.warning("GEMINI_API_KEY no configurada. Configúrala en .env para habilitar la IA.")
 
-    async def _build_config(self, prompt_name: str = "nova_default") -> types.LiveConnectConfig:
-        system_prompt = await self._prompt_loader.load(prompt_name)
+    def _build_config(self, prompt_name: str = "nova_default") -> types.LiveConnectConfig:
+        system_prompt = self._prompt_loader.load(prompt_name)
         tools = self._registry.load_schemas()
 
         config = types.LiveConnectConfig(
@@ -46,7 +46,7 @@ class GeminiLiveClient:
             logger.error("No se puede iniciar sesión: GEMINI_API_KEY no configurada")
             return
 
-        config = await self._build_config(prompt_name)
+        config = self._build_config(prompt_name)
         logger.info(f"Conectando sesión {session.session_id} a Gemini Live...")
 
         try:

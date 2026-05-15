@@ -106,27 +106,31 @@ async def list_active_sessions():
 # --- System Prompts ---
 @router.get("/prompts")
 async def list_prompts():
-    """Listar todos los prompts guardados en BD"""
-    return await _db.get_all_prompts()
+    return _prompt_loader.list_prompts()
 
 
 @router.get("/prompts/{name}")
 async def get_prompt(name: str):
-    """Obtener un prompt específico de BD"""
-    prompt_data = await _db.get_prompt(name)
-    if not prompt_data:
-        raise HTTPException(status_code=404, detail=f"Prompt '{name}' no encontrado")
-    return prompt_data
+    content = _prompt_loader.load(name)
+    return {"name": name, "content": content}
 
 
-@router.post("/prompts")
-async def save_prompt(data: PromptUpdate):
-    """Guardar o actualizar un prompt en BD"""
-    return await _db.save_prompt(data.name, data.content)
-
-
-@router.delete("/prompts/{prompt_id}")
-async def delete_prompt(prompt_id: int):
-    """Eliminar un prompt de BD"""
-    await _db.delete_prompt(prompt_id)
-    return {"success": True, "message": "Prompt eliminado"}
+@router.put("/prompts/{name}")
+async def update_prompt(name: str, data: PromptUpdate):
+    import os
+    os.makedirs(_prompt_loader.prompts_dir, exist_ok=True)
+    
+    filepath_md = os.path.join(_prompt_loader.prompts_dir, f"{name}.md")
+    with open(filepath_md, "w", encoding="utf-8") as f:
+        f.write(data.content)
+    
+    filepath_yaml = os.path.join(_prompt_loader.prompts_dir, f"{name}.yaml")
+    try:
+        import yaml
+        yaml.safe_load(data.content)
+        with open(filepath_yaml, "w", encoding="utf-8") as f:
+            f.write(data.content)
+    except:
+        pass
+    
+    return {"success": True, "message": f"Prompt '{name}' guardado en archivos"}
