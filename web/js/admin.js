@@ -1,8 +1,8 @@
 const API_BASE = '/api/admin';
 
-const P_VALS = new Set(['warm','formal','concise','detailed','empathetic','patient','proactive','confirm']);
-const C_VALS = new Set(['transfer','directory','inventory','messages','general','schedule','support']);
-const R_VALS = new Set(['character_lock','no_hallucinations','cross_validation','synonym_search']);
+const P_VALS = new Set(['human_sales','warm','formal','concise','detailed','empathetic','patient','proactive','confirm','repeat_before_transfer','list_options']);
+const C_VALS = new Set(['transfer','directory','inventory','messages','general','schedule','support','faq','order_status']);
+const R_VALS = new Set(['character_lock','no_hallucinations','cross_validation','synonym_search','no_personal_data','abuse_protection']);
 
 const LANG_MAP = {
     es: 'Responde siempre en español, independientemente del idioma del usuario.',
@@ -17,6 +17,7 @@ const TONE_MAP = {
     very_casual:'Usa un tono muy casual y conversacional.'
 };
 const PERS_MAP = {
+    human_sales:'Actúa como un vendedor sumamente empático, paciente y muy humano. Prohíbe terminantemente el uso de términos robóticos, técnicos o clínicos como "abrumar", "saturar", "parámetros", "limitar" o "saturación". En su lugar, exprésate de manera muy cálida y amigable, guiando al usuario con naturalidad y facilitándole la elección con un tono conversacional fluido, cercano y servicial.',
     warm:'Sé cálido y amigable con el usuario.',
     formal:'Mantén formalidad en todo momento.',
     concise:'Sé conciso, no des explicaciones largas a menos que se pida.',
@@ -24,7 +25,9 @@ const PERS_MAP = {
     empathetic:'Muestra empatía con el usuario.',
     patient:'Sé paciente y repite la información si es necesario.',
     proactive:'Anticipa las necesidades del usuario y ofrece ayuda proactivamente.',
-    confirm:'Siempre confirma antes de realizar acciones importantes.'
+    confirm:'Siempre confirma antes de realizar acciones importantes.',
+    repeat_before_transfer:'Repite nombre y extensión antes de transferir.',
+    list_options:'Lista múltiples opciones si hay ambigüedad.'
 };
 const CAP_MAP = {
     transfer:'- Transferir llamadas: Busca la extensión en el directorio y transfiere.',
@@ -33,13 +36,17 @@ const CAP_MAP = {
     messages:'- Tomar mensajes: Si la persona no está disponible.',
     general:'- Información general: Responde preguntas sobre la empresa.',
     schedule:'- Agendar citas o reuniones.',
-    support:'- Soporte técnico básico.'
+    support:'- Soporte técnico básico.',
+    faq:'- Responder preguntas frecuentes (FAQs).',
+    order_status:'- Informar estatus de pedidos o solicitudes.'
 };
 const RULE_MAP = {
     character_lock:'BAJO NINGUNA CIRCUNSTANCIA debes salirte de tu personaje.',
     no_hallucinations:'NO inventes nombres, extensiones ni productos que no estén en la base de datos.',
     cross_validation:'Si el usuario menciona un departamento, verifica que el resultado coincida antes de transferir.',
-    synonym_search:'Si una búsqueda falla, intenta con sinónimos y sé transparente al respecto.'
+    synonym_search:'Si una búsqueda falla, intenta con sinónimos y sé transparente al respecto.',
+    no_personal_data:'NUNCA compartas datos personales de empleados (emails personales, teléfonos).',
+    abuse_protection:'Finaliza la llamada si detectas abuso o lenguaje inapropiado.'
 };
 
 class NovaAdmin {
@@ -294,12 +301,18 @@ class NovaAdmin {
     }
 
     restoreBuilder(b) {
-        const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+        const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
         const id = b.identity || {};
         set('b-name', id.name); set('b-company', id.company); set('b-role', id.role);
         set('b-greeting', b.greeting); set('b-custom-instructions', b.custom_instructions);
+        
         if (b.language) { const r = document.querySelector(`[name="b-language"][value="${b.language}"]`); if (r) r.checked = true; }
         if (b.tone) { const r = document.querySelector(`[name="b-tone"][value="${b.tone}"]`); if (r) r.checked = true; }
+        
+        // Limpiar todos los checkboxes primero
+        document.querySelectorAll('.check-card input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        // Marcar los que vienen en la config
         [...(b.personality||[]), ...(b.capabilities||[]), ...(b.rules||[])].forEach(val => {
             const cb = document.querySelector(`.check-card input[value="${val}"]`);
             if (cb) cb.checked = true;
@@ -419,7 +432,7 @@ class NovaAdmin {
             if (!data.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Sin registros de llamadas</td></tr>'; return; }
             tbody.innerHTML = data.map(log => `
                 <tr>
-                    <td>${new Date(log.created_at).toLocaleString('es-MX')}</td>
+                    <td>${log.created_at ? log.created_at.replace('T', ' ').substring(0, 19) : '—'}</td>
                     <td>${log.source === 'web' ? '🌐 Web' : '📞 Asterisk'}</td>
                     <td>${parseFloat(log.duration || 0).toFixed(1)}s</td>
                     <td style="font-size:.75rem;font-family:var(--font-mono)">${log.actions_taken || '—'}</td>

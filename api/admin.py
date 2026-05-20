@@ -93,6 +93,7 @@ async def list_call_logs(limit: int = 50):
 # --- Sesiones activas ---
 @router.get("/sessions")
 async def list_active_sessions():
+    from core.session import TOKEN_LIMIT_PER_SESSION
     sessions = _session_manager.active_sessions
     return [
         {
@@ -100,10 +101,31 @@ async def list_active_sessions():
             "source": s.source,
             "caller_id": s.caller_id,
             "duration": round(s.duration, 1),
-            "active": s.active
+            "active": s.active,
+            "tokens_input": s.tokens_input,
+            "tokens_output": s.tokens_output,
+            "tokens_total": s.tokens_total,
+            "token_limit": TOKEN_LIMIT_PER_SESSION,
+            "token_pct": round(s.tokens_total / TOKEN_LIMIT_PER_SESSION * 100, 1),
         }
         for s in sessions.values()
     ]
+
+
+# --- Estadísticas de tokens ---
+@router.get("/token-stats")
+async def get_token_stats():
+    return await _db.get_token_stats_summary()
+
+
+@router.get("/token-stats/daily")
+async def get_token_stats_daily(days: int = 30):
+    return await _db.get_token_usage_daily(days)
+
+
+@router.get("/token-stats/top")
+async def get_top_calls_by_cost(limit: int = 10):
+    return await _db.get_top_calls_by_cost(limit)
 
 
 # --- System Prompts ---

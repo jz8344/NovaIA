@@ -30,7 +30,23 @@ CREATE TABLE IF NOT EXISTS call_logs (
     duration REAL DEFAULT 0.0,
     actions_taken TEXT DEFAULT '[]',
     transcript TEXT DEFAULT '',
+    tokens_input INTEGER DEFAULT 0,
+    tokens_output INTEGER DEFAULT 0,
+    tokens_total INTEGER DEFAULT 0,
+    cost_usd REAL DEFAULT 0.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS token_usage_daily (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    total_calls INTEGER DEFAULT 0,
+    tokens_input INTEGER DEFAULT 0,
+    tokens_output INTEGER DEFAULT 0,
+    tokens_total INTEGER DEFAULT 0,
+    cost_usd REAL DEFAULT 0.0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(date)
 );
 
 -- FTS5: Full-Text Search sobre inventario (multilingüe, sin configuración de idioma)

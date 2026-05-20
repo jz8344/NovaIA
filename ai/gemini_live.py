@@ -46,32 +46,50 @@ class GeminiLiveClient:
             return
 
         config = self._build_config(prompt_name)
-        logger.info(f"Conectando sesión {session.session_id} a Gemini Live...")
+        max_retries = 3
 
-        try:
-            async with self._client.aio.live.connect(
-                model=self._model,
-                config=config
-            ) as gemini_session:
-                session.gemini_session = gemini_session
-                logger.info(f"Sesión {session.session_id} conectada a Gemini Live")
+        for attempt in range(max_retries):
+            if not session.active:
+                break
+            try:
+                logger.info(f"Conectando sesión {session.session_id} a Gemini Live (intento {attempt + 1}/{max_retries})...")
+                async with self._client.aio.live.connect(
+                    model=self._model,
+                    config=config
+                ) as gemini_session:
+                    session.gemini_session = gemini_session
+                    logger.info(f"Sesión {session.session_id} conectada a Gemini Live")
 
-                send_task = asyncio.create_task(
-                    self._send_audio_loop(session, gemini_session)
-                )
-                receive_task = asyncio.create_task(
-                    self._receive_loop(session, gemini_session)
-                )
+                    send_task = asyncio.create_task(
+                        self._send_audio_loop(session, gemini_session)
+                    )
+                    receive_task = asyncio.create_task(
+                        self._receive_loop(session, gemini_session)
+                    )
 
-                await asyncio.gather(send_task, receive_task)
+                    await asyncio.sleep(0.1)
 
-        except asyncio.CancelledError:
-            logger.info(f"Sesión Gemini {session.session_id} cancelada")
-        except Exception as e:
-            logger.error(f"Error en sesión Gemini {session.session_id}: {e}")
-            raise
-        finally:
-            session.gemini_session = None
+                    await gemini_session.send(
+                        input="Hola",
+                        end_of_turn=True
+                    )
+
+                    await asyncio.gather(send_task, receive_task)
+                    break
+
+            except asyncio.CancelledError:
+                logger.info(f"Sesión Gemini {session.session_id} cancelada")
+                break
+            except Exception as e:
+                logger.error(f"Error en sesión Gemini {session.session_id} (intento {attempt + 1}): {e}")
+                if attempt < max_retries - 1 and session.active:
+                    wait = 1.5 * (attempt + 1)
+                    logger.info(f"Reintentando en {wait:.1f}s...")
+                    await asyncio.sleep(wait)
+                else:
+                    raise
+            finally:
+                session.gemini_session = None
 
     async def _send_audio_loop(self, session: CallSession, gemini_session):
         try:
@@ -105,6 +123,26 @@ class GeminiLiveClient:
                         if not session.active:
                             break
 
+                        usage = getattr(response, "usage_metadata", None)
+                        if usage:
+                            tin  = getattr(usage, "prompt_token_count", 0) or 0
+                            tout = getattr(usage, "candidates_token_count", 0) or 0
+                            session.tokens_input  = tin
+                            session.tokens_output = tout
+                            session.metadata["last_usage"] = {
+                                "tokens_input":  session.tokens_input,
+                                "tokens_output": session.tokens_output,
+                                "tokens_total":  session.tokens_total,
+                            }
+                            if session.token_limit_reached:
+                                logger.warning(
+                                    f"[{session.session_id}] CIRCUIT BREAKER: "
+                                    f"límite de {session.tokens_total} tokens alcanzado. "
+                                    f"Cerrando sesión."
+                                )
+                                session.active = False
+                                break
+
                         server_content = response.server_content
                         if server_content:
                             if server_content.interrupted:
@@ -119,6 +157,11 @@ class GeminiLiveClient:
                             model_turn = server_content.model_turn
                             if model_turn:
                                 for part in model_turn.parts:
+                                    if part.text:
+                                        logger.info(f"[{session.session_id}] IA: {part.text}")
+                                        if not hasattr(session, "_ai_transcript_accumulator"):
+                                            session._ai_transcript_accumulator = []
+                                        session._ai_transcript_accumulator.append(part.text)
                                     if part.inline_data:
                                         await session.audio_queue_out.put(part.inline_data.data)
 
@@ -148,7 +191,7 @@ class GeminiLiveClient:
 
             args = dict(fc.args) if fc.args else {}
 
-            if fc.name in ("transfer_call", "end_call"):
+            if fc.name in ("transfer_call", "end_call", "lookup_inventory"):
                 args["session"] = session
 
             result = await self._registry.execute(fc.name, args)
@@ -156,13 +199,21 @@ class GeminiLiveClient:
             if not isinstance(result, dict):
                 result = {"result": str(result)}
 
+            if isinstance(result.get("output"), str):
+                flat_response = result
+            else:
+                flat_response = {"output": json.dumps(result, ensure_ascii=False)}
+
+            fc_id = fc.id or f"{fc.name}_response"
+
             function_responses.append(
                 types.FunctionResponse(
-                    id=fc.id,
+                    id=fc_id,
                     name=fc.name,
-                    response=result
+                    response=flat_response,
                 )
             )
+            logger.debug(f"[{session.session_id}] FunctionResponse id={fc_id} payload={len(flat_response['output'])}chars")
 
         await gemini_session.send(
             input=types.LiveClientToolResponse(

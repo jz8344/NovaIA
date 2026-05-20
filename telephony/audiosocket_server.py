@@ -4,6 +4,7 @@ import uuid
 from loguru import logger
 from core.session import SessionManager, CallSession
 from core.audio_processor import AudioProcessor
+from core.vad import VoiceActivityDetector
 from core.events import event_bus
 from config.settings import get_settings
 
@@ -47,6 +48,8 @@ class AudioSocketServer:
                 call_id=str(uuid.uuid4())
             )
 
+            vad = VoiceActivityDetector()
+
             send_task = asyncio.create_task(
                 self._send_audio_to_asterisk(session, writer)
             )
@@ -70,10 +73,16 @@ class AudioSocketServer:
 
                 elif msg_type == MSG_TYPE_AUDIO:
                     pcm_16khz = AudioProcessor.asterisk_to_gemini(payload)
-                    try:
-                        session.audio_queue_in.put_nowait(pcm_16khz)
-                    except asyncio.QueueFull:
-                        pass
+                    if vad.is_speech(pcm_16khz):
+                        try:
+                            session.audio_queue_in.put_nowait(pcm_16khz)
+                        except asyncio.QueueFull:
+                            try:
+                                session.audio_queue_in.get_nowait()
+                            except asyncio.QueueEmpty:
+                                pass
+                            session.audio_queue_in.put_nowait(pcm_16khz)
+                            logger.warning(f"[{session.session_id}] Cola de audio llena en AudioSocket: descartando frame antiguo.")
 
                 elif msg_type == MSG_TYPE_HANGUP:
                     logger.info(f"AudioSocket: colgado recibido para {session.session_id}")
@@ -118,7 +127,9 @@ class AudioSocketServer:
                             break
                         header = struct.pack(">BH", MSG_TYPE_AUDIO, len(chunk))
                         writer.write(header + chunk)
-                        await writer.drain()
+                    
+                    # Un solo drain tras enviar todos los chunks de la ráfaga actual
+                    await writer.drain()
 
                 except asyncio.TimeoutError:
                     continue

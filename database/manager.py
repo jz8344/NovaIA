@@ -1,5 +1,6 @@
 import aiosqlite
 import os
+import re
 import unicodedata
 from loguru import logger
 from config.settings import get_settings
@@ -25,6 +26,13 @@ def _tokenize_query(query: str) -> list[str]:
         if len(w) >= 5:
             terms.add(w[:4])
     return list(terms)
+
+
+def _sanitize_fts_query(query: str) -> str:
+    cleaned = re.sub(r'[^\w\s]', ' ', query)
+    forbidden = {"or", "and", "not"}
+    tokens = [t for t in cleaned.split() if t.lower() not in forbidden]
+    return ' OR '.join(f'"{t}"*' for t in tokens if t)
 
 
 class DatabaseManager:
@@ -75,7 +83,9 @@ class DatabaseManager:
     async def _fts_search_extensions(self, query: str) -> list[dict]:
         """FTS5: busca en name y department simultáneamente."""
         try:
-            fts_query = ' OR '.join(f'"{t}"*' for t in query.split() if t)
+            fts_query = _sanitize_fts_query(query)
+            if not fts_query:
+                return []
             sql = """
                 SELECT e.* FROM extensions e
                 JOIN extensions_fts f ON e.id = f.rowid
@@ -130,7 +140,9 @@ class DatabaseManager:
     async def _fts_search_inventory(self, query: str) -> list[dict]:
         """FTS5: busca en name, description, category, brand, color simultáneamente."""
         try:
-            fts_query = ' OR '.join(f'"{t}"*' for t in query.split() if t)
+            fts_query = _sanitize_fts_query(query)
+            if not fts_query:
+                return []
             sql = """
                 SELECT i.* FROM inventory i
                 JOIN inventory_fts f ON i.id = f.rowid
@@ -176,12 +188,41 @@ class DatabaseManager:
     # ── LOGS ───────────────────────────────────────────────────────────────────
 
     async def log_call(self, session_id: str, caller_id: str, source: str,
-                       duration: float, actions: str, transcript: str):
+                       duration: float, actions: str, transcript: str,
+                       tokens_input: int = 0, tokens_output: int = 0):
+        from datetime import datetime
+        created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tokens_total = tokens_input + tokens_output
+        cost_usd = (tokens_input * 0.000001) + (tokens_output * 0.000002)
         sql = """
-            INSERT INTO call_logs (session_id, caller_id, source, duration, actions_taken, transcript)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO call_logs
+                (session_id, caller_id, source, duration, actions_taken, transcript,
+                 tokens_input, tokens_output, tokens_total, cost_usd, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        await self._db.execute(sql, (session_id, caller_id, source, duration, actions, transcript))
+        await self._db.execute(sql, (
+            session_id, caller_id, source, duration, actions, transcript,
+            tokens_input, tokens_output, tokens_total, cost_usd, created_at
+        ))
+        await self._db.commit()
+        await self._upsert_daily_usage(tokens_input, tokens_output, tokens_total, cost_usd)
+
+    async def _upsert_daily_usage(self, tin: int, tout: int, ttotal: int, cost: float):
+        from datetime import date, datetime
+        today = date.today().isoformat()
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sql = """
+            INSERT INTO token_usage_daily (date, total_calls, tokens_input, tokens_output, tokens_total, cost_usd, updated_at)
+            VALUES (?, 1, ?, ?, ?, ?, ?)
+            ON CONFLICT(date) DO UPDATE SET
+                total_calls   = total_calls + 1,
+                tokens_input  = tokens_input + excluded.tokens_input,
+                tokens_output = tokens_output + excluded.tokens_output,
+                tokens_total  = tokens_total + excluded.tokens_total,
+                cost_usd      = cost_usd + excluded.cost_usd,
+                updated_at    = excluded.updated_at
+        """
+        await self._db.execute(sql, (today, tin, tout, ttotal, cost, now))
         await self._db.commit()
 
     # ── EXTENSIONES CRUD ───────────────────────────────────────────────────────
@@ -223,6 +264,44 @@ class DatabaseManager:
 
     async def get_call_logs(self, limit: int = 50) -> list[dict]:
         sql = "SELECT * FROM call_logs ORDER BY created_at DESC LIMIT ?"
+        async with self._db.execute(sql, (limit,)) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    async def get_token_stats_summary(self) -> dict:
+        sql = """
+            SELECT
+                COUNT(*) as total_calls,
+                COALESCE(SUM(tokens_input),0)  as tokens_input,
+                COALESCE(SUM(tokens_output),0) as tokens_output,
+                COALESCE(SUM(tokens_total),0)  as tokens_total,
+                COALESCE(SUM(cost_usd),0)      as cost_usd,
+                COALESCE(AVG(tokens_total),0)  as avg_tokens_per_call
+            FROM call_logs
+        """
+        async with self._db.execute(sql) as cursor:
+            row = await cursor.fetchone()
+            return dict(row) if row else {}
+
+    async def get_token_usage_daily(self, days: int = 30) -> list[dict]:
+        sql = """
+            SELECT date, total_calls, tokens_input, tokens_output, tokens_total, cost_usd
+            FROM token_usage_daily
+            ORDER BY date DESC
+            LIMIT ?
+        """
+        async with self._db.execute(sql, (days,)) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    async def get_top_calls_by_cost(self, limit: int = 10) -> list[dict]:
+        sql = """
+            SELECT session_id, caller_id, source, duration,
+                   tokens_input, tokens_output, tokens_total, cost_usd, created_at
+            FROM call_logs
+            ORDER BY cost_usd DESC
+            LIMIT ?
+        """
         async with self._db.execute(sql, (limit,)) as cursor:
             rows = await cursor.fetchall()
             return [dict(row) for row in rows]

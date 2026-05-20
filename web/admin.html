@@ -408,6 +408,81 @@
             .form-grid { grid-template-columns: 1fr; }
             .tabs { width: 100%; }
         }
+
+        /* ── TOKENS DASHBOARD ── */
+        .tk-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .tk-kpi-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 18px 16px;
+            display: flex; align-items: center; gap: 14px;
+            box-shadow: var(--shadow-card);
+            transition: border-color var(--transition);
+        }
+        .tk-kpi-card:hover { border-color: var(--border-mid); }
+        .tk-kpi-icon {
+            width: 42px; height: 42px; border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
+        }
+        .tk-kpi-body { min-width: 0; }
+        .tk-kpi-label { font-size: 0.72rem; color: var(--text-3); font-weight: 500; letter-spacing: .03em; text-transform: uppercase; margin-bottom: 4px; }
+        .tk-kpi-value { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-1); white-space: nowrap; }
+
+        /* Live session bar */
+        .tk-session-row {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .tk-session-row:last-child { border-bottom: none; }
+        .tk-session-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .tk-session-id { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-2); }
+        .tk-session-nums { font-size: 0.78rem; color: var(--text-2); }
+        .tk-session-nums strong { color: var(--text-1); }
+        .tk-bar-track {
+            height: 8px; background: var(--bg-input); border-radius: 4px;
+            overflow: hidden; position: relative;
+        }
+        .tk-bar-fill {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, #4f8ef7, #7c5ef5);
+            transition: width .6s cubic-bezier(.4,0,.2,1);
+        }
+        .tk-bar-fill.warning { background: linear-gradient(90deg, #fbbf24, #f87171); }
+        .tk-bar-fill.danger  { background: #f87171; }
+        .tk-pct-label {
+            font-size: 0.7rem; color: var(--text-3);
+            margin-top: 4px; text-align: right;
+        }
+        .tk-empty {
+            text-align: center; color: var(--text-3);
+            padding: 28px; font-size: 0.85rem;
+        }
+
+        /* Daily chart */
+        .tk-daily-chart { display: flex; flex-direction: column; gap: 10px; }
+        .tk-day-row { display: grid; grid-template-columns: 80px 1fr 60px; align-items: center; gap: 12px; }
+        .tk-day-label { font-size: 0.75rem; color: var(--text-2); font-family: var(--font-mono); text-align: right; }
+        .tk-day-bars { display: flex; gap: 2px; height: 14px; border-radius: 4px; overflow: hidden; }
+        .tk-day-in  { background: #4f8ef7; transition: width .4s; border-radius: 4px 0 0 4px; }
+        .tk-day-out { background: #7c5ef5; transition: width .4s; border-radius: 0 4px 4px 0; }
+        .tk-day-total { font-size: 0.72rem; color: var(--text-3); font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+        /* Legend */
+        .tk-legend { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--text-2); }
+        .tk-legend span { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+        @media (max-width: 900px) {
+            .tk-kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .tk-day-row { grid-template-columns: 64px 1fr 50px; }
+        }
     </style>
 </head>
 <body>
@@ -455,6 +530,7 @@
             <button class="tab" data-tab="tools">⚙️ Herramientas</button>
             <button class="tab" data-tab="sessions">📊 Sesiones</button>
             <button class="tab" data-tab="logs">📝 Logs</button>
+            <button class="tab" data-tab="tokens">💰 Tokens</button>
         </div>
 
         <!-- ── EXTENSIONS ── -->
@@ -635,6 +711,7 @@
                         <div class="section">
                             <div class="section-title">✨ Rasgos de Personalidad</div>
                             <div class="checkbox-grid">
+                                <label class="check-card" style="grid-column: 1 / -1; border-color: rgba(103,232,249,.45); background: rgba(103,232,249,.04);" title="(Altamente Recomendado) Elimina respuestas mecánicas y términos como 'abrumar'. Hace que el agente guíe al usuario de forma muy cercana y 100% humana al consultar inventarios extensos."><input type="checkbox" value="human_sales" checked><span class="check-box"></span>🌟 Vendedor Humano y Empático <span style="font-size: 0.68rem; font-weight: 700; color: var(--cyan); margin-left: auto; letter-spacing: .02em; text-transform: uppercase;">★ Recomendado</span></label>
                                 <label class="check-card" title="Hace que el agente responda con calidez y empatía, usando un tono amigable y cercano."><input type="checkbox" value="warm"><span class="check-box"></span>🤝 Cálido / Amable</label>
                                 <label class="check-card" title="El agente mantiene formalidad en todo momento. Sin modismos ni lenguaje coloquial."><input type="checkbox" value="formal"><span class="check-box"></span>🎩 Formal</label>
                                 <label class="check-card" title="Las respuestas son breves y directas. No da explicaciones largas a menos que se le pida." ><input type="checkbox" value="concise" checked><span class="check-box"></span>⚡ Conciso</label>
@@ -785,10 +862,10 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
                 </div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>Session ID</th><th>Fuente</th><th>Duración</th><th>Estado</th></tr>
+                        <tr><th>Session ID</th><th>Fuente</th><th>Duración</th><th>Tokens In</th><th>Tokens Out</th><th>Total</th><th>Límite</th><th>Estado</th></tr>
                     </thead>
                     <tbody id="sessionsBody">
-                        <tr><td colspan="4" class="empty-state">Sin sesiones activas</td></tr>
+                        <tr><td colspan="8" class="empty-state">Sin sesiones activas</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -803,16 +880,113 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
                 </div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>Fecha</th><th>Fuente</th><th>Duración</th><th>Acciones</th></tr>
+                        <tr><th>Fecha</th><th>Fuente</th><th>Duración</th><th>Tokens</th><th>Costo USD</th><th>Acciones</th></tr>
                     </thead>
                     <tbody id="logsBody">
-                        <tr><td colspan="4" class="empty-state">Sin registros</td></tr>
+                        <tr><td colspan="6" class="empty-state">Sin registros</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-    </main>
+        <!-- ── TOKENS DASHBOARD ── -->
+        <div class="panel" id="panel-tokens">
+
+            <!-- KPI Row -->
+            <div class="tk-kpi-row" id="tkKpiRow">
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(79,142,247,.15);color:#4f8ef7">⬆</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Tokens de Entrada</div>
+                        <div class="tk-kpi-value" id="tkTotalIn">—</div>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(124,94,245,.15);color:#7c5ef5">⬇</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Tokens de Salida</div>
+                        <div class="tk-kpi-value" id="tkTotalOut">—</div>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(52,211,153,.15);color:#34d399">∑</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Total Tokens</div>
+                        <div class="tk-kpi-value" id="tkTotalAll">—</div>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(251,191,36,.15);color:#fbbf24">$</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Costo Estimado</div>
+                        <div class="tk-kpi-value" id="tkCostUsd">—</div>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(103,232,249,.15);color:#67e8f9">📞</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Total Llamadas</div>
+                        <div class="tk-kpi-value" id="tkTotalCalls">—</div>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background:rgba(248,113,113,.15);color:#f87171">⌀</div>
+                    <div class="tk-kpi-body">
+                        <div class="tk-kpi-label">Promedio / Llamada</div>
+                        <div class="tk-kpi-value" id="tkAvgPerCall">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sesiones activas con barra de límite -->
+            <div class="card" style="margin-bottom:16px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <div>
+                        <div class="card-title" style="margin-bottom:2px">Sesiones en Vivo — Consumo de Tokens</div>
+                        <div class="card-sub" style="margin-bottom:0">Límite por sesión: 50,000 tokens (circuit breaker)</div>
+                    </div>
+                    <button class="btn-ghost btn-sm" id="btnRefreshTokenSessions">↻ Actualizar</button>
+                </div>
+                <div id="tkLiveSessions">
+                    <div class="tk-empty">Sin sesiones activas en este momento</div>
+                </div>
+            </div>
+
+            <!-- Historial diario -->
+            <div class="card" style="margin-bottom:16px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <div>
+                        <div class="card-title" style="margin-bottom:2px">Historial de Uso Diario</div>
+                        <div class="card-sub" style="margin-bottom:0">Tokens acumulados por día (últimos 30 días)</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <span class="tk-legend"><span style="background:#4f8ef7"></span>Entrada</span>
+                        <span class="tk-legend"><span style="background:#7c5ef5"></span>Salida</span>
+                    </div>
+                </div>
+                <div id="tkDailyChart" class="tk-daily-chart"></div>
+            </div>
+
+            <!-- Top llamadas costosas -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom:4px">Top Llamadas por Costo</div>
+                <div class="card-sub">Las 10 sesiones con mayor consumo de tokens</div>
+                <table class="data-table" style="margin-top:8px">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th><th>Session ID</th><th>Fuente</th>
+                            <th>Duración</th><th>Tokens In</th><th>Tokens Out</th>
+                            <th>Total</th><th>Costo USD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tkTopCalls">
+                        <tr><td colspan="8" class="empty-state">Sin datos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
 
     <footer>
         <span>Nova Voice Agent v1.0</span>
@@ -830,6 +1004,7 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById('panel-' + tab.dataset.tab)?.classList.add('active');
+        if (tab.dataset.tab === 'tokens') loadTokenDashboard();
     });
 
     /* ── MODE TABS ── */
@@ -859,6 +1034,124 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
         if (!v) { badge.textContent = '📄 Detectando formato…'; return; }
         try { JSON.parse(v); badge.textContent = '🔷 JSON detectado'; }
         catch { badge.textContent = v.startsWith('---') ? '📋 YAML detectado' : '📄 Texto plano'; }
+    });
+
+    /* ── TOKEN DASHBOARD ── */
+    const fmt = n => Number(n || 0).toLocaleString('es-MX');
+    const fmtUsd = n => '$' + Number(n || 0).toFixed(6);
+
+    async function loadTokenDashboard() {
+        await Promise.all([
+            loadTokenSummary(),
+            loadTokenSessions(),
+            loadTokenDaily(),
+            loadTokenTop()
+        ]);
+    }
+
+    async function loadTokenSummary() {
+        try {
+            const r = await fetch('/api/admin/token-stats');
+            const d = await r.json();
+            document.getElementById('tkTotalIn').textContent    = fmt(d.tokens_input);
+            document.getElementById('tkTotalOut').textContent   = fmt(d.tokens_output);
+            document.getElementById('tkTotalAll').textContent   = fmt(d.tokens_total);
+            document.getElementById('tkCostUsd').textContent    = fmtUsd(d.cost_usd);
+            document.getElementById('tkTotalCalls').textContent = fmt(d.total_calls);
+            document.getElementById('tkAvgPerCall').textContent = fmt(Math.round(d.avg_tokens_per_call || 0));
+        } catch(e) { console.warn('token-stats error', e); }
+    }
+
+    async function loadTokenSessions() {
+        try {
+            const r  = await fetch('/api/admin/sessions');
+            const ss = await r.json();
+            const el = document.getElementById('tkLiveSessions');
+            if (!ss.length) {
+                el.innerHTML = '<div class="tk-empty">Sin sesiones activas en este momento</div>';
+                return;
+            }
+            el.innerHTML = ss.map(s => {
+                const pct   = Math.min(s.token_pct || 0, 100);
+                const cls   = pct >= 90 ? 'danger' : pct >= 70 ? 'warning' : '';
+                const limit = (s.token_limit || 50000).toLocaleString('es-MX');
+                return `
+                <div class="tk-session-row">
+                    <div class="tk-session-meta">
+                        <span class="tk-session-id">${s.session_id.slice(0,18)}… &bull; ${s.source} &bull; ${s.duration}s</span>
+                        <span class="tk-session-nums">
+                            In: <strong>${fmt(s.tokens_input)}</strong> &nbsp;
+                            Out: <strong>${fmt(s.tokens_output)}</strong> &nbsp;
+                            Total: <strong>${fmt(s.tokens_total)}</strong> / ${limit}
+                        </span>
+                    </div>
+                    <div class="tk-bar-track">
+                        <div class="tk-bar-fill ${cls}" style="width:${pct}%"></div>
+                    </div>
+                    <div class="tk-pct-label">${pct.toFixed(1)}% del límite</div>
+                </div>`;
+            }).join('');
+        } catch(e) { console.warn('sessions error', e); }
+    }
+
+    async function loadTokenDaily() {
+        try {
+            const r    = await fetch('/api/admin/token-stats/daily?days=30');
+            const days = await r.json();
+            const el   = document.getElementById('tkDailyChart');
+            if (!days.length) {
+                el.innerHTML = '<div class="tk-empty">Sin historial de uso diario aún</div>';
+                return;
+            }
+            const maxTotal = Math.max(...days.map(d => d.tokens_total), 1);
+            el.innerHTML = days.map(d => {
+                const wIn  = (d.tokens_input  / maxTotal * 100).toFixed(1);
+                const wOut = (d.tokens_output / maxTotal * 100).toFixed(1);
+                return `
+                <div class="tk-day-row">
+                    <div class="tk-day-label">${d.date.slice(5)}</div>
+                    <div class="tk-day-bars">
+                        <div class="tk-day-in"  style="width:${wIn}%"></div>
+                        <div class="tk-day-out" style="width:${wOut}%"></div>
+                    </div>
+                    <div class="tk-day-total">${fmt(d.tokens_total)}</div>
+                </div>`;
+            }).join('');
+        } catch(e) { console.warn('daily error', e); }
+    }
+
+    async function loadTokenTop() {
+        try {
+            const r    = await fetch('/api/admin/token-stats/top?limit=10');
+            const rows = await r.json();
+            const tb   = document.getElementById('tkTopCalls');
+            if (!rows.length) {
+                tb.innerHTML = '<tr><td colspan="8" class="empty-state">Sin datos aún</td></tr>';
+                return;
+            }
+            tb.innerHTML = rows.map(r => `
+                <tr>
+                    <td>${r.created_at ? r.created_at.slice(0,16) : '—'}</td>
+                    <td style="font-family:var(--font-mono);font-size:.72rem">${r.session_id.slice(0,14)}…</td>
+                    <td>${r.source}</td>
+                    <td>${r.duration ? r.duration.toFixed(1)+'s' : '—'}</td>
+                    <td>${fmt(r.tokens_input)}</td>
+                    <td>${fmt(r.tokens_output)}</td>
+                    <td><strong>${fmt(r.tokens_total)}</strong></td>
+                    <td style="color:var(--amber)">${fmtUsd(r.cost_usd)}</td>
+                </tr>
+            `).join('');
+        } catch(e) { console.warn('top error', e); }
+    }
+
+    document.getElementById('btnRefreshTokenSessions')?.addEventListener('click', loadTokenSessions);
+
+    let _tkAutoRefresh;
+    document.getElementById('adminTabs').addEventListener('click', e => {
+        clearInterval(_tkAutoRefresh);
+        if (e.target.closest('[data-tab="tokens"]')) {
+            _tkAutoRefresh = setInterval(loadTokenDashboard, 15000);
+        }
     });
 </script>
 

@@ -11,6 +11,13 @@ PROMPT_CONFIG_PATH = str(_PROJECT_ROOT / "data" / "prompt_config.json")
 
 
 PERSONALITY_MAP = {
+    "human_sales": (
+        "Actúa siempre como un vendedor sumamente empático, paciente y muy humano. "
+        "Prohíbe terminantemente el uso de términos robóticos, técnicos o clínicos como "
+        "'abrumar', 'saturar', 'parámetros', 'limitar' o 'saturación'. En su lugar, "
+        "exprésate de manera muy cálida y amigable, guiando al usuario con naturalidad y "
+        "facilitándole la elección con un tono conversacional fluido, cercano y servicial."
+    ),
     "concise":    "Sé conciso: no des explicaciones largas a menos que se te pida.",
     "detailed":   "Da respuestas detalladas y completas.",
     "empathetic": "Muestra empatía y comprensión con el usuario.",
@@ -19,6 +26,8 @@ PERSONALITY_MAP = {
     "confirm":    "Siempre confirma antes de realizar acciones importantes.",
     "formal":     "Mantén un tono formal en todo momento.",
     "warm":       "Usa un tono cálido y amigable.",
+    "repeat_before_transfer": "Repite siempre el nombre y extensión antes de realizar una transferencia.",
+    "list_options": "Si encuentras múltiples opciones en una búsqueda, lístalas todas y pregunta al usuario.",
 }
 
 CAPABILITY_MAP = {
@@ -26,9 +35,11 @@ CAPABILITY_MAP = {
     "directory":  "- Consultar directorio: Informa extensiones y departamentos.",
     "inventory":  "- Consultar inventario: Busca productos, precios y stock.",
     "messages":   "- Tomar mensajes: Si la persona no está disponible.",
-    "general":    "- Información general: Responde preguntas sobre la empresa.",
+    "general":    "- Información general: Responde preguntas sobre la empresa (horarios, ubicación).",
     "schedule":   "- Agendar citas o reuniones.",
     "support":    "- Soporte técnico básico.",
+    "faq":        "- Responder preguntas frecuentes (FAQs) del sistema.",
+    "order_status": "- Informar sobre el estatus de pedidos o solicitudes.",
 }
 
 RULE_MAP = {

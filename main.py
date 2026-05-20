@@ -10,6 +10,7 @@ from loguru import logger
 from config.settings import get_settings
 from core.session import SessionManager
 from core.audio_processor import AudioProcessor
+from core.vad import VoiceActivityDetector
 from ai.gemini_live import GeminiLiveClient
 from ai.function_registry import FunctionRegistry
 from ai.prompt_loader import PromptLoader
@@ -116,7 +117,7 @@ async def websocket_voice(websocket: WebSocket):
     session = await session_manager.create_session(source="web")
     logger.info(f"WebSocket de voz conectado: {session.session_id}")
 
-    gemini_task = None
+    vad = VoiceActivityDetector()
 
     try:
         gemini_task = asyncio.create_task(
@@ -133,10 +134,16 @@ async def websocket_voice(websocket: WebSocket):
             if "bytes" in data:
                 audio_bytes = data["bytes"]
                 pcm_16khz = AudioProcessor.browser_to_gemini(audio_bytes)
-                try:
-                    session.audio_queue_in.put_nowait(pcm_16khz)
-                except asyncio.QueueFull:
-                    pass
+                if vad.is_speech(pcm_16khz):
+                    try:
+                        session.audio_queue_in.put_nowait(pcm_16khz)
+                    except asyncio.QueueFull:
+                        try:
+                            session.audio_queue_in.get_nowait()
+                        except asyncio.QueueEmpty:
+                            pass
+                        session.audio_queue_in.put_nowait(pcm_16khz)
+                        logger.warning(f"[{session.session_id}] Cola de audio llena: se descarta frame antiguo.")
 
             elif "text" in data:
                 msg = json.loads(data["text"])
@@ -158,7 +165,21 @@ async def websocket_voice(websocket: WebSocket):
             except (asyncio.CancelledError, Exception):
                 pass
 
-        await session_manager.end_session(session.session_id, "websocket_disconnect")
+        ended = await session_manager.end_session(session.session_id, "websocket_disconnect")
+        if ended:
+            try:
+                await db.log_call(
+                    session_id=ended.session_id,
+                    caller_id=ended.caller_id or "web",
+                    source=ended.source,
+                    duration=round(ended.duration, 2),
+                    actions=str(ended.metadata.get("actions", [])),
+                    transcript="",
+                    tokens_input=ended.tokens_input,
+                    tokens_output=ended.tokens_output,
+                )
+            except Exception as _log_err:
+                logger.warning(f"No se pudo registrar log de llamada: {_log_err}")
         logger.info(f"Sesión WebSocket limpiada: {session.session_id}")
 
 
