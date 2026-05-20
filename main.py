@@ -26,8 +26,9 @@ from actions.lookup_extension import (
 )
 from actions.lookup_inventory import (
     handle_lookup_inventory,
-    set_db as set_lookup_inv_db,
+    set_worker as set_lookup_inv_worker,
 )
+from ai.inventory_worker import InventoryWorker
 from actions.transfer_call import (
     handle_transfer_call,
     set_dependencies as set_transfer_deps,
@@ -56,7 +57,8 @@ async def lifespan(app: FastAPI):
     await seed_database(db)
 
     set_lookup_ext_db(db)
-    set_lookup_inv_db(db)
+    worker = InventoryWorker(db)
+    set_lookup_inv_worker(worker)
     set_transfer_deps(db, ami_client)
     set_admin_deps(db, session_manager, prompt_loader)
 

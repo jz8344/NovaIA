@@ -30,13 +30,13 @@
     },
     {
       "name": "lookup_inventory",
-      "description": "Consulta el inventario de productos de la empresa. Busca por nombre de producto para obtener precio, stock y descripción.",
+      "description": "Consulta el catálogo de productos. Envía TODA la consulta del usuario en un solo llamado, incluso si menciona varias categorías (ejemplo: 'laptops y periféricos'). NUNCA hagas múltiples llamadas a esta función por turno. Recibirás un catálogo estructurado que es tu conocimiento del inventario para responder como vendedor.",
       "parameters": {
         "type": "object",
         "properties": {
           "product_query": {
             "type": "string",
-            "description": "Nombre o descripción del producto a buscar"
+            "description": "La consulta completa del usuario tal como la dijo"
           }
         },
         "required": ["product_query"]
