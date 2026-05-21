@@ -182,6 +182,21 @@ const AGENT_PRESETS = [
     }
 ];
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 class NovaAdmin {
     constructor() {
         this.setupTabDataLoading();
@@ -196,7 +211,12 @@ class NovaAdmin {
     }
 
     async api(method, path, body = null) {
-        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        const headers = { 'Content-Type': 'application/json' };
+        if (['POST', 'PUT', 'DELETE'].includes(method.toUpperCase())) {
+            const csrf = getCookie('csrftoken');
+            if (csrf) headers['X-CSRFToken'] = csrf;
+        }
+        const opts = { method, headers };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(`${API_BASE}${path}`, opts);
         if (!res.ok) {
