@@ -16,9 +16,23 @@ class VoiceConsumer(AsyncWebsocketConsumer):
 
         self.vad = VoiceActivityDetector()
 
+        # Obtener agente y user_id desde query params para aislamiento de prompts por sesión
+        from urllib.parse import parse_qs
+        query_string = self.scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        agent = params.get("agent", ["nova_default"])[0]
+        
+        user_id_raw = params.get("user_id", [None])[0]
+        user_id = None
+        if user_id_raw:
+            try:
+                user_id = int(user_id_raw)
+            except ValueError:
+                pass
+
         # Iniciar las tareas en segundo plano
         self.gemini_task = asyncio.create_task(
-            state.gemini_client.start_session(self.session)
+            state.gemini_client.start_session(self.session, prompt_name=agent, user_id=user_id)
         )
         self.send_task = asyncio.create_task(
             self._send_audio_to_browser()

@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova — Iniciar Sesión</title>
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-base: #000000;
+            --text-1: #e3e3e3;
+            --text-2: #8e959f;
+            --glass-bg: rgba(20, 20, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #a8c7fa;
+            --accent-glow: #669df6;
+            --danger: #f28b82;
+            --radius-card: 28px;
+            --radius-btn: 20px;
+            --radius-input: 16px;
+            --font-display: 'Google Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --transition: 250ms cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-base);
+            color: var(--text-1);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* Anti-gravity animated background */
+        .ambient {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a1a24 0%, #000000 80%);
+        }
+
+        .mesh-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: antiGravity 20s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+        }
+
+        .blob-1 { width: 50vw; height: 50vw; top: -10%; left: -10%; background: #2f2a5c; animation-delay: -5s; }
+        .blob-2 { width: 40vw; height: 40vw; bottom: -20%; right: -10%; background: #1b3d5c; animation-duration: 25s; }
+        .blob-3 { width: 30vw; height: 30vw; top: 40%; left: 60%; background: #3d2247; animation-delay: -12s; animation-duration: 30s; }
+
+        .anti-gravity-particles {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+                radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
+                radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+            background-size: 200px 200px;
+            animation: driftUp 40s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes antiGravity {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(5vw, -5vh) scale(1.1) rotate(10deg); }
+            100% { transform: translate(-5vw, 10vh) scale(0.9) rotate(-5deg); }
+        }
+
+        @keyframes driftUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-200px); }
+        }
+
+        /* Login Card */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 40px;
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+            animation: levitate 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes levitate {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-10px); }
+        }
+
+        .logo-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+        }
+
+        .logo-title {
+            font-family: var(--font-display);
+            font-weight: 500;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff, #a8c7fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-input);
+            color: var(--text-1);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            padding: 16px;
+            outline: none;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.15);
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-btn);
+            background: var(--accent);
+            color: #0b111a;
+            font-family: var(--font-display);
+            font-weight: 500;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 12px;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 24px rgba(168, 199, 250, 0.4);
+            transform: scale(1.02);
+            background: #d3e2fe;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(242, 139, 130, 0.1);
+            border: 1px solid rgba(242, 139, 130, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
+        <div class="anti-gravity-particles"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-header">
+                <svg class="logo-icon" viewBox="0 0 34 34" fill="none">
+                    <circle cx="17" cy="17" r="15.5" stroke="url(#g-nova)" stroke-width="2" fill="none"/>
+                    <path d="M12 22V12l10 5-10 5z" fill="url(#g-nova)"/>
+                    <defs>
+                        <linearGradient id="g-nova" x1="0" y1="0" x2="34" y2="34">
+                            <stop offset="0%" stop-color="#a8c7fa"/>
+                            <stop offset="100%" stop-color="#ffffff"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="logo-title">Nova</div>
+            </div>
+
+            <div id="loginError" class="login-error" style="display: none;"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <input type="text" id="username" autocomplete="username" required placeholder="User">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" autocomplete="current-password" required placeholder="Password">
+                </div>
+                <button type="submit" id="btnLogin" class="btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const btn = document.getElementById("btnLogin");
+            const errDiv = document.getElementById("loginError");
+            const uInput = document.getElementById("username");
+            const pInput = document.getElementById("password");
+
+            btn.disabled = true;
+            btn.innerText = "Ingresando...";
+            errDiv.style.display = "none";
+
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: uInput.value.trim(),
+                        password: pInput.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    window.location.reload();
+                } else {
+                    errDiv.innerText = data.detail || "Error al iniciar sesión.";
+                    errDiv.style.display = "block";
+                    errDiv.style.animation = 'none';
+                    errDiv.offsetHeight;
+                    errDiv.style.animation = null;
+                }
+            } catch (e) {
+                errDiv.innerText = "Error de red al conectar con el servidor.";
+                errDiv.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Continue";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from pathlib import Path
 import uuid
 from django.http import JsonResponse, HttpResponse
@@ -195,9 +196,13 @@ PROMPT_CONFIG_PATH = str(_PROJECT_ROOT / "data" / "prompt_config.json")
 
 
 async def prompt_config_handler(request):
+    user_id = request.admin_user["id"]
+    loader = _get_prompt_loader()
+    config_path = loader._get_config_path(user_id)
+
     if request.method == "GET":
-        if os.path.exists(PROMPT_CONFIG_PATH):
-            with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
                 return JsonResponse(json.load(f))
         return JsonResponse({"use_custom": False, "mode": "builder", "raw_content": "", "builder": {}})
     
@@ -207,15 +212,14 @@ async def prompt_config_handler(request):
             os.makedirs(str(_PROJECT_ROOT / "data"), exist_ok=True)
             
             existing_config = {}
-            if os.path.exists(PROMPT_CONFIG_PATH):
+            if os.path.exists(config_path):
                 try:
-                    with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+                    with open(config_path, "r", encoding="utf-8") as f:
                         existing_config = json.load(f)
                 except Exception:
                     pass
                     
             mode = data.get("mode", "builder")
-            loader = _get_prompt_loader()
             os.makedirs(loader.prompts_dir, exist_ok=True)
             
             existing_config["mode"] = mode
@@ -224,19 +228,27 @@ async def prompt_config_handler(request):
             if "voice" in data:
                 existing_config["voice"] = data["voice"]
             
+            compiled = ""
+            agent_name = "Nova"
+
             if mode == "builder":
                 builder = data.get("builder", {})
                 if builder:
                     existing_config["builder"] = builder
                     compiled = loader._build_from_config(builder)
-                    filepath_md = os.path.join(loader.prompts_dir, "nova_builder.md")
+                    agent_name = builder.get("identity", {}).get("name", "Nova")
+                    
+                    filepath_md = os.path.join(loader.prompts_dir, f"nova_builder_{user_id}.md")
                     with open(filepath_md, "w", encoding="utf-8") as f:
                         f.write(compiled)
                         
             elif mode == "raw":
                 raw_content = data.get("raw_content", "").strip()
                 existing_config["raw_content"] = raw_content
-                filepath_yaml = os.path.join(loader.prompts_dir, "nova_default.yaml")
+                compiled = raw_content
+                agent_name = "Raw Agent"
+                
+                filepath_yaml = os.path.join(loader.prompts_dir, f"nova_default_{user_id}.yaml")
                 with open(filepath_yaml, "w", encoding="utf-8") as f:
                     f.write(raw_content)
                     
@@ -250,19 +262,20 @@ async def prompt_config_handler(request):
                 if agent_builder:
                     existing_config["agent_builder"] = agent_builder
                     compiled = loader._build_from_config(agent_builder)
+                    agent_name = agent_builder.get("identity", {}).get("name", "Nova")
                     
                     if agent_source == "custom" and agent_id:
                         filepath_md = os.path.join(loader.prompts_dir, f"nova_custom_{agent_id}.md")
                         with open(filepath_md, "w", encoding="utf-8") as f:
                             f.write(compiled)
                     else:
-                        filepath_md = os.path.join(loader.prompts_dir, "nova_agent.md")
+                        filepath_md = os.path.join(loader.prompts_dir, f"nova_agent_{user_id}.md")
                         with open(filepath_md, "w", encoding="utf-8") as f:
                             f.write(compiled)
                         
                         if agent_id:
                             import yaml
-                            filepath_yaml = os.path.join(loader.prompts_dir, f"nova_{agent_id}.yaml")
+                            filepath_yaml = os.path.join(loader.prompts_dir, f"nova_{agent_id}_{user_id}.yaml")
                             preset_data = {
                                 "name": agent_builder.get("identity", {}).get("name", "Nova"),
                                 "company": agent_builder.get("identity", {}).get("company", "la empresa"),
@@ -279,7 +292,12 @@ async def prompt_config_handler(request):
                             with open(filepath_yaml, "w", encoding="utf-8") as f:
                                 yaml.safe_dump(preset_data, f, allow_unicode=True, default_flow_style=False)
 
-            with open(PROMPT_CONFIG_PATH, "w", encoding="utf-8") as f:
+            # Persistir el agente y system prompt activo del administrador en la base de datos
+            # Usamos 'active_agent' como clave de agente activo para este usuario
+            if compiled:
+                await _db.save_admin_agent(user_id, "active_agent", agent_name, compiled)
+
+            with open(config_path, "w", encoding="utf-8") as f:
                 json.dump(existing_config, f, ensure_ascii=False, indent=2)
                 
             return JsonResponse({"success": True, "message": "Configuración de prompt guardada e implementada físicamente"})
@@ -291,42 +309,46 @@ async def prompt_config_handler(request):
 
 async def get_active_prompt_preview(request):
     if request.method == "GET":
+        user_id = request.admin_user["id"]
         from ai.prompt_loader import PromptLoader
         loader = PromptLoader()
-        text = loader.load()
+        text = loader.load(user_id=user_id)
+        config_path = loader._get_config_path(user_id)
         return JsonResponse({
             "prompt_preview": text[:500] + "..." if len(text) > 500 else text,
             "total_chars": len(text),
-            "config_path": PROMPT_CONFIG_PATH,
-            "config_exists": os.path.exists(PROMPT_CONFIG_PATH)
+            "config_path": config_path,
+            "config_exists": os.path.exists(config_path)
         })
     return HttpResponse(status=405)
 
 
-CUSTOM_AGENTS_PATH = str(_PROJECT_ROOT / "data" / "custom_agents.json")
-
-
-def _load_custom_agents() -> list:
-    if os.path.exists(CUSTOM_AGENTS_PATH):
-        with open(CUSTOM_AGENTS_PATH, "r", encoding="utf-8") as f:
+def _load_custom_agents(user_id: int) -> list:
+    loader = _get_prompt_loader()
+    path = loader._get_custom_agents_path(user_id)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return []
 
 
-def _save_custom_agents(agents: list):
-    os.makedirs(str(_PROJECT_ROOT / "data"), exist_ok=True)
-    with open(CUSTOM_AGENTS_PATH, "w", encoding="utf-8") as f:
+def _save_custom_agents(agents: list, user_id: int):
+    loader = _get_prompt_loader()
+    path = loader._get_custom_agents_path(user_id)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(agents, f, ensure_ascii=False, indent=2)
 
 
 async def custom_agents_handler(request):
+    user_id = request.admin_user["id"]
     if request.method == "GET":
-        return JsonResponse(_load_custom_agents(), safe=False)
+        return JsonResponse(_load_custom_agents(user_id), safe=False)
         
     elif request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
-            agents = _load_custom_agents()
+            agents = _load_custom_agents(user_id)
             
             agent_id = str(uuid.uuid4())[:8]
             data["id"] = agent_id
@@ -339,9 +361,12 @@ async def custom_agents_handler(request):
                 filepath_md = os.path.join(loader.prompts_dir, f"nova_custom_{agent_id}.md")
                 with open(filepath_md, "w", encoding="utf-8") as f:
                     f.write(compiled)
+                
+                # Sincronizar agente personalizado nuevo en la base de datos
+                await _db.save_admin_agent(user_id, agent_id, data.get("profile_name", "Agente Personalizado"), compiled)
                     
             agents.append(data)
-            _save_custom_agents(agents)
+            _save_custom_agents(agents, user_id)
             return JsonResponse({"success": True, "id": agent_id, "message": f"Agente '{data.get('profile_name', '')}' guardado físicamente"})
         except Exception as e:
             return JsonResponse({"detail": str(e)}, status=400)
@@ -350,10 +375,11 @@ async def custom_agents_handler(request):
 
 
 async def delete_custom_agent(request, agent_id: str):
+    user_id = request.admin_user["id"]
     if request.method == "DELETE":
-        agents = _load_custom_agents()
+        agents = _load_custom_agents(user_id)
         agents = [a for a in agents if a.get("id") != agent_id]
-        _save_custom_agents(agents)
+        _save_custom_agents(agents, user_id)
         
         loader = _get_prompt_loader()
         filepath_md = os.path.join(loader.prompts_dir, f"nova_custom_{agent_id}.md")
@@ -362,6 +388,59 @@ async def delete_custom_agent(request, agent_id: str):
                 os.remove(filepath_md)
             except Exception:
                 pass
+        
+        # Eliminar de la base de datos
+        try:
+            await _db.execute("DELETE FROM admin_agents WHERE user_id = ? AND agent_id = ?", (user_id, agent_id))
+        except Exception:
+            pass
                 
         return JsonResponse({"success": True})
     return HttpResponse(status=405)
+
+
+class DbConfigUpdate(BaseModel):
+    db_type: str
+    sqlite_path: Optional[str] = "./data/nova.db"
+    postgres_url: Optional[str] = ""
+
+
+async def get_db_config(request):
+    if request.method == "GET":
+        connected = _db._db is not None
+        masked_url = _db.postgres_url
+        if masked_url and "@" in masked_url:
+            masked_url = re.sub(r'(:[^:@]+)@', ':****@', masked_url)
+        return JsonResponse({
+            "db_type": _db.db_type,
+            "sqlite_path": _db.sqlite_path,
+            "postgres_url": masked_url,
+            "connected": connected,
+            "error": None if connected else "Base de datos desconectada"
+        })
+    return HttpResponse(status=405)
+
+
+async def update_db_config(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+            data = DbConfigUpdate(**body)
+            await _db.reconnect(data.db_type, data.sqlite_path, data.postgres_url)
+            return JsonResponse({"success": True, "message": "Base de datos reconectada exitosamente"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
+    return HttpResponse(status=405)
+
+
+async def test_db_config(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+            data = DbConfigUpdate(**body)
+            await _db.test_connection(data.db_type, data.sqlite_path, data.postgres_url)
+            return JsonResponse({"success": True, "message": "Prueba de conexión exitosa"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return HttpResponse(status=405)
+

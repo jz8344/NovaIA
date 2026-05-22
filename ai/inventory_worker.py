@@ -1,6 +1,15 @@
+import os
+import json
 from loguru import logger
 from database.manager import DatabaseManager
 from collections import defaultdict
+from config.settings import get_settings
+
+EXCHANGE_RATES_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data",
+    "exchange_rates.json"
+)
 
 
 class InventoryWorker:
@@ -92,6 +101,24 @@ class InventoryWorker:
             lines.append("=== INVENTARIO CONSULTADO ===")
             lines.append("")
 
+        # Cargar tasas de cambio
+        rates = {
+            "USD": 1.0,
+            "MXN": 17.37,
+            "ARS": 900.0,
+            "BOB": 6.91,
+            "GBP": 0.79,
+            "RUB": 90.0,
+            "CNY": 7.24,
+            "KRW": 1360.0
+        }
+        if os.path.exists(EXCHANGE_RATES_FILE):
+            try:
+                with open(EXCHANGE_RATES_FILE, "r", encoding="utf-8") as f:
+                    rates.update(json.load(f))
+            except Exception as e:
+                logger.warning(f"No se pudo leer exchange_rates.json: {e}")
+
         for category in sorted(grouped.keys()):
             lines.append(category.upper())
             brands = grouped[category]
@@ -103,7 +130,14 @@ class InventoryWorker:
                     stock = p.get("stock", 0)
                     desc = p.get("description", "")
 
-                    price_str = f"${price:,.0f} MXN"
+                    mxn_rate = rates.get("MXN", 17.37) or 17.37
+                    usd_price = price / mxn_rate
+                    gbp_price = usd_price * rates.get("GBP", 0.79)
+                    ars_price = usd_price * rates.get("ARS", 900.0)
+                    bob_price = usd_price * rates.get("BOB", 6.91)
+                    cny_price = usd_price * rates.get("CNY", 7.24)
+
+                    price_str = f"${price:,.0f} MXN (~${usd_price:,.2f} USD | ~£{gbp_price:,.2f} GBP | ~{ars_price:,.0f} ARS | ~{bob_price:,.2f} BOB | ~{cny_price:,.2f} CNY)"
                     stock_str = f"stock: {stock}" if stock > 0 else "agotado"
 
                     line = f"    - {name} — {price_str} ({stock_str})"

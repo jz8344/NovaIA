@@ -27,6 +27,8 @@ from actions.transfer_call import (
 from actions.end_call import handle_end_call
 from api.admin import set_dependencies as set_admin_deps
 
+from core.exchange_updater import ExchangeRateUpdater
+
 # Instancias globales
 settings = get_settings()
 db = DatabaseManager()
@@ -36,13 +38,17 @@ function_registry = FunctionRegistry()
 ami_client = AMIClient()
 gemini_client: GeminiLiveClient | None = None
 audiosocket_server: AudioSocketServer | None = None
+exchange_updater: ExchangeRateUpdater | None = None
 
 async def init_resources():
-    global gemini_client, audiosocket_server
+    global gemini_client, audiosocket_server, exchange_updater
 
     logger.info("=" * 60)
     logger.info("  Nova Voice Agent (Django) — Iniciando...")
     logger.info("=" * 60)
+
+    exchange_updater = ExchangeRateUpdater()
+    exchange_updater.start()
 
     await db.connect()
     await seed_database(db)
@@ -73,8 +79,13 @@ async def init_resources():
     logger.info("=" * 60)
 
 async def close_resources():
-    global audiosocket_server
+    global audiosocket_server, exchange_updater
     logger.info("Nova Voice Agent (Django) — Cerrando...")
+    if exchange_updater:
+        try:
+            exchange_updater.stop()
+        except Exception as e:
+            logger.error(f"Error deteniendo actualizador de divisas: {e}")
     if audiosocket_server:
         try:
             await audiosocket_server.stop()

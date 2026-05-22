@@ -9,6 +9,22 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Configuración de orígenes de confianza para la protección CSRF en producción (HTTPS)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.up.railway.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+# Añadir dinámicamente el dominio asignado por Railway si está presente
+railway_url = os.environ.get("RAILWAY_STATIC_URL")
+if railway_url:
+    if not railway_url.startswith("http"):
+        CSRF_TRUSTED_ORIGINS.append(f"https://{railway_url}")
+    else:
+        CSRF_TRUSTED_ORIGINS.append(railway_url)
+
+
 INSTALLED_APPS = [
     'daphne',
     'channels',
@@ -21,6 +37,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'auth.middleware.AdminAuthMiddleware',
 ]
 
 ROOT_URLCONF = 'django_project.urls'

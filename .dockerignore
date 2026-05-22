@@ -1,0 +1,50 @@
+# Entornos virtuales locales
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache y compilaciones
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Bases de datos y archivos de datos locales
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.sqlite3
+database/*.db
+
+# Entornos y secretos locales (Railway manejará las variables de entorno en la nube)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# Archivos del editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Docker y despliegues locales
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Archivos de depuración y temporales
+scratch/
+tests/
+logs/
+*.log

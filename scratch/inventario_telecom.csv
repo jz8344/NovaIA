@@ -1,0 +1,318 @@
+product_name,description,price,stock,category,brand,color,weight
+Teléfono IP Grandstream GRP2601,"Teléfono IP básico de 2 líneas, 1 cuenta SIP, pantalla LCD de 132x48 píxeles, sin soporte PoE, ideal para oficina.",780.0,50,Telefonía IP,Grandstream,Negro,0.8 kg
+Teléfono IP Grandstream GRP2601P,"Teléfono IP básico de 2 líneas, 1 cuenta SIP, pantalla LCD, soporte PoE para alimentación por red.",890.0,45,Telefonía IP,Grandstream,Negro,0.8 kg
+Teléfono IP Grandstream GRP2602,"Teléfono IP de 2 líneas, 4 cuentas SIP, pantalla LCD retroiluminada de 2.21 pulgadas, audio HD.",950.0,40,Telefonía IP,Grandstream,Negro,0.82 kg
+Teléfono IP Grandstream GRP2602P,"Teléfono IP de 2 líneas, 4 cuentas SIP, pantalla retroiluminada, soporte PoE integrado.",1050.0,60,Telefonía IP,Grandstream,Negro,0.82 kg
+Teléfono IP Grandstream GRP2602W,Teléfono IP de 2 líneas con soporte Wi-Fi de doble banda integrado para conexión inalámbrica.,1390.0,30,Telefonía IP,Grandstream,Negro,0.85 kg
+Teléfono IP Grandstream GRP2603,"Teléfono IP de 3 líneas, 6 cuentas SIP, pantalla LCD retroiluminada, puertos Gigabit Ethernet duales.",1150.0,35,Telefonía IP,Grandstream,Negro,0.83 kg
+Teléfono IP Grandstream GRP2604,"Teléfono IP de 3 líneas, 6 cuentas SIP, 10 teclas BLF de marcación rápida, puertos Gigabit Ethernet.",1350.0,25,Telefonía IP,Grandstream,Negro,0.86 kg
+Teléfono IP Grandstream GRP2604P,"Teléfono IP de 3 líneas, 6 cuentas SIP, 10 teclas BLF, soporte PoE y puertos Gigabit duales.",1490.0,30,Telefonía IP,Grandstream,Negro,0.86 kg
+Teléfono IP Grandstream GRP2612,"Teléfono IP de gama media con 4 líneas, 2 cuentas SIP, pantalla color de 2.4 pulgadas, sin PoE.",1320.0,20,Telefonía IP,Grandstream,Negro,0.9 kg
+Teléfono IP Grandstream GRP2612P,"Teléfono IP de gama media con 4 líneas, pantalla color de 2.4 pulgadas y PoE integrado.",1450.0,35,Telefonía IP,Grandstream,Negro,0.9 kg
+Teléfono IP Grandstream GRP2612W,Teléfono IP de 4 líneas con Wi-Fi de doble banda y pantalla color de 2.4 pulgadas.,1780.0,25,Telefonía IP,Grandstream,Negro,0.92 kg
+Teléfono IP Grandstream GRP2613,"Teléfono IP profesional de 6 líneas, 3 cuentas SIP, pantalla a color de 2.8 pulgadas, puertos Gigabit.",1850.0,20,Telefonía IP,Grandstream,Negro,0.95 kg
+Teléfono IP Grandstream GRP2614,"Teléfono IP profesional con pantallas color duales, Wi-Fi de doble banda y Bluetooth integrados.",2450.0,15,Telefonía IP,Grandstream,Negro,1.05 kg
+Teléfono IP Grandstream GRP2615,"Teléfono IP carrier-grade de 10 líneas, Wi-Fi y Bluetooth integrados, pantalla a color de 4.3 pulgadas y PoE.",3190.0,18,Telefonía IP,Grandstream,Negro,1.1 kg
+Teléfono IP Grandstream GRP2616,Teléfono IP profesional de 6 líneas con pantallas duales y Wi-Fi/Bluetooth integrados de fábrica.,2850.0,12,Telefonía IP,Grandstream,Negro,1.08 kg
+Teléfono IP Grandstream GRP2624,"Teléfono IP profesional de 8 líneas, Wi-Fi de doble banda, Bluetooth y soporte para módulo GBX20.",2980.0,15,Telefonía IP,Grandstream,Negro,1.0 kg
+Teléfono IP Grandstream GRP2634,"Teléfono IP profesional de 8 líneas, Wi-Fi de doble banda, Bluetooth y 10 teclas BLF físicas.",3100.0,14,Telefonía IP,Grandstream,Negro,1.05 kg
+Teléfono IP Grandstream GRP2636,Teléfono IP carrier-grade de 12 líneas con pantalla a color de 4.3 pulgadas y 24 teclas BLF virtuales.,3750.0,10,Telefonía IP,Grandstream,Negro,1.15 kg
+Teléfono IP Grandstream GRP2650,"Teléfono IP profesional de 14 líneas, pantalla a color de 5.0 pulgadas, Wi-Fi y Bluetooth.",4200.0,8,Telefonía IP,Grandstream,Negro,1.2 kg
+Teléfono IP Grandstream GRP2670,Teléfono IP ejecutivo carrier-grade con pantalla táctil capacitiva de 7 pulgadas y hasta 12 líneas.,4990.0,5,Telefonía IP,Grandstream,Negro,1.25 kg
+Teléfono IP Grandstream GXP1610,"Teléfono IP básico para pequeñas empresas con 1 cuenta SIP, 2 líneas y pantalla LCD de 132x48.",690.0,50,Telefonía IP,Grandstream,Negro,0.75 kg
+Teléfono IP Grandstream GXP1615,Teléfono IP básico de 1 cuenta SIP y 2 líneas con PoE integrado para fácil instalación.,790.0,48,Telefonía IP,Grandstream,Negro,0.75 kg
+Teléfono IP Grandstream GXP1620,"Teléfono IP básico de 2 cuentas SIP y 2 líneas, pantalla retroiluminada de 132x48.",890.0,30,Telefonía IP,Grandstream,Negro,0.78 kg
+Teléfono IP Grandstream GXP1625,Teléfono IP básico de 2 cuentas SIP y 2 líneas con PoE integrado y pantalla retroiluminada.,990.0,40,Telefonía IP,Grandstream,Negro,0.78 kg
+Teléfono IP Grandstream GXP1628,"Teléfono IP Gigabit básico de 2 cuentas SIP y 2 líneas, 8 teclas de marcación rápida BLF y PoE.",1490.0,18,Telefonía IP,Grandstream,Negro,0.8 kg
+Teléfono IP Grandstream GXP1630,"Teléfono IP Gigabit básico de 3 cuentas SIP y 3 líneas, 8 teclas BLF y PoE integrado.",1690.0,15,Telefonía IP,Grandstream,Negro,0.81 kg
+Teléfono IP Grandstream GXP2130,"Teléfono IP empresarial de 3 líneas, pantalla LCD a color de 2.8 pulgadas, 8 teclas BLF y PoE.",1890.0,12,Telefonía IP,Grandstream,Negro,0.95 kg
+Teléfono IP Grandstream GXP2135,"Teléfono IP empresarial de 8 líneas, pantalla a color de 2.8 pulgadas, Gigabit, Bluetooth y PoE.",2150.0,15,Telefonía IP,Grandstream,Negro,0.92 kg
+Teléfono IP Grandstream GXP2140,"Teléfono IP empresarial de 4 líneas con pantalla color de 4.3 pulgadas, Gigabit y soporte de módulos.",2490.0,10,Telefonía IP,Grandstream,Negro,1.04 kg
+Teléfono IP Grandstream GXP2160,"Teléfono IP empresarial de 6 líneas con pantalla a color de 4.3 pulgadas, 24 teclas físicas BLF.",2890.0,8,Telefonía IP,Grandstream,Negro,1.1 kg
+Teléfono IP Grandstream GXP2170,"Teléfono IP ejecutivo de 12 líneas, pantalla color de 4.3 pulgadas, 48 teclas virtuales BLF.",3190.0,22,Telefonía IP,Grandstream,Negro,1.05 kg
+Videoteléfono IP Grandstream GXV3350,Videoteléfono inteligente para Android con cámara integrada de 1MP y pantalla de 5.0 pulgadas.,4650.0,6,Telefonía IP,Grandstream,Negro,1.2 kg
+Videoteléfono IP Grandstream GXV3370,"Videoteléfono IP inteligente con pantalla táctil de 7 pulgadas, cámara HD y sistema operativo Android.",5890.0,5,Telefonía IP,Grandstream,Negro,1.4 kg
+Videoteléfono IP Grandstream GXV3380,"Videoteléfono IP ejecutivo con pantalla táctil IPS de 8 pulgadas, cámara de 2MP y soporte para Android 7.",7900.0,3,Telefonía IP,Grandstream,Negro,1.6 kg
+Videoteléfono IP Grandstream GXV3450,"Videoteléfono inteligente de alta gama con Android 11, pantalla táctil de 5 pulgadas y cámara HD.",5490.0,8,Telefonía IP,Grandstream,Negro,1.18 kg
+Videoteléfono IP Grandstream GXV3470,"Videoteléfono inteligente premium con Android 11, pantalla táctil de 7 pulgadas y cámara CMOS de 2MP.",6800.0,4,Telefonía IP,Grandstream,Negro,1.35 kg
+Teléfono Wi-Fi Portátil Grandstream WP810,"Teléfono IP inalámbrico con Wi-Fi de doble banda integrado, audio HD, hasta 6 horas de conversación.",2100.0,20,Telefonía IP,Grandstream,Negro,0.4 kg
+Teléfono Wi-Fi Portátil Grandstream WP820,"Teléfono IP inalámbrico con Wi-Fi de doble banda, Bluetooth, pantalla a color y botón PTT.",3100.0,15,Telefonía IP,Grandstream,Negro,0.43 kg
+Teléfono Wi-Fi Portátil Grandstream WP822,Teléfono IP inalámbrico empresarial con Wi-Fi de doble banda y batería de larga duración (8h conv).,2700.0,18,Telefonía IP,Grandstream,Negro,0.41 kg
+Teléfono Wi-Fi Portátil Grandstream WP825,Teléfono IP inalámbrico rugerizado con Wi-Fi de doble banda y protección IP67 contra polvo y agua.,3890.0,10,Telefonía IP,Grandstream,Negro,0.45 kg
+Teléfono Inalámbrico DECT Grandstream DP720,"Auricular inalámbrico DECT para conmutadores IP, pantalla a color, audio HD y conector de 3.5mm.",1090.0,25,Telefonía IP,Grandstream,Negro,0.32 kg
+Teléfono Inalámbrico DECT Grandstream DP722,Auricular inalámbrico DECT de gama media con pantalla a color de 1.8 pulgadas y audio HD.,1250.0,20,Telefonía IP,Grandstream,Negro,0.33 kg
+Teléfono Inalámbrico DECT Grandstream DP730,"Auricular inalámbrico DECT de alta gama, pantalla a color de 2.4 pulgadas, botón PTT y sensor de movimiento.",1890.0,12,Telefonía IP,Grandstream,Negro,0.36 kg
+Estación Base DECT Grandstream DP750,"Estación base DECT VoIP para hasta 5 auriculares DP720, soporta 10 cuentas SIP y 5 llamadas simultáneas.",1190.0,18,Telefonía IP,Grandstream,Negro,0.45 kg
+Estación Base DECT Grandstream DP752,"Estación base DECT VoIP de largo alcance para hasta 5 auriculares DECT, con botón de emparejamiento físico.",1390.0,15,Telefonía IP,Grandstream,Negro,0.46 kg
+Conmutador IP Grandstream UCM6301,"Conmutador PBX IP empresarial para hasta 500 usuarios, 1 puerto FXS y 1 puerto FXO integrados.",7900.0,6,Conmutadores IP,Grandstream,Gris,1.5 kg
+Conmutador IP Grandstream UCM6302,"Conmutador PBX IP empresarial para hasta 1000 usuarios, 2 puertos FXS y 2 puertos FXO integrados.",11500.0,5,Conmutadores IP,Grandstream,Gris,1.6 kg
+Conmutador IP Grandstream UCM6304,"Conmutador PBX IP empresarial para hasta 2000 usuarios, 4 puertos FXS y 4 puertos FXO integrados.",28900.0,3,Conmutadores IP,Grandstream,Gris,2.8 kg
+Conmutador IP Grandstream UCM6308,"Conmutador PBX IP empresarial de alto rendimiento para hasta 3000 usuarios, 8 FXS y 8 FXO.",48900.0,2,Conmutadores IP,Grandstream,Gris,3.5 kg
+Conmutador IP Grandstream UCM6300A,"Conmutador PBX IP serie UCM6300 Audio, soporta hasta 250 usuarios, llamadas de solo audio.",4990.0,10,Conmutadores IP,Grandstream,Gris,1.3 kg
+Conmutador IP Grandstream UCM6302A,"Conmutador PBX IP serie UCM6300 Audio, soporta hasta 500 usuarios, 2 puertos FXS y 2 FXO.",7690.0,8,Conmutadores IP,Grandstream,Gris,1.4 kg
+Conmutador IP Grandstream UCM6304A,"Conmutador PBX IP serie UCM6300 Audio, soporta hasta 1000 usuarios, 4 puertos FXS y 4 FXO.",16900.0,4,Conmutadores IP,Grandstream,Gris,2.2 kg
+Conmutador IP Grandstream UCM6308A,"Conmutador PBX IP serie UCM6300 Audio, soporta hasta 1500 usuarios, 8 puertos FXS y 8 FXO.",31500.0,2,Conmutadores IP,Grandstream,Gris,3.0 kg
+Conmutador IP Grandstream UCM6202,"Conmutador PBX IP empresarial heredado, soporta hasta 500 usuarios y 30 llamadas simultáneas.",6800.0,4,Conmutadores IP,Grandstream,Negro,1.2 kg
+Conmutador IP Grandstream UCM6204,"Conmutador PBX IP empresarial heredado, 4 puertos FXO, soporta hasta 500 usuarios.",9900.0,3,Conmutadores IP,Grandstream,Negro,1.3 kg
+Adaptador ATA Grandstream HT801,Adaptador de teléfono analógico de 1 puerto FXS para conectar teléfono común a red VoIP.,790.0,35,Gateways/ATAs,Grandstream,Negro,0.3 kg
+Adaptador ATA Grandstream HT802,"Adaptador de teléfono analógico de 2 puertos FXS, enrutador NAT integrado, tamaño compacto.",890.0,40,Gateways/ATAs,Grandstream,Negro,0.32 kg
+Adaptador ATA Grandstream HT812,Adaptador de teléfono analógico de 2 puertos FXS con enrutador NAT Gigabit integrado.,1150.0,30,Gateways/ATAs,Grandstream,Negro,0.35 kg
+Adaptador ATA Grandstream HT814,Adaptador de teléfono analógico con 4 puertos FXS y enrutador Gigabit NAT integrado.,1980.0,15,Gateways/ATAs,Grandstream,Negro,0.45 kg
+Adaptador ATA Grandstream HT818,Adaptador de teléfono analógico de alta densidad con 8 puertos FXS y 2 puertos Gigabit.,3650.0,10,Gateways/ATAs,Grandstream,Negro,0.6 kg
+Gateway VoIP Grandstream GXW4004,"Gateway analógico FXS de 4 puertos, ideal para integrar faxes y líneas analógicas a conmutadores IP.",2350.0,12,Gateways/ATAs,Grandstream,Negro,0.8 kg
+Gateway VoIP Grandstream GXW4008,Gateway analógico FXS de 8 puertos para conectar hasta 8 extensiones analógicas a telefonía IP.,3890.0,8,Gateways/ATAs,Grandstream,Negro,0.85 kg
+Gateway VoIP Grandstream GXW4216,Gateway analógico FXS de alta densidad con 16 puertos RJ11 y conector Telco de 50 pines.,6800.0,6,Gateways/ATAs,Grandstream,Negro,2.1 kg
+Gateway VoIP Grandstream GXW4224,Gateway analógico FXS de alta densidad de 24 puertos para migración masiva a telefonía IP.,8900.0,5,Gateways/ATAs,Grandstream,Negro,2.3 kg
+Gateway VoIP Grandstream GXW4232,"Gateway analógico FXS de alta densidad con 32 puertos RJ11, montaje en rack.",10900.0,4,Gateways/ATAs,Grandstream,Negro,2.5 kg
+Gateway VoIP Grandstream GXW4248,Gateway analógico FXS de ultra-alta densidad con 48 puertos y conectores Telco RJ21.,16900.0,2,Gateways/ATAs,Grandstream,Negro,3.2 kg
+Gateway FXO Grandstream GXW4104,Gateway analógico de 4 puertos FXO para integrar hasta 4 líneas analógicas (Telmex) a conmutador IP.,3100.0,8,Gateways/ATAs,Grandstream,Negro,0.8 kg
+Gateway FXO Grandstream GXW4108,Gateway analógico de 8 puertos FXO para conectar 8 líneas analógicas a redes VoIP.,4990.0,6,Gateways/ATAs,Grandstream,Negro,0.85 kg
+Punto de Acceso Grandstream GWN7600,"Access Point inalámbrico Wave-2 802.11ac de rango medio, ideal para oficinas medianas.",1850.0,15,Redes inalámbricas,Grandstream,Blanco,0.55 kg
+Punto de Acceso Grandstream GWN7600LR,Access Point de largo alcance para exteriores (Long Range) con certificación IP66.,2890.0,10,Redes inalámbricas,Grandstream,Blanco,0.9 kg
+Punto de Acceso Grandstream GWN7602,AP Wi-Fi compacto para hoteles y sucursales con switch de 4 puertos Ethernet integrados.,1100.0,25,Redes inalámbricas,Grandstream,Blanco,0.4 kg
+Punto de Acceso Grandstream GWN7605,"Access Point Wi-Fi 802.11ac Wave 2 de doble banda, soporta hasta 100 dispositivos.",1450.0,20,Redes inalámbricas,Grandstream,Blanco,0.5 kg
+Punto de Acceso Grandstream GWN7605LR,"AP Wi-Fi para exteriores Wave-2 802.11ac, alcance de hasta 250 metros.",2490.0,12,Redes inalámbricas,Grandstream,Blanco,0.8 kg
+Punto de Acceso Grandstream GWN7610,AP inalámbrico 802.11ac corporativo de alto rendimiento para campus u oficinas.,1950.0,8,Redes inalámbricas,Grandstream,Blanco,0.6 kg
+Punto de Acceso Grandstream GWN7615,AP inalámbrico empresarial 802.11ac Wave 2 con tecnología MIMO 3x3:3 de doble banda.,1690.0,15,Redes inalámbricas,Grandstream,Blanco,0.52 kg
+Punto de Acceso Grandstream GWN7630,"AP inalámbrico Wave-2 4x4:4 de alto rendimiento para interiores, capacidad de hasta 200 clientes.",2350.0,14,Redes inalámbricas,Grandstream,Blanco,0.58 kg
+Punto de Acceso Grandstream GWN7630LR,AP para exteriores Wave-2 de alto rendimiento 4x4:4 MIMO con alcance de hasta 300m.,3980.0,8,Redes inalámbricas,Grandstream,Blanco,1.0 kg
+Punto de Acceso Grandstream GWN7660,"Access Point Wi-Fi 6 (802.11ax) empresarial de doble banda, soporta hasta 256 dispositivos.",2850.0,18,Redes inalámbricas,Grandstream,Blanco,0.6 kg
+Punto de Acceso Grandstream GWN7660LR,Access Point exterior Wi-Fi 6 (802.11ax) de largo alcance con tecnología MIMO 2x2.,4200.0,10,Redes inalámbricas,Grandstream,Blanco,0.95 kg
+Punto de Acceso Grandstream GWN7662,Access Point Wi-Fi 6 con soporte de doble banda y tecnología MIMO 4x4 para zonas densas.,3190.0,12,Redes inalámbricas,Grandstream,Blanco,0.62 kg
+Punto de Acceso Grandstream GWN7664,AP Wi-Fi 6 de alto rendimiento para interiores con MIMO 4x4:4 y velocidad agregada de 3.55 Gbps.,3950.0,10,Redes inalámbricas,Grandstream,Blanco,0.65 kg
+Punto de Acceso Grandstream GWN7664LR,"AP exterior premium Wi-Fi 6 MIMO 4x4:4 con antena de alta ganancia, rango de hasta 300m.",5490.0,6,Redes inalámbricas,Grandstream,Blanco,1.1 kg
+Punto de Acceso Grandstream GWN7661,Access Point Wi-Fi 6 de placa de pared (In-Wall) con puertos Ethernet RJ45 integrados.,2100.0,15,Redes inalámbricas,Grandstream,Blanco,0.42 kg
+Punto de Acceso Grandstream GWN7624,AP de pared Wi-Fi 5 empresarial con switch Gigabit de 4 puertos e inyector PoE integrado.,1450.0,20,Redes inalámbricas,Grandstream,Blanco,0.45 kg
+Punto de Acceso Grandstream GWN7625,Access Point Wi-Fi 5 de alto rendimiento para interiores con 2x2 MIMO y puertos Gigabit.,1590.0,15,Redes inalámbricas,Grandstream,Blanco,0.53 kg
+Router VPN Grandstream GWN7000,Router Gigabit empresarial Multi-WAN con soporte VPN avanzado y balanceo de carga.,2100.0,8,Redes cableadas,Grandstream,Negro,0.8 kg
+Router VPN Grandstream GWN7001,Router Multi-WAN Gigabit compacto con cortafuegos de hardware y compatibilidad con GDMS.,1590.0,12,Redes cableadas,Grandstream,Negro,0.6 kg
+Router VPN Grandstream GWN7002,Router Gigabit Multi-WAN empresarial de alto rendimiento con 2 puertos SFP de fibra.,2350.0,10,Redes cableadas,Grandstream,Negro,0.75 kg
+Router VPN Grandstream GWN7003,Router Multi-WAN con puertos SFP y múltiples opciones de equilibrio de carga empresarial.,2980.0,8,Redes cableadas,Grandstream,Negro,0.8 kg
+Router Wi-Fi Grandstream GWN7052,Router inalámbrico de doble banda Gigabit AC1200 con soporte para VPN y redes Mesh.,1150.0,25,Redes inalámbricas,Grandstream,Negro,0.48 kg
+Router Wi-Fi Grandstream GWN7052F,Router inalámbrico de doble banda Gigabit con puerto SFP WAN para conexión por fibra óptica.,1490.0,15,Redes inalámbricas,Grandstream,Negro,0.5 kg
+Router Wi-Fi Grandstream GWN7062,Router inalámbrico Wi-Fi 6 (802.11ax) de doble banda con tecnología DL/UL MU-MIMO.,2100.0,18,Redes inalámbricas,Grandstream,Negro,0.55 kg
+Switch Administrable Grandstream GWN7801,Switch L2+ administrable empresarial de 8 puertos Gigabit Ethernet y 2 puertos SFP.,3100.0,12,Switches,Grandstream,Gris,1.8 kg
+Switch Administrable Grandstream GWN7801P,Switch L2+ administrable empresarial con 8 puertos Gigabit PoE+ y 2 puertos SFP (120W).,4890.0,10,Switches,Grandstream,Gris oscuro,2.1 kg
+Switch Administrable Grandstream GWN7802,Switch L2+ administrable empresarial de 16 puertos Gigabit Ethernet y 4 puertos SFP.,4650.0,8,Switches,Grandstream,Gris,2.4 kg
+Switch Administrable Grandstream GWN7802P,Switch L2+ administrable de 16 puertos Gigabit PoE+ y 4 puertos SFP (presupuesto 240W).,7900.0,6,Switches,Grandstream,Gris oscuro,2.8 kg
+Switch Administrable Grandstream GWN7803,Switch L2+ administrable de 24 puertos Gigabit Ethernet y 4 puertos SFP para racks.,5890.0,8,Switches,Grandstream,Gris,3.1 kg
+Switch Administrable Grandstream GWN7803P,Switch L2+ administrable de 24 puertos Gigabit PoE+ y 4 puertos SFP (presupuesto 360W).,9900.0,5,Switches,Grandstream,Gris oscuro,3.5 kg
+Switch Administrable Grandstream GWN7811,Switch L3 administrable de alto rendimiento con 8 puertos Gigabit y 2 puertos 10Gb SFP+.,4800.0,6,Switches,Grandstream,Gris,1.9 kg
+Switch Administrable Grandstream GWN7811P,Switch L3 administrable de 8 puertos Gigabit PoE+ y 2 puertos 10Gb SFP+ para fibra.,6500.0,4,Switches,Grandstream,Gris oscuro,2.2 kg
+Switch Administrable Grandstream GWN7812,Switch L3 administrable con 16 puertos Gigabit y 4 puertos 10Gb SFP+ de alta velocidad.,6800.0,5,Switches,Grandstream,Gris,2.5 kg
+Switch Administrable Grandstream GWN7812P,Switch L3 administrable de 16 puertos Gigabit PoE+ y 4 puertos 10Gb SFP+.,9500.0,3,Switches,Grandstream,Gris oscuro,2.9 kg
+Switch Administrable Grandstream GWN7813,Switch L3 administrable de 24 puertos Gigabit y 4 puertos 10Gb SFP+.,8200.0,4,Switches,Grandstream,Gris,3.2 kg
+Switch Administrable Grandstream GWN7813P,Switch L3 administrable de 24 puertos Gigabit PoE+ y 4 puertos 10Gb SFP+.,12800.0,3,Switches,Grandstream,Gris oscuro,3.6 kg
+Punto de Acceso Ubiquiti UAP-AC-LITE,"Access Point compacto de doble banda 802.11ac, alcance de hasta 122 metros y puerto Gigabit.",1750.0,30,Redes inalámbricas,Ubiquiti,Blanco,0.35 kg
+Punto de Acceso Ubiquiti UAP-AC-LR,"Access Point de largo alcance (Long Range) 802.11ac, antena optimizada para distancias largas.",2150.0,25,Redes inalámbricas,Ubiquiti,Blanco,0.45 kg
+Punto de Acceso Ubiquiti UAP-AC-PRO,Access Point empresarial de alto rendimiento 802.11ac de 3x3 MIMO para interiores y exteriores.,3100.0,20,Redes inalámbricas,Ubiquiti,Blanco,0.52 kg
+Punto de Acceso Ubiquiti UAP-AC-M,Access Point UniFi AC Mesh para exteriores de doble banda con antenas desmontables omnidireccionales.,1980.0,35,Redes inalámbricas,Ubiquiti,Blanco,0.3 kg
+Punto de Acceso Ubiquiti UAP-AC-M-PRO,Access Point exterior UniFi AC Mesh Pro con rendimiento MIMO 3x3 de doble banda y puerto Gigabit.,3950.0,15,Redes inalámbricas,Ubiquiti,Blanco,0.85 kg
+Punto de Acceso Ubiquiti U6-Lite,Access Point compacto Wi-Fi 6 de doble banda con tecnología MIMO 2x2 y soporte PoE.,2190.0,40,Redes inalámbricas,Ubiquiti,Blanco,0.3 kg
+Punto de Acceso Ubiquiti U6-Plus,Access Point mejorado Wi-Fi 6 que ofrece mayor velocidad y mejor cobertura a un menor costo.,2490.0,30,Redes inalámbricas,Ubiquiti,Blanco,0.32 kg
+Punto de Acceso Ubiquiti U6-Pro,Access Point empresarial de alto rendimiento Wi-Fi 6 de doble banda MIMO 4x4.,3790.0,20,Redes inalámbricas,Ubiquiti,Blanco,0.46 kg
+Punto de Acceso Ubiquiti U6-LR,Access Point Wi-Fi 6 de largo alcance con soporte de hasta 300 conexiones simultáneas.,4200.0,15,Redes inalámbricas,Ubiquiti,Blanco,0.8 kg
+Punto de Acceso Ubiquiti U6-Enterprise,AP de gama ultra alta Wi-Fi 6E con soporte para banda de 6 GHz y puerto Ethernet a 2.5 Gbps.,6900.0,8,Redes inalámbricas,Ubiquiti,Blanco,0.96 kg
+Punto de Acceso Ubiquiti U6-Mesh,AP Wi-Fi 6 cilíndrico de alto rendimiento para interiores o exteriores con protección IPX5.,3890.0,18,Redes inalámbricas,Ubiquiti,Blanco,0.4 kg
+Punto de Acceso Ubiquiti U6-IW,Access Point Wi-Fi 6 de pared con switch de 4 puertos Gigabit integrados.,3650.0,12,Redes inalámbricas,Ubiquiti,Blanco,0.45 kg
+Extensor Wi-Fi Ubiquiti U6-Extender,Extensor de rango Wi-Fi 6 inalámbrico que se conecta directamente a un enchufe de pared estándar.,2890.0,15,Redes inalámbricas,Ubiquiti,Blanco,0.29 kg
+Switch Ubiquiti USW-Flex-Mini,Switch administrable compacto de 5 puertos Gigabit Ethernet con opciones de alimentación PoE.,720.0,50,Switches,Ubiquiti,Blanco,0.15 kg
+Switch Ubiquiti USW-Lite-8-PoE,Switch de 8 puertos Gigabit con 4 puertos PoE+ auto-detectables y presupuesto de 52W.,2490.0,25,Switches,Ubiquiti,Blanco,0.45 kg
+Switch Ubiquiti USW-Lite-16-PoE,Switch de 16 puertos Gigabit con 8 puertos PoE+ auto-detectables (presupuesto 45W).,4350.0,18,Switches,Ubiquiti,Blanco,1.2 kg
+Switch Ubiquiti US-8-60W,Switch PoE clásico de 8 puertos Gigabit con 4 puertos PoE 802.3af (presupuesto total 60W).,2350.0,20,Switches,Ubiquiti,Gris claro,0.43 kg
+Switch Ubiquiti US-8-150W,Switch administrable PoE+ de 8 puertos Gigabit y 2 puertos SFP (150W de capacidad).,4500.0,12,Switches,Ubiquiti,Gris claro,1.7 kg
+Switch Ubiquiti US-16-150W,Switch de 16 puertos Gigabit PoE+ con 2 puertos SFP para racks (capacidad 150W).,6390.0,10,Switches,Ubiquiti,Gris claro,2.8 kg
+Switch Ubiquiti USW-24-PoE,"Switch administrable con pantalla táctil de 24 puertos Gigabit (16 puertos PoE+, 95W) y 2 SFP.",7900.0,8,Switches,Ubiquiti,Gris,3.0 kg
+Switch Ubiquiti USW-Pro-24-PoE,"Switch L3 de 24 puertos Gigabit con 16 puertos PoE+, 8 puertos PoE++ (400W) y 2 puertos SFP+.",13900.0,5,Switches,Ubiquiti,Gris,4.3 kg
+Switch Ubiquiti USW-48-PoE,"Switch L2 administrable de 48 puertos Gigabit (32 PoE+, 195W) y 4 puertos SFP.",12900.0,6,Switches,Ubiquiti,Gris,4.7 kg
+Switch Ubiquiti USW-Pro-48-PoE,Switch L3 administrable de 48 puertos con PoE+ y PoE++ (600W de presupuesto) y 4 puertos SFP+.,22500.0,3,Switches,Ubiquiti,Gris,6.2 kg
+Switch Ubiquiti USW-Pro-24,Switch L3 administrable de 24 puertos Gigabit y 2 puertos 10Gb SFP+ sin PoE.,8600.0,6,Switches,Ubiquiti,Gris,3.5 kg
+Switch Ubiquiti USW-Pro-48,Switch L3 administrable de 48 puertos Gigabit y 4 puertos 10Gb SFP+ sin PoE.,14900.0,4,Switches,Ubiquiti,Gris,5.2 kg
+Switch Ubiquiti USW-Flex,Switch Gigabit exterior de 5 puertos resistente al clima con capacidad de paso PoE.,2100.0,15,Switches,Ubiquiti,Blanco,0.5 kg
+Router Ubiquiti EdgeRouter X,Router Gigabit cableado ultracompacto de 5 puertos con soporte PoE pasivo passthrough.,1290.0,30,Redes cableadas,Ubiquiti,Negro,0.17 kg
+Router Ubiquiti EdgeRouter X-SFP,Router Gigabit con 5 puertos RJ45 PoE pasivos de 24V y 1 puerto SFP para fibra.,1890.0,25,Redes cableadas,Ubiquiti,Negro,0.23 kg
+Router Ubiquiti EdgeRouter 4,Router de alto rendimiento con 3 puertos Gigabit y 1 puerto SFP (capacidad de 3.4M pps).,4200.0,10,Redes cableadas,Ubiquiti,Negro,0.79 kg
+Router Ubiquiti EdgeRouter 6P,Router de alto rendimiento con 5 puertos Gigabit PoE y 1 puerto SFP para conectividad de fibra.,5490.0,8,Redes cableadas,Ubiquiti,Negro,0.85 kg
+Router Ubiquiti EdgeRouter 12,"Router Gigabit con 10 puertos RJ45, 2 puertos SFP y funciones avanzadas de capa 3.",6390.0,6,Redes cableadas,Ubiquiti,Negro,1.3 kg
+Router Ubiquiti EdgeRouter Infinity,Router de fibra de 8 puertos SFP+ 10G y 1 puerto Gigabit Ethernet para aplicaciones masivas.,38900.0,2,Redes cableadas,Ubiquiti,Negro,4.9 kg
+Switch Ubiquiti EdgeSwitch 8 150W,Switch L2 administrable con 8 puertos Gigabit PoE+ (150W) y 2 puertos SFP para racks.,4390.0,10,Switches,Ubiquiti,Negro,1.7 kg
+Switch Ubiquiti EdgeSwitch 16 150W,Switch administrable PoE+ de 16 puertos Gigabit y 2 puertos SFP (150W).,6200.0,8,Switches,Ubiquiti,Negro,2.8 kg
+Switch Ubiquiti EdgeSwitch 24 250W,Switch administrable PoE+ de 24 puertos Gigabit y 2 puertos SFP (250W de presupuesto).,9500.0,5,Switches,Ubiquiti,Negro,3.7 kg
+Switch Ubiquiti EdgeSwitch 48 500W,Switch administrable de alta densidad con 48 puertos Gigabit PoE+ y 2 SFP+ (500W).,18900.0,3,Switches,Ubiquiti,Negro,5.8 kg
+CPE Ubiquiti NanoStation Loco M5,Antena exterior compacta airMAX de 5 GHz con alcance de hasta 5 km y antena integrada de 13 dBi.,1150.0,50,Antenas / Enlaces,Ubiquiti,Blanco,0.18 kg
+CPE Ubiquiti NanoStation M5,"Antena exterior airMAX 5 GHz de 16 dBi de ganancia, puertos de red duales con soporte PoE.",1780.0,35,Antenas / Enlaces,Ubiquiti,Blanco,0.4 kg
+CPE Ubiquiti NanoStation AC loco,Antena inalámbrica exterior de 5 GHz AC con tecnología airMAX de hasta 450 Mbps.,1250.0,45,Antenas / Enlaces,Ubiquiti,Blanco,0.18 kg
+CPE Ubiquiti NanoStation AC,Antena airMAX AC de 5 GHz para enlaces inalámbricos punto a punto y punto a multipunto.,2890.0,20,Antenas / Enlaces,Ubiquiti,Blanco,0.5 kg
+CPE Ubiquiti PowerBeam AC Gen2,Antena directiva tipo plato de 5 GHz AC de 25 dBi con blindaje de RF para enlaces de más de 15 km.,3100.0,18,Antenas / Enlaces,Ubiquiti,Blanco,2.2 kg
+CPE Ubiquiti LiteBeam M5,"Antena exterior tipo rejilla ultraligera de 5 GHz de 23 dBi de ganancia, alcance medio.",1150.0,40,Antenas / Enlaces,Ubiquiti,Blanco,0.75 kg
+CPE Ubiquiti LiteBeam AC Gen2,Antena exterior tipo rejilla airMAX AC de 5 GHz con alcance de hasta 15 km y 23 dBi de ganancia.,1490.0,50,Antenas / Enlaces,Ubiquiti,Blanco,0.98 kg
+Radio Base Ubiquiti Rocket M5,Transceptor de alta potencia airMAX de 5 GHz para acoplamiento a antenas direccionales o sectoriales.,1980.0,15,Antenas / Enlaces,Ubiquiti,Blanco,0.5 kg
+Radio Base Ubiquiti Rocket Prism 5AC,Radio airMAX AC de 5 GHz de alto rendimiento para estaciones base con filtrado activo de RF.,4650.0,10,Antenas / Enlaces,Ubiquiti,Plateado,0.4 kg
+Inyector PoE Ubiquiti POE-24-12W-G,Adaptador PoE de 24 VDC y 0.5 A con puertos Gigabit Ethernet para equipos airMAX.,280.0,100,Accesorios de Red,Ubiquiti,Negro,0.15 kg
+Inyector PoE Ubiquiti POE-48-24W-G,Adaptador PoE de 48 VDC y 0.5 A con protección contra sobretensiones y puerto Gigabit.,420.0,60,Accesorios de Red,Ubiquiti,Negro,0.16 kg
+Router MikroTik hEX lite,"Router básico de 5 puertos Ethernet 10/100, diseño compacto de plástico, ideal para el hogar.",950.0,30,Redes cableadas,MikroTik,Blanco,0.12 kg
+Router MikroTik hEX,Router cableado Gigabit de 5 puertos con CPU de doble núcleo a 880 MHz y ranura MicroSD.,1250.0,45,Redes cableadas,MikroTik,Gris/Azul,0.14 kg
+Router MikroTik hEX PoE,Router Gigabit de 5 puertos con salida PoE pasiva en los puertos 2 a 5 para alimentación remota.,1780.0,20,Redes cableadas,MikroTik,Gris/Azul,0.15 kg
+Router MikroTik hEX S,Router Gigabit de 5 puertos con soporte para fibra SFP y salida PoE en el puerto 5.,1690.0,25,Redes cableadas,MikroTik,Gris/Azul,0.15 kg
+Router Inalámbrico MikroTik hAP mini,"Punto de acceso compacto de 2.4 GHz de 3 puertos 10/100, ideal para configuraciones residenciales.",590.0,40,Redes inalámbricas,MikroTik,Negro,0.1 kg
+Router Inalámbrico MikroTik hAP lite,AP inalámbrico de 2.4 GHz con 4 puertos Ethernet 10/100 y botón WPS físico (modelo RB941).,690.0,50,Redes inalámbricas,MikroTik,Gris/Azul,0.12 kg
+Router Inalámbrico MikroTik hAP ac lite,AP inalámbrico de doble banda simultánea de 2.4 GHz y 5 GHz con 5 puertos Ethernet 10/100.,1150.0,30,Redes inalámbricas,MikroTik,Gris/Azul,0.14 kg
+Router Inalámbrico MikroTik hAP ac2,Router inalámbrico Gigabit de doble banda simultánea con CPU de 4 núcleos a 716 MHz.,1490.0,25,Redes inalámbricas,MikroTik,Negro,0.22 kg
+Router Inalámbrico MikroTik hAP ac3,Router de doble banda Gigabit con antenas externas de alta ganancia y soporte de montaje vertical.,2100.0,18,Redes inalámbricas,MikroTik,Negro,0.35 kg
+Router Inalámbrico MikroTik hAP ax2,Router inalámbrico Wi-Fi 6 de doble banda con cifrado WPA3 y puertos Gigabit (modelo C52iG).,2350.0,15,Redes inalámbricas,MikroTik,Negro,0.36 kg
+Router Inalámbrico MikroTik hAP ax3,Router premium Wi-Fi 6 de doble banda con CPU quad-core a 1.8 GHz y puerto Ethernet 2.5G.,3150.0,12,Redes inalámbricas,MikroTik,Negro,0.45 kg
+Router MikroTik CCR2004-16G-2S+,Router empresarial de alto rendimiento con 16 puertos Gigabit y 2 puertos 10Gb SFP+.,9900.0,5,Redes cableadas,MikroTik,Blanco,2.2 kg
+Router MikroTik CCR2004-1G-12S+2XS,Router empresarial de fibra con 12 puertos 10G SFP+ y 2 puertos 25G SFP28 para backbone.,13900.0,3,Redes cableadas,MikroTik,Blanco,2.4 kg
+Router MikroTik CCR2116-12G-4S+,"Router de núcleo masivo con CPU ARM de 16 núcleos, 12 puertos Gigabit y 4 puertos 10Gb SFP+.",28900.0,2,Redes cableadas,MikroTik,Blanco,3.5 kg
+Switch MikroTik CRS305-1G-4S+IN,Switch de fibra de escritorio ultracompacto con 4 puertos 10Gb SFP+ y 1 puerto Gigabit Ethernet.,2980.0,15,Switches,MikroTik,Blanco,0.41 kg
+Switch MikroTik CRS309-1G-8S+IN,"Switch de fibra administrable con 8 puertos 10Gb SFP+, montaje en rack opcional.",6390.0,8,Switches,MikroTik,Blanco,1.2 kg
+Switch MikroTik CRS310-1G-8S-2S+IN,Switch administrable con 8 puertos SFP de 1Gb y 2 puertos SFP+ de 10Gb para distribución de fibra.,5490.0,10,Switches,MikroTik,Blanco,1.1 kg
+Switch MikroTik CRS326-24G-2S+RM,Switch administrable con 24 puertos Gigabit y 2 puertos SFP+ para montaje en rack de 1UR.,3890.0,12,Switches,MikroTik,Blanco,1.6 kg
+Switch MikroTik CRS326-24G-2S+OUT,Switch Gigabit de exterior de 24 puertos con caja hermética impermeable IP54.,4990.0,5,Switches,MikroTik,Blanco,2.8 kg
+Switch MikroTik CRS328-24P-4S+RM,Switch PoE administrable con 24 puertos Gigabit PoE+ (capacidad total 450W) y 4 SFP+.,10900.0,6,Switches,MikroTik,Blanco,3.8 kg
+Switch MikroTik CRS354-48G-4S+2LQ+RM,"Switch administrable de alta densidad de 48 puertos Gigabit, 4 puertos SFP+ y 2 QSFP+ 40G.",14900.0,4,Switches,MikroTik,Blanco,4.2 kg
+Router MikroTik RB3011UiAS-RM,"Router Gigabit potente de 10 puertos con arquitectura ARM, puerto SFP y pantalla LCD táctil.",4390.0,12,Redes cableadas,MikroTik,Negro,1.1 kg
+Router MikroTik RB4011iGS+RM,Router de 10 puertos Gigabit con CPU quad-core de 1.4 GHz y jaula SFP+ para fibra de 10Gb.,5890.0,10,Redes cableadas,MikroTik,Negro,1.15 kg
+Router Inalámbrico MikroTik RB4011-WiFi,Router de 10 puertos Gigabit con Wi-Fi integrado de doble banda de alta velocidad.,6800.0,8,Redes inalámbricas,MikroTik,Negro,1.25 kg
+Router MikroTik RB5009UG+S+IN,"Router robusto de 7 puertos Gigabit, 1 puerto Ethernet 2.5G y 1 puerto SFP+ 10G.",4900.0,15,Redes cableadas,MikroTik,Negro,0.56 kg
+Router MikroTik RB5009UPr+S+OUT,Router exterior reforzado con protección IP66 y 8 puertos con capacidades de salida PoE.,7900.0,6,Redes cableadas,MikroTik,Gris,1.3 kg
+Gabinete de Pared LinkedPRO 6UR,"Gabinete de montaje en pared de 6 unidades de rack, dimensiones 60 x 45 cm, puerta de cristal templado.",1450.0,15,Gabinete / Racks,LinkedPRO,Negro,12.0 kg
+Gabinete de Pared LinkedPRO 9UR,"Gabinete para pared de 9 unidades de rack, dimensiones 60 x 45 cm, paneles laterales desmontables.",1690.0,12,Gabinete / Racks,LinkedPRO,Negro,15.2 kg
+Gabinete de Pared LinkedPRO 12UR,"Gabinete para pared de 12 unidades de rack, dimensiones 60 x 45 cm, incluye ventilador superior.",1980.0,10,Gabinete / Racks,LinkedPRO,Negro,18.5 kg
+Gabinete de Pared LinkedPRO 12UR Profundo,Gabinete de pared de 12 unidades de rack de 60 cm de profundidad para alojar servidores compactos.,2200.0,8,Gabinete / Racks,LinkedPRO,Negro,21.0 kg
+Gabinete de Pared LinkedPRO 16UR,"Gabinete para pared de 16 unidades de rack, 60 x 60 cm de espacio útil, puerta con llave de seguridad.",2850.0,6,Gabinete / Racks,LinkedPRO,Negro,26.5 kg
+Gabinete de Piso LinkedPRO 22UR,Gabinete de piso para telecomunicaciones de 22 unidades de rack con puerta frontal ventilada.,5490.0,4,Gabinete / Racks,LinkedPRO,Negro,42.0 kg
+Rack de Dos Postes LinkedPRO 45UR,"Rack de dos postes de aluminio para montaje de equipos de 19 pulgadas, capacidad 45UR.",1750.0,10,Gabinete / Racks,LinkedPRO,Negro,15.0 kg
+Rack de Dos Postes LinkedPRO 24UR,"Rack de dos postes de acero de 24 unidades de rack, ideal para cuartos de comunicación pequeños.",1250.0,15,Gabinete / Racks,LinkedPRO,Negro,10.5 kg
+Rack de Dos Postes LinkedPRO 28UR,Rack de dos postes de 28 unidades de rack para sujeción de cableado estructurado.,1390.0,12,Gabinete / Racks,LinkedPRO,Negro,11.8 kg
+Organizador de Cables LinkedPRO 1UR Sencillo,"Organizador horizontal de cables de 1 unidad de rack, ducto ranurado de plástico con tapa.",180.0,50,Accesorios de Red,LinkedPRO,Negro,0.45 kg
+Organizador de Cables LinkedPRO 2UR Sencillo,"Organizador horizontal de cables de 2 unidades de rack, ranuras traseras para paso de cables.",280.0,40,Accesorios de Red,LinkedPRO,Negro,0.65 kg
+Organizador de Cables LinkedPRO 1UR Doble Cara,Organizador horizontal doble cara de 1 unidad de rack para acomodo frontal y trasero.,310.0,25,Accesorios de Red,LinkedPRO,Negro,0.8 kg
+Organizador de Cables LinkedPRO 2UR Doble Cara,Organizador horizontal doble cara de 2 unidades de rack con anillas de administración.,420.0,20,Accesorios de Red,LinkedPRO,Negro,1.1 kg
+Patch Panel LinkedPRO 24 Puertos Cat6,"Panel de parcheo de 24 puertos categoría 6 para rack de 19 pulgadas, etiquetas integradas.",850.0,25,Cableado estructurado,LinkedPRO,Negro,1.2 kg
+Patch Panel LinkedPRO 48 Puertos Cat6,Panel de parcheo de 48 puertos categoría 6 de alto rendimiento para montaje de 2UR.,1590.0,15,Cableado estructurado,LinkedPRO,Negro,2.1 kg
+Plugs RJ45 Cat6 LinkedPRO (Bolsa de 100),Conectores modulares RJ45 macho categoría 6 con contactos chapados en oro.,280.0,80,Accesorios de Red,LinkedPRO,Transparente,0.25 kg
+Plugs RJ45 Cat5e LinkedPRO (Bolsa de 100),Conectores modulares RJ45 macho categoría 5e estándar para cables de parcheo.,180.0,70,Accesorios de Red,LinkedPRO,Transparente,0.22 kg
+Jack RJ45 Cat6 LinkedPRO Azul,Conector modular RJ45 hembra tipo Keystone categoría 6 de impacto 180 grados.,45.0,200,Cableado estructurado,LinkedPRO,Azul,0.02 kg
+Jack RJ45 Cat6 LinkedPRO Blanco,Conector modular RJ45 hembra tipo Keystone categoría 6 para faceplates.,45.0,200,Cableado estructurado,LinkedPRO,Blanco,0.02 kg
+Jack RJ45 Cat6 LinkedPRO Amarillo,Conector modular RJ45 hembra tipo Keystone categoría 6 para voz y datos.,45.0,150,Cableado estructurado,LinkedPRO,Amarillo,0.02 kg
+Bobina de Cable UTP Cat6 LinkedPRO 305m (CCA),Bobina de cable de red Cat6 para aplicaciones básicas interiores de corta distancia (aleación).,1980.0,40,Cableado estructurado,LinkedPRO,Gris,9.8 kg
+Bobina de Cable UTP Cat6 LinkedPRO 100% Cobre 305m,Bobina de cable de red Cat6 para interiores con conductores 100% cobre para redes gigabit.,2890.0,25,Cableado estructurado,LinkedPRO,Azul,11.2 kg
+Bobina de Cable UTP Cat5e LinkedPRO 305m (CCA),Bobina económica de cable de red Cat5e para interiores de datos e instrumentación.,1150.0,35,Cableado estructurado,LinkedPRO,Gris,8.2 kg
+Bobina de Cable FTP Cat6 Exterior LinkedPRO 305m,"Bobina de cable blindada FTP categoría 6 para instalación en intemperie, doble cubierta.",4650.0,15,Cableado estructurado,LinkedPRO,Negro,14.5 kg
+Patch Cord Cat6 LinkedPRO 0.3m Azul,"Cable de parcheo pre-armado y certificado de categoría 6 UTP, longitud de 30 cm.",28.0,150,Accesorios de Red,LinkedPRO,Azul,0.05 kg
+Patch Cord Cat6 LinkedPRO 0.9m Azul,"Cable de parcheo pre-armado y certificado de categoría 6 UTP, longitud de 90 cm.",45.0,180,Accesorios de Red,LinkedPRO,Azul,0.08 kg
+Patch Cord Cat6 LinkedPRO 1.5m Azul,"Cable de parcheo certificado Cat6 UTP con capuchas protectoras de clips, 1.5 metros.",55.0,200,Accesorios de Red,LinkedPRO,Azul,0.12 kg
+Patch Cord Cat6 LinkedPRO 2.1m Azul,"Cable de parcheo certificado Cat6 UTP para interconexión en racks, 2.1 metros.",65.0,120,Accesorios de Red,LinkedPRO,Azul,0.15 kg
+Patch Cord Cat6 LinkedPRO 3.0m Azul,"Cable de parcheo certificado Cat6 UTP, longitud de 3.0 metros.",75.0,100,Accesorios de Red,LinkedPRO,Azul,0.18 kg
+Patch Cord Cat6 LinkedPRO 4.5m Azul,"Cable de parcheo certificado Cat6 UTP para distancias largas, 4.5 metros.",95.0,80,Accesorios de Red,LinkedPRO,Azul,0.22 kg
+Jack RJ45 Cat6 Panduit Blanco,"Jack modular Mini-Com categoría 6 UTP con terminación TG de fácil impacto, color blanco.",145.0,150,Cableado estructurado,Panduit,Blanco,0.02 kg
+Jack RJ45 Cat6 Panduit Azul,Jack modular Mini-Com categoría 6 UTP con tecnología de cancelación de ruido alien crosstalk.,145.0,120,Cableado estructurado,Panduit,Azul,0.02 kg
+Jack RJ45 Cat6 Panduit Rojo,Jack modular Mini-Com categoría 6 para diferenciación de redes críticas (telefonía o seguridad).,145.0,80,Cableado estructurado,Panduit,Rojo,0.02 kg
+Jack RJ45 Cat6 Panduit Verde,Jack modular Mini-Com categoría 6 con sistema de identificación por colores.,145.0,70,Cableado estructurado,Panduit,Verde,0.02 kg
+Jack RJ45 Cat6A Panduit Negro,"Jack modular Mini-Com de alto rendimiento categoría 6A blindado, para velocidades de 10Gbps.",260.0,50,Cableado estructurado,Panduit,Negro,0.03 kg
+Faceplate Panduit 2 Posiciones Blanco,"Placa de pared Mini-Com de 2 posiciones para montaje empotrado de jacks, color blanco hueso.",45.0,100,Cableado estructurado,Panduit,Blanco,0.05 kg
+Faceplate Panduit 4 Posiciones Blanco,Placa de pared de 4 posiciones Mini-Com para instalación de múltiples salidas de red.,55.0,80,Cableado estructurado,Panduit,Blanco,0.06 kg
+Faceplate Panduit 1 Posición Blanco,Placa de pared de 1 posición Mini-Com con etiquetas para rotulación.,38.0,60,Cableado estructurado,Panduit,Blanco,0.04 kg
+Bobina de Cable UTP Cat6 Panduit Azul 305m,Bobina de cable de red Cat6 100% cobre con recubrimiento retardante a la flama (CM).,4350.0,15,Cableado estructurado,Panduit,Azul,12.5 kg
+Bobina de Cable UTP Cat6 Panduit Gris 305m,"Bobina de cable de red Cat6 100% cobre, diseño especial para tendido vertical en edificios.",4350.0,10,Cableado estructurado,Panduit,Gris,12.5 kg
+Bobina de Cable UTP Cat6A Panduit Blanca 305m,Bobina de cable de red categoría 6A LSZH (bajo humo cero halógenos) para centros de datos.,6500.0,8,Cableado estructurado,Panduit,Blanco,14.2 kg
+Patch Panel Panduit 24 Puertos Modular,Panel de parcheo plano de 24 puertos modular para recibir jacks Mini-Com en 1UR de rack.,950.0,18,Cableado estructurado,Panduit,Negro,0.8 kg
+Patch Panel Panduit 48 Puertos Modular,Panel de parcheo plano modular de 48 puertos de 2UR para montaje en rack de 19 pulgadas.,1690.0,12,Cableado estructurado,Panduit,Negro,1.3 kg
+Organizador Panduit Frontal 1UR,Organizador de cables horizontal con anillas en D de metal para organización frontal limpia.,890.0,20,Accesorios de Red,Panduit,Negro,0.95 kg
+Organizador Panduit con Tapa 2UR,Organizador horizontal con tapa de bisagra frontal/trasera para alta densidad de cables.,1450.0,15,Accesorios de Red,Panduit,Negro,1.4 kg
+Patch Cord Cat6 Panduit 1.0m Azul,"Cable de red certificado categoría 6 de cobre multifilar, revestimiento CM, 1 metro.",115.0,100,Accesorios de Red,Panduit,Azul,0.08 kg
+Patch Cord Cat6 Panduit 2.0m Azul,"Cable de parcheo certificado Cat6 con botas delgadas anti-enredos de fábrica, 2 metros.",145.0,80,Accesorios de Red,Panduit,Azul,0.13 kg
+Patch Cord Cat6 Panduit 3.0m Azul,"Cable de parcheo certificado Cat6 de alto rendimiento para enlaces de datos, 3 metros.",180.0,60,Accesorios de Red,Panduit,Azul,0.18 kg
+Patch Cord Cat6 Panduit 5.0m Azul,"Cable de parcheo premium certificado Cat6 para interconexiones distantes, 5 metros.",240.0,40,Accesorios de Red,Panduit,Azul,0.26 kg
+Plug Modular RJ45 Panduit Cat6 (Bolsa de 50),Conectores modulares RJ45 de tres piezas con guía de alineación interna para cables sólidos.,850.0,25,Accesorios de Red,Panduit,Transparente,0.15 kg
+Bobina de Cable UTP Cat6 Condumex Gris 305m,"Bobina de cable de red Cat6 de cobre puro 23 AWG, ideal para aplicaciones de voz y datos.",3200.0,20,Cableado estructurado,Condumex,Gris,11.5 kg
+Bobina de Cable UTP Cat6 Condumex Azul 305m,"Bobina de cable Cat6 100% cobre, certificación oficial de seguridad y flama mexicana.",3200.0,18,Cableado estructurado,Condumex,Azul,11.5 kg
+Bobina de Cable UTP Cat6 Condumex Rojo 305m,Bobina de cable de red Cat6 para cableado de seguridad o redes dedicadas contra incendios.,3300.0,10,Cableado estructurado,Condumex,Rojo,11.5 kg
+Bobina de Cable UTP Cat5e Condumex Gris 305m,"Bobina de cable de red Cat5e de cobre puro 24 AWG, apto para tendidos en canalizaciones.",2100.0,15,Cableado estructurado,Condumex,Gris,9.2 kg
+Bobina de Cable UTP Cat5e Condumex Azul 305m,Bobina de cable de red Cat5e 100% cobre para redes domésticas o de pequeñas oficinas.,2100.0,12,Cableado estructurado,Condumex,Azul,9.2 kg
+Cable Coaxial RG6 Condumex 305m,Bobina de cable coaxial RG6 con blindaje del 75% para aplicaciones de CATV y señales de satélite.,2400.0,14,Cableado estructurado,Condumex,Negro,12.8 kg
+Cable Coaxial RG59 Condumex 305m,Bobina de cable coaxial RG59 con malla de cobre del 95% para circuitos de videovigilancia.,2150.0,10,Cableado estructurado,Condumex,Negro,10.2 kg
+Cable de Alarma Condumex 2x22 305m,Bobina de cable de 2 conductores calibre 22 para instalación de sensores e intercomunicadores.,890.0,30,Cables de control,Condumex,Blanco,4.5 kg
+Cable de Alarma Condumex 4x22 305m,Bobina de cable de 4 conductores calibre 22 con forro de PVC blanco para automatización.,1450.0,25,Cables de control,Condumex,Blanco,6.8 kg
+Fibra Óptica ADSS Condumex 12 Hilos Monomodo,Cable de fibra óptica autosoportada ADSS de 12 hilos monomodo dieléctrica por metro.,22.0,1500,Fibra óptica,Condumex,Negro,0.1 kg
+Fibra Óptica ADSS Condumex 24 Hilos Monomodo,Cable de fibra óptica autosoportada ADSS de 24 hilos monomodo dieléctrica por metro.,32.0,1000,Fibra óptica,Condumex,Negro,0.12 kg
+Fibra Óptica Interior Condumex 2 Hilos OM3,Cable de fibra óptica interior de distribución de 2 hilos multimodo OM3 de bajas pérdidas.,18.0,800,Fibra óptica,Condumex,Aqua,0.05 kg
+Switch Cisco Catalyst C1000-8T-2G-L,Switch Catalyst de 8 puertos Gigabit Ethernet de datos y 2 puertos Gigabit SFP de enlace.,8900.0,8,Switches,Cisco,Negro,1.8 kg
+Switch Cisco Catalyst C1000-8P-2G-L,Switch Catalyst de 8 puertos Gigabit PoE+ con presupuesto total de 67W y 2 puertos SFP.,11800.0,6,Switches,Cisco,Negro,2.2 kg
+Switch Cisco Catalyst C1000-16T-2G-L,Switch Catalyst de 16 puertos Gigabit Ethernet y 2 puertos SFP Gigabit sin ventiladores.,12900.0,5,Switches,Cisco,Negro,2.5 kg
+Switch Cisco Catalyst C1000-16P-2G-L,Switch Catalyst de 16 puertos Gigabit PoE+ (capacidad total 120W) y 2 puertos SFP.,16900.0,4,Switches,Cisco,Negro,2.9 kg
+Switch Cisco Catalyst C1000-24T-4G-L,Switch Catalyst de 24 puertos Gigabit Ethernet y 4 puertos SFP Gigabit de enlace ascendente.,15800.0,8,Switches,Cisco,Negro,3.5 kg
+Switch Cisco Catalyst C1000-24P-4G-L,Switch Catalyst de 24 puertos Gigabit PoE+ (presupuesto de 195W) y 4 puertos SFP.,22800.0,5,Switches,Cisco,Negro,4.1 kg
+Switch Cisco Catalyst C1000-48T-4G-L,Switch Catalyst de 48 puertos Gigabit de datos y 4 puertos SFP Gigabit para montaje en rack.,24900.0,4,Switches,Cisco,Negro,4.8 kg
+Switch Cisco Catalyst C1000-48P-4G-L,Switch Catalyst de 48 puertos Gigabit PoE+ (presupuesto de 370W) y 4 puertos SFP.,35900.0,3,Switches,Cisco,Negro,5.6 kg
+Switch Cisco Business CBS250-8T-8G,Switch administrable inteligente con 8 puertos Gigabit y 2 puertos combinados Gigabit SFP.,3890.0,15,Switches,Cisco,Blanco,1.2 kg
+Switch Cisco Business CBS250-8P-8G,Switch administrable inteligente con 8 puertos Gigabit PoE+ (presupuesto de 67W) y 2 combinados SFP.,5490.0,12,Switches,Cisco,Blanco,1.4 kg
+Switch Cisco Business CBS250-24T-4G,Switch inteligente administrable de 24 puertos Gigabit y 4 puertos SFP para racks.,6800.0,10,Switches,Cisco,Blanco,2.8 kg
+Switch Cisco Business CBS250-24P-4G,Switch inteligente administrable de 24 puertos Gigabit PoE+ (presupuesto de 195W) y 4 SFP.,9900.0,8,Switches,Cisco,Blanco,3.2 kg
+Switch Cisco Business CBS250-48T-4G,Switch inteligente administrable de 48 puertos Gigabit y 4 puertos SFP.,12500.0,6,Switches,Cisco,Blanco,4.1 kg
+Switch Cisco Business CBS250-48P-4G,Switch inteligente administrable de 48 puertos Gigabit PoE+ (presupuesto de 370W) y 4 SFP.,18900.0,4,Switches,Cisco,Blanco,5.1 kg
+Router Cisco RV160-K9-NA,"Router VPN cableado de 4 puertos Gigabit con cortafuegos integrado, ideal para pequeñas oficinas.",2890.0,12,Redes cableadas,Cisco,Negro,0.85 kg
+Router Cisco RV260-K9-NA,Router VPN de 8 puertos Gigabit de alto rendimiento con procesador de doble núcleo y cortafuegos.,4200.0,10,Redes cableadas,Cisco,Negro,1.1 kg
+Router Cisco RV340-K9-NA,Router VPN empresarial de doble puerto WAN Gigabit con seguridad avanzada y balanceo de carga.,6390.0,6,Redes cableadas,Cisco,Negro,1.3 kg
+Router Cisco RV345-K9-NA,Router VPN empresarial de doble WAN de alto rendimiento con switch de 16 puertos Gigabit.,8900.0,4,Redes cableadas,Cisco,Negro,1.8 kg
+Transceptor Cisco GLC-SX-MMD,"Módulo SFP de fibra multimodo de 1000BASE-SX, longitud de onda de 850 nm, conector duplex LC.",1450.0,40,Accesorios de Red,Cisco,Plateado,0.05 kg
+Transceptor Cisco GLC-LH-SMD,"Módulo SFP de fibra monomodo de 1000BASE-LX/LH, longitud de onda de 1310 nm, hasta 10 km.",2100.0,30,Accesorios de Red,Cisco,Plateado,0.05 kg
+Transceptor Cisco GLC-TE,Módulo SFP de cobre Gigabit Ethernet 1000BASE-T RJ45 con rango de temperatura extendido.,1150.0,50,Accesorios de Red,Cisco,Plateado,0.06 kg
+Cámara Bullet Epcom EV1008T-TURBO,"Cámara Bullet TurboHD 1080p, lente de 2.8 mm, visión nocturna Smart IR de hasta 20 metros.",310.0,60,CCTV y Seguridad,Epcom,Blanco,0.35 kg
+Cámara Bullet IP Hikvision DS-2CD1023G0-I,"Cámara Bullet IP de 2 Megapíxeles, lente de 2.8 mm, soporte PoE integrado, protección IP67.",1250.0,35,CCTV y Seguridad,Hikvision,Blanco,0.45 kg
+Cámara Bullet IP Hikvision DS-2CD1043G0-I,"Cámara Bullet IP de 4 Megapíxeles, compresión H.265+, visión nocturna IR de 30m y ranura MicroSD.",1890.0,25,CCTV y Seguridad,Hikvision,Blanco,0.48 kg
+Cámara Bullet Epcom B8-TURBO,"Cámara de seguridad exterior TurboHD de 1080p, construcción metálica, visión IR nocturna.",450.0,50,CCTV y Seguridad,Epcom,Blanco,0.52 kg
+Cámara Domo IP Hikvision DS-2CD1123G0-I,"Cámara Domo IP antivandálica de 2MP, protección IK10 contra golpes, soporte PoE integrado.",1390.0,30,CCTV y Seguridad,Hikvision,Blanco/Negro,0.55 kg
+Cámara Domo IP Hikvision DS-2CD1143G0-I,"Cámara Domo IP antivandálica de 4MP, lente de 2.8 mm, compresión de video H.265, PoE.",1980.0,20,CCTV y Seguridad,Hikvision,Blanco/Negro,0.58 kg
+Cámara Domo Epcom E8-TURBO,"Cámara domo de seguridad para interiores TurboHD de 1080p, forro plástico, IR inteligente.",280.0,80,CCTV y Seguridad,Epcom,Blanco,0.28 kg
+Grabador NVR Hikvision DS-7604NI-Q1/4P,"Grabador de video en red (NVR) de 4 canales con 4 puertos PoE independientes, soporta hasta 8MP.",2490.0,15,CCTV y Seguridad,Hikvision,Negro,1.5 kg
+Grabador NVR Hikvision DS-7608NI-Q1/8P,"Grabador NVR de 8 canales de video con 8 puertos PoE integrados para cámaras IP, resolución 4K.",3890.0,10,CCTV y Seguridad,Hikvision,Negro,1.8 kg
+Grabador NVR Hikvision DS-7616NI-Q2/16P,"Grabador NVR de 16 canales con 16 puertos PoE independientes, soporte para 2 discos duros.",6800.0,8,CCTV y Seguridad,Hikvision,Negro,2.8 kg
+Grabador DVR Epcom EV4004TURBO,"Grabador digital de video DVR de 4 canales de tecnología híbrida de 1080p, salida HDMI.",990.0,20,CCTV y Seguridad,Epcom,Negro,1.1 kg
+Grabador DVR Epcom EV4008TURBO,"Grabador DVR híbrido de 8 canales TurboHD, soporta cámaras HD y cámaras IP, salida de video 1080p.",1450.0,18,CCTV y Seguridad,Epcom,Negro,1.3 kg
+Grabador DVR Epcom EV4016TURBO,"Grabador DVR híbrido de 16 canales de 1080p Lite, compresión H.264+, puerto SATA.",2350.0,12,CCTV y Seguridad,Epcom,Negro,1.9 kg
+Disco Duro Western Digital Purple 1TB,"Disco duro de 3.5 pulgadas para videovigilancia las 24 horas, interfaz SATA III de 6 Gb/s.",1150.0,30,Accesorios de CCTV,Western Digital,Plateado,0.45 kg
+Disco Duro Western Digital Purple 2TB,"Disco duro optimizado para DVR y NVR de videovigilancia, tecnología AllFrame.",1490.0,25,Accesorios de CCTV,Western Digital,Plateado,0.45 kg
+Disco Duro Western Digital Purple 4TB,Disco duro de gran capacidad para almacenamiento continuo de flujos de video HD.,2350.0,15,Accesorios de CCTV,Western Digital,Plateado,0.6 kg
+Disco Duro Western Digital Purple 6TB,Disco duro de alto almacenamiento para grabadoras de cámaras profesionales en empresas.,3890.0,8,Accesorios de CCTV,Western Digital,Plateado,0.65 kg
+Transceptores Pasivos Epcom TT101FTURBO,"Par de transceptores pasivos TurboHD de vídeo por cable UTP, soporte hasta 4K.",95.0,100,Accesorios de CCTV,Epcom,Negro,0.08 kg
+Transceptores Pasivos con Energía Epcom TT101PFTURBO,Par de transceptores pasivos de vídeo y corriente para cámaras de seguridad de 12V.,180.0,80,Accesorios de CCTV,Epcom,Negro,0.12 kg
+Fuente de Poder Epcom PL-12DC-4-BK,Fuente de alimentación regulada de 12 VDC a 4 Amperes para cámaras de seguridad comunes.,280.0,40,Accesorios de CCTV,Epcom,Negro,0.35 kg
+Fuente de Poder Epcom PL-12DC-8-BK,Fuente de alimentación de 12 VDC a 8 Amperes con cable pulpo de 8 salidas de corriente.,420.0,30,Accesorios de CCTV,Epcom,Negro,0.5 kg
+Fuente de Poder Distribuidora Epcom PL-12DC-10-A,Fuente en gabinete metálico de 12 VDC a 10 Amperes con fusible reseteable y 9 salidas.,1150.0,15,Accesorios de CCTV,Epcom,Gris,2.2 kg
+Punto de Acceso TP-Link EAP225,"Access Point inalámbrico de doble banda Gigabit AC1350 para montaje en techo, soporte Omada.",1250.0,30,Redes inalámbricas,TP-Link,Blanco,0.5 kg
+Punto de Acceso TP-Link EAP225-Outdoor,"AP inalámbrico exterior Gigabit AC1200, resistente a la intemperie IP65 con tecnología mesh.",1490.0,25,Redes inalámbricas,TP-Link,Blanco,0.6 kg
+Punto de Acceso TP-Link EAP245,Access Point empresarial de doble banda Gigabit AC1750 MIMO 3x3 para techo.,1850.0,18,Redes inalámbricas,TP-Link,Blanco,0.55 kg
+Punto de Acceso TP-Link EAP610,Access Point Wi-Fi 6 de montaje en techo Gigabit AX1800 compatible con controladora Omada.,2100.0,20,Redes inalámbricas,TP-Link,Blanco,0.52 kg
+Punto de Acceso TP-Link EAP610-Outdoor,"AP exterior Wi-Fi 6 Gigabit AX1800, resistente al clima, ideal para albercas o patios.",2890.0,12,Redes inalámbricas,TP-Link,Blanco,0.75 kg
+Punto de Acceso TP-Link EAP650,Access Point de perfil delgado Wi-Fi 6 Gigabit AX3000 de doble banda ultra veloz.,2690.0,15,Redes inalámbricas,TP-Link,Blanco,0.45 kg
+Punto de Acceso TP-Link EAP670,Access Point empresarial Wi-Fi 6 Gigabit de doble banda AX5400 con puerto Ethernet de 2.5G.,3890.0,10,Redes inalámbricas,TP-Link,Blanco,0.6 kg
+Switch TP-Link TL-SG2008P,Switch inteligente JetStream de 8 puertos Gigabit con 4 puertos PoE+ integrados (62W).,1890.0,25,Switches,TP-Link,Negro,0.8 kg
+Switch TP-Link TL-SG2210P,Switch administrable de 8 puertos Gigabit PoE+ y 2 ranuras SFP para rack (62W de capacidad).,2490.0,20,Switches,TP-Link,Negro,1.2 kg
+Switch TP-Link TL-SG2428P,Switch inteligente de 24 puertos Gigabit PoE+ con 4 ranuras SFP (presupuesto total de 250W).,6390.0,10,Switches,TP-Link,Negro,3.5 kg
+Switch TP-Link TL-SG3428XMP,Switch L2+ administrado JetStream de 24 puertos Gigabit PoE+ y 4 ranuras SFP+ de 10G (384W).,9900.0,6,Switches,TP-Link,Negro,4.2 kg
+Router VPN TP-Link ER605,"Router Multi-WAN cableado Gigabit VPN, ideal para pequeñas oficinas, integrado en Omada.",1150.0,35,Redes cableadas,TP-Link,Negro,0.45 kg
+Router VPN TP-Link ER7206,Router de alto rendimiento Multi-WAN Gigabit VPN con puerto SFP integrado.,2890.0,15,Redes cableadas,TP-Link,Negro,0.75 kg
+Controladora de Red TP-Link OC200,Controladora de hardware Omada para la administración centralizada de la red inalámbrica.,1690.0,20,Equipos de Red,TP-Link,Negro,0.35 kg
+Controladora de Red TP-Link OC300,Controladora de red corporativa por hardware Omada para gestionar hasta 500 dispositivos.,3100.0,10,Equipos de Red,TP-Link,Negro,0.85 kg
+Switch TP-Link TL-SF1005D,"Switch de escritorio básico de 5 puertos de velocidad 10/100 Mbps, carcasa plástica.",180.0,80,Switches,TP-Link,Blanco,0.15 kg
+Switch TP-Link TL-SF1008D,"Switch de escritorio básico de 8 puertos de velocidad 10/100 Mbps, Plug and Play.",250.0,70,Switches,TP-Link,Blanco,0.18 kg
+Switch TP-Link TL-SG1005D,"Switch de escritorio Gigabit Ethernet de 5 puertos, ahorro de energía automático.",290.0,100,Switches,TP-Link,Negro,0.18 kg
+Switch TP-Link TL-SG1008D,"Switch de escritorio Gigabit Ethernet de 8 puertos, ideal para expandir la red del hogar.",420.0,90,Switches,TP-Link,Negro,0.22 kg
+Switch TP-Link TL-SG1008PE,Switch de escritorio Gigabit de 8 puertos con 8 puertos PoE+ (presupuesto de potencia de 124W).,2100.0,25,Switches,TP-Link,Negro,1.3 kg
+Módulo de Extensión Grandstream GBX20,"Módulo de extensión de pantalla LCD a color de 4.3 pulgadas para teléfonos GRP2615, GRP2624 y GXV3350.",2490.0,15,Telefonía IP,Grandstream,Negro,0.6 kg
+Módulo de Extensión Grandstream GXP2200EXT,"Módulo de extensión con pantalla LCD para teléfonos GXP2140 y GXP2170, hasta 40 teclas.",2350.0,12,Telefonía IP,Grandstream,Negro,0.58 kg
+Videoportero IP Grandstream GDS3710,"Sistema de videoportero IP con cámara HD de 1080p, lector de tarjetas RFID y micrófono/altavoz.",5490.0,8,Porteros y voceo,Grandstream,Plateado,1.1 kg
+Portero de Audio IP Grandstream GDS3705,Sistema de control de acceso de audio IP con lector de tarjetas RFID y micrófono cancelador de ruido.,3100.0,10,Porteros y voceo,Grandstream,Plateado,0.85 kg
+Altavoz SIP de Voceo Grandstream GSC3505,Altavoz SIP de voceo unidireccional de 8W con conectores de red y Wi-Fi/Bluetooth integrados.,2100.0,14,Porteros y voceo,Grandstream,Blanco,0.45 kg
+Intercomunicador SIP de Voceo Grandstream GSC3510,"Altavoz y micrófono SIP bidireccional de voceo, 8W de potencia y soporte Wi-Fi de doble banda.",2690.0,12,Porteros y voceo,Grandstream,Blanco,0.5 kg
+Diadema Telefónica Grandstream GUV3000,Diadema monoaural con conexión USB y micrófono con cancelación de ruido activa.,790.0,40,Accesorios de Telefonía,Grandstream,Negro,0.15 kg
+Diadema Telefónica Grandstream GUV3005,"Diadema biaural (doble oído) con conexión USB, indicador LED de ocupado y sonido HD.",1150.0,35,Accesorios de Telefonía,Grandstream,Negro,0.18 kg
+Diadema Inalámbrica Grandstream GUV3050,"Diadema inalámbrica profesional Bluetooth con base de carga, audio HD, hasta 12 horas de duración.",2650.0,15,Accesorios de Telefonía,Grandstream,Negro,0.35 kg
+Cámara IP Ubiquiti UniFi Protect G4 Bullet,"Cámara IP exterior de 4MP, visión nocturna por infrarrojos y micrófono integrado (modelo UVC-G4-BULLET).",4200.0,15,CCTV y Seguridad,Ubiquiti,Blanco,0.46 kg
+Cámara IP Ubiquiti UniFi Protect G3 Flex,Cámara IP compacta y versátil de 1080p para interiores o exteriores con soporte para múltiples montajes.,1890.0,25,CCTV y Seguridad,Ubiquiti,Blanco,0.25 kg
+Cámara IP Ubiquiti UniFi Protect G4 Dome,Cámara IP domo antivandálica de 4MP con audio bidireccional y resistencia al clima (modelo UVC-G4-DOME).,4650.0,12,CCTV y Seguridad,Ubiquiti,Blanco,0.38 kg
+Controladora de Hardware Ubiquiti Cloud Key Gen2 Plus,Dispositivo para gestión local de redes UniFi y cámaras UniFi Protect con disco duro de 1TB.,4890.0,10,Equipos de Red,Ubiquiti,Plateado/Negro,0.58 kg
+Router y Gateway Ubiquiti UniFi Dream Machine Pro,"Consola empresarial de 1UR todo-en-uno que incluye router, switch de 8 puertos y NVR UniFi Protect.",8900.0,8,Redes cableadas,Ubiquiti,Gris,3.9 kg
+Router y Gateway Ubiquiti UniFi Dream Router,"Consola de red residencial todo-en-uno con Wi-Fi 6 integrado, 4 puertos Gigabit (2 PoE) y NVR.",4990.0,12,Redes inalámbricas,Ubiquiti,Blanco,1.2 kg

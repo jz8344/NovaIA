@@ -62,6 +62,25 @@
                 </div>
             </div>
             <div class="header-actions">
+                <select id="agentSelector" style="
+                    background: var(--bg-card);
+                    color: var(--text-2);
+                    border: 1px solid var(--border-mid);
+                    border-radius: 6px;
+                    padding: 6px 12px;
+                    font-family: var(--font-body);
+                    font-size: 0.8rem;
+                    outline: none;
+                    cursor: pointer;
+                    transition: all var(--transition);
+                " onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--text-1)';" onmouseout="this.style.borderColor='var(--border-mid)';this.style.color='var(--text-2)';">
+                    <option value="nova_default">Configuración Activa</option>
+                    <option value="nova_sales">Ventas (Bilingüe)</option>
+                    <option value="nova_support">Soporte Técnico</option>
+                    <option value="nova_attention">Atención Telefónica</option>
+                    <option value="nova_technical">Soporte Avanzado</option>
+                    <option value="nova_finance">Finanzas</option>
+                </select>
                 <div class="status-pill" id="statusPill">
                     <span class="status-dot"></span>
                     <span class="status-text">Desconectado</span>

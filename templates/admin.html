@@ -635,10 +635,15 @@
             <span class="logo-word">Nova</span>
             <span class="logo-badge">Admin</span>
         </div>
-        <a href="/" class="btn-ghost">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-            Voz
-        </a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/" class="btn-ghost">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                Voz
+            </a>
+            <button id="btnLogout" class="btn-ghost" style="border-color: rgba(248,113,113,.2); color: var(--red);">
+                🚪 Cerrar Sesión
+            </button>
+        </div>
     </header>
 
     <main>
@@ -656,6 +661,7 @@
             <button class="tab" data-tab="sessions">📊 Sesiones</button>
             <button class="tab" data-tab="logs">📝 Logs</button>
             <button class="tab" data-tab="tokens">💰 Tokens</button>
+            <button class="tab" data-tab="database">🗄️ Base de Datos</button>
         </div>
 
         <!-- ── EXTENSIONS ── -->
@@ -1128,6 +1134,62 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
         </div>
 
 
+        <!-- ── DATABASE ── -->
+        <div class="panel" id="panel-database">
+            <div class="card">
+                <div class="card-title">Estado de la Base de Datos</div>
+                <div class="card-sub">Monitorea y cambia en caliente la conexión a la base de datos activa</div>
+                
+                <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius); background: var(--bg-input); border: 1px solid var(--border);">
+                        <div style="font-size: 1.8rem;">🗄️</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.88rem; font-weight: 600;">Motor Activo: <span id="dbActiveType" style="color: var(--accent); text-transform: uppercase;">Cargando...</span></div>
+                            <div style="font-size: 0.78rem; color: var(--text-2); margin-top: 3px;" id="dbStatusDetails">Obteniendo detalles de la base de datos...</div>
+                        </div>
+                        <div>
+                            <span id="dbStatusPill" class="pill pill-amber">Verificando</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Configuración de Conexión</div>
+                <div class="card-sub">Selecciona el tipo de base de datos y define sus credenciales o ruta de acceso</div>
+                
+                <div class="form-grid" style="grid-template-columns: 1fr; gap: 18px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Tipo de Base de Datos</label>
+                        <select id="dbSelectType" style="background: var(--bg-input); border: 1px solid var(--border-mid); color: var(--text-1); border-radius: var(--radius-sm); padding: 9px 12px; font-family: var(--font-body); font-size: 0.85rem; outline: none; width: 100%;">
+                            <option value="sqlite">Desarrollo Local (SQLite)</option>
+                            <option value="postgres">Nube / Producción (PostgreSQL)</option>
+                        </select>
+                    </div>
+
+                    <!-- Campos SQLite -->
+                    <div class="form-group" id="dbGroupSqlite">
+                        <label>Ruta del archivo SQLite</label>
+                        <input type="text" id="dbSqlitePath" placeholder="./data/nova.db" value="./data/nova.db">
+                        <span style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">Ruta local del archivo de base de datos SQLite (se creará automáticamente si no existe).</span>
+                    </div>
+
+                    <!-- Campos Postgres -->
+                    <div class="form-group" id="dbGroupPostgres" style="display: none;">
+                        <label>URL de Conexión PostgreSQL (Connection String)</label>
+                        <input type="text" id="dbPostgresUrl" placeholder="postgresql://usuario:contraseña@servidor:puerto/bd">
+                        <span style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">URL de conexión externa o interna provista by Railway u otro proveedor. Ej. postgresql://postgres:contraseña@kodama.proxy.rlwy.net:19011/railway_</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-secondary" id="btnTestDb">🧪 Probar Conexión</button>
+                    <button class="btn-primary" id="btnSaveDb">💾 Aplicar y Guardar</button>
+                </div>
+            </div>
+        </div>
+
+
     <footer>
         <span>Nova Voice Agent v1.0</span>
         <span class="sep">·</span>
@@ -1295,7 +1357,6 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
     });
 </script>
 
-<!-- Drop-in replacement for /static/js/admin.js -->
 <script src="/static/js/neural-bg.js"></script>
 <script src="/static/js/admin.js?v=1.0.2"></script>
 </body>

@@ -10,6 +10,8 @@ class NovaVoiceApp {
         this.playbackQueue = [];
         this.isPlaying = false;
         this.agentName = 'Nova';
+        this.isConnecting = false;
+        this.adminUserId = null;
 
         this.micButton = document.getElementById('micButton');
         this.micIcon = document.querySelector('.mic-icon');
@@ -36,11 +38,13 @@ class NovaVoiceApp {
     init() {
         this.micButton.addEventListener('click', () => this.toggleRecording());
         document.getElementById('btnClearLog').addEventListener('click', () => this.clearLog());
+        this._checkAdminSession();
 
         this.drawIdleWaveform();
     }
 
     async toggleRecording() {
+        if (this.isConnecting) return;
         if (this.isRecording) {
             this.stopRecording();
         } else {
@@ -49,6 +53,9 @@ class NovaVoiceApp {
     }
 
     async startRecording() {
+        if (this.isConnecting || this.isRecording) return;
+        this.isConnecting = true;
+        this.updateUI('connecting');
         try {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
@@ -82,24 +89,47 @@ class NovaVoiceApp {
             this.connectWebSocket();
 
         } catch (err) {
+            this.isConnecting = false;
+            this.updateUI('idle');
             this.logEvent('error', `Error al acceder al micrófono: ${err.message}`);
+        }
+    }
+
+    async _checkAdminSession() {
+        try {
+            const res = await fetch('/api/auth/session');
+            if (res.ok) {
+                const d = await res.json();
+                if (d.authenticated && d.user) {
+                    this.adminUserId = d.user.id;
+                    this.logEvent('system', `Sesión de administrador activa detectada (${d.user.username}). Tus prompts personalizados se aplicarán.`);
+                }
+            }
+        } catch (e) {
+            console.warn('Error verificando sesión de administrador en la app cliente', e);
         }
     }
 
     connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws/voice`;
+        const agentSel = document.getElementById('agentSelector');
+        const agent = agentSel ? agentSel.value : 'nova_default';
+        let wsUrl = `${protocol}//${window.location.host}/ws/voice?agent=${agent}`;
+        if (this.adminUserId) {
+            wsUrl += `&user_id=${this.adminUserId}`;
+        }
 
         this.ws = new WebSocket(wsUrl);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
+            this.isConnecting = false;
             this.isRecording = true;
             this.sessionStart = Date.now();
             this.updateUI('recording');
             this.startTimer();
             this.startWaveformAnimation();
-            this.logEvent('system', 'Conectado al Asistente Virtual. Habla ahora...');
+            this.logEvent('system', `Conectado al Asistente Virtual [${agent}]. Habla ahora...`);
         };
 
         this.ws.onmessage = (event) => {
@@ -111,6 +141,7 @@ class NovaVoiceApp {
         };
 
         this.ws.onclose = () => {
+            this.isConnecting = false;
             if (this.isRecording) {
                 this.stopRecording();
             }
@@ -118,6 +149,8 @@ class NovaVoiceApp {
         };
 
         this.ws.onerror = (err) => {
+            this.isConnecting = false;
+            this.updateUI('idle');
             this.logEvent('error', 'Error de conexión WebSocket');
         };
     }
@@ -218,6 +251,7 @@ class NovaVoiceApp {
 
     stopRecording() {
         this.isRecording = false;
+        this.isConnecting = false;
 
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: 'end' }));
@@ -260,6 +294,17 @@ class NovaVoiceApp {
                 this.voiceVisualizer.classList.add('active');
                 this.waveformBar.classList.add('active');
                 this.voiceInstruction.textContent = `Escuchando... Habla con ${this.agentName}`;
+                break;
+
+            case 'connecting':
+                pill.classList.add('active');
+                this.statusText.textContent = 'Conectando';
+                this.micButton.classList.add('recording');
+                this.micIcon.classList.add('hidden');
+                this.stopIcon.classList.add('hidden');
+                this.voiceVisualizer.classList.remove('active');
+                this.waveformBar.classList.remove('active');
+                this.voiceInstruction.textContent = 'Conectando con el Asistente Virtual...';
                 break;
 
             case 'idle':

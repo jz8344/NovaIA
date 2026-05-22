@@ -14,6 +14,18 @@ def resample_linear(data: bytes, from_rate: int, to_rate: int) -> bytes:
     if from_rate == to_rate:
         return data
 
+    # Optimización por decimación rápida para tasas proporcionales (elimina el bucle for en CPU)
+    if from_rate == 24000 and to_rate == 8000:
+        samples_in = struct.unpack(f"<{len(data) // 2}h", data)
+        samples_out = samples_in[::3]
+        return struct.pack(f"<{len(samples_out)}h", *samples_out)
+
+    if from_rate == 24000 and to_rate == 16000:
+        samples_in = struct.unpack(f"<{len(data) // 2}h", data)
+        samples_out = [samples_in[i] for i in range(len(samples_in)) if i % 3 != 2]
+        return struct.pack(f"<{len(samples_out)}h", *samples_out)
+
+    # Fallback algoritmo lineal para otras tasas
     samples_in = struct.unpack(f"<{len(data) // 2}h", data)
     ratio = to_rate / from_rate
     n_out = int(len(samples_in) * ratio)

@@ -3,9 +3,20 @@ from database.manager import DatabaseManager
 
 
 async def seed_database(db: DatabaseManager):
+    # Sembrar usuario administrador por defecto si no existe ninguno
+    try:
+        admins_count = await db.fetch_one("SELECT COUNT(*) as count FROM admin_users")
+        if not admins_count or admins_count.get("count", 0) == 0:
+            logger.info("No se encontraron usuarios administradores. Sembrando administrador por defecto (admin/nova1234)...")
+            await db.create_admin_user("admin", "nova1234", "admin@nova-ia.app")
+            logger.info("Usuario administrador por defecto creado exitosamente.")
+    except Exception as e:
+        logger.error(f"Error sembrando usuario administrador: {e}")
+
+    # Sembrar extensiones e inventario si no hay extensiones
     existing = await db.get_all_extensions()
     if existing:
-        logger.info(f"Base de datos ya tiene {len(existing)} extensiones, omitiendo seed")
+        logger.info(f"Base de datos ya tiene {len(existing)} extensiones, omitiendo seed de negocio")
         return
 
     logger.info("Insertando datos iniciales de ejemplo...")

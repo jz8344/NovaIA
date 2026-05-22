@@ -44,6 +44,16 @@ class SessionManager:
         self._lock = asyncio.Lock()
 
     async def create_session(self, source: str = "unknown", **kwargs) -> CallSession:
+        if source == "web":
+            async with self._lock:
+                active_web_sessions = [
+                    s_id for s_id, s in self._sessions.items()
+                    if s.source == "web" and s.active
+                ]
+            for old_id in active_web_sessions:
+                logger.info(f"Cerrando sesión web antigua duplicada: {old_id}")
+                await self.end_session(old_id, reason="new_session_override")
+
         session = CallSession(source=source, **kwargs)
         async with self._lock:
             self._sessions[session.session_id] = session

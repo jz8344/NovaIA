@@ -91,6 +91,10 @@ Cuando recibas un catálogo de inventario como resultado de una consulta:
   MAL: "¿marca, precio o uso?" (suena a menú de opciones)
   MAL: "¿desea filtrar por categoría?" (suena a sistema)
 
+- CONVERSIÓN DE PRECIOS A USD (BILINGÜE):
+  - Si estás hablando en inglés, debes decir ÚNICAMENTE el precio en USD. El catálogo te dará los precios en formato '$MXN (~$USD | ~£GBP)' (por ejemplo: '$1,500 MXN (~$86.36 USD)'). Debes responder en inglés utilizando esa cantidad en USD (por ejemplo: 'eighty-six point thirty-six dollars' o '$86.36 USD'). Está ESTRICTAMENTE PROHIBIDO que menciones el precio en pesos (MXN) en tus respuestas en inglés.
+  - Si estás hablando en español, debes decir ÚNICAMENTE el precio en pesos (MXN) (por ejemplo: 'mil quinientos pesos' o '$1,500 MXN').
+
 Para preguntas de seguimiento sobre productos que YA consultaste, NO vuelvas a llamar a la herramienta. Ya tienes los datos, úsalos directamente.
 
 Solo consulta el inventario de nuevo si el usuario pide algo que NO está en tu contexto actual.
@@ -177,36 +181,57 @@ class PromptLoader:
         os.makedirs(self.prompts_dir, exist_ok=True)
         for key, preset_data in presets.items():
             preset_file = Path(self.prompts_dir) / f"nova_{key}.yaml"
-            if not preset_file.exists():
+            should_recreate = False
+            if preset_file.exists():
+                try:
+                    with open(preset_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    if "USD" not in content:
+                        should_recreate = True
+                except Exception:
+                    should_recreate = True
+
+            if not preset_file.exists() or should_recreate:
                 compiled_text = self._build_from_config(preset_data)
                 preset_data["system_prompt"] = compiled_text
                 with open(preset_file, "w", encoding="utf-8") as f:
                     yaml.safe_dump(preset_data, f, allow_unicode=True, default_flow_style=False)
-                logger.info(f"Bootstrap: {preset_file.name} creado con éxito")
+                logger.info(f"Bootstrap: {preset_file.name} creado/actualizado con éxito")
 
-    def load(self, prompt_name: str = "nova_default") -> str:
+    def _get_config_path(self, user_id: int | None = None) -> str:
+        if user_id is not None:
+            return str(_PROJECT_ROOT / "data" / f"prompt_config_{user_id}.json")
+        return PROMPT_CONFIG_PATH
+
+    def _get_custom_agents_path(self, user_id: int | None = None) -> str:
+        if user_id is not None:
+            return str(_PROJECT_ROOT / "data" / f"custom_agents_{user_id}.json")
+        return str(_PROJECT_ROOT / "data" / "custom_agents.json")
+
+    def load(self, prompt_name: str = "nova_default", user_id: int | None = None) -> str:
         mode = "none"
         agent_id = None
         agent_source = "preset"
 
-        if os.path.exists(PROMPT_CONFIG_PATH):
+        config_path = self._get_config_path(user_id)
+        if os.path.exists(config_path):
             try:
-                with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     config = json.load(f)
                 mode = config.get("mode", "none")
                 agent_id = config.get("agent_id")
                 agent_source = config.get("agent_source", "preset")
             except Exception as e:
-                logger.warning(f"Error leyendo prompt_config.json: {e}")
+                logger.warning(f"Error leyendo config en {config_path}: {e}")
 
         filepath = None
         if mode == "raw":
             filepath = os.path.join(self.prompts_dir, "nova_default.yaml")
         elif mode == "builder":
-            filepath = os.path.join(self.prompts_dir, "nova_builder.md")
-            if not os.path.exists(filepath) and os.path.exists(PROMPT_CONFIG_PATH):
+            filepath = os.path.join(self.prompts_dir, f"nova_builder_{user_id}.md" if user_id else "nova_builder.md")
+            if not os.path.exists(filepath) and os.path.exists(config_path):
                 try:
-                    with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+                    with open(config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
                     builder = config.get("builder", {})
                     if builder:
@@ -220,7 +245,7 @@ class PromptLoader:
                 filepath = os.path.join(self.prompts_dir, f"nova_custom_{agent_id}.md")
                 if not os.path.exists(filepath):
                     try:
-                        custom_agents_path = os.path.join(os.path.dirname(PROMPT_CONFIG_PATH), "custom_agents.json")
+                        custom_agents_path = self._get_custom_agents_path(user_id)
                         if os.path.exists(custom_agents_path):
                             with open(custom_agents_path, "r", encoding="utf-8") as f2:
                                 agents = json.load(f2)
@@ -317,10 +342,11 @@ class PromptLoader:
 
         return "\n".join(lines)
 
-    def get_voice(self) -> str:
-        if os.path.exists(PROMPT_CONFIG_PATH):
+    def get_voice(self, user_id: int | None = None) -> str:
+        config_path = self._get_config_path(user_id)
+        if os.path.exists(config_path):
             try:
-                with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     config = json.load(f)
                 if config.get("use_custom") or config.get("mode") in ("builder", "agent", "raw"):
                     return config.get("voice", "Aoede")
@@ -328,10 +354,11 @@ class PromptLoader:
                 pass
         return "Aoede"
 
-    def get_db_language(self) -> str:
-        if os.path.exists(PROMPT_CONFIG_PATH):
+    def get_db_language(self, user_id: int | None = None) -> str:
+        config_path = self._get_config_path(user_id)
+        if os.path.exists(config_path):
             try:
-                with open(PROMPT_CONFIG_PATH, "r", encoding="utf-8") as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     config = json.load(f)
                 if config.get("use_custom") or config.get("mode") in ("builder", "agent", "raw"):
                     builder = config.get("builder", {})

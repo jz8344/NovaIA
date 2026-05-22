@@ -23,9 +23,10 @@ class GeminiLiveClient:
         else:
             logger.warning("GEMINI_API_KEY no configurada. Configúrala en .env para habilitar la IA.")
 
-    def _build_config(self, prompt_name: str = "nova_default") -> types.LiveConnectConfig:
-        system_prompt = self._prompt_loader.load(prompt_name)
+    def _build_config(self, prompt_name: str = "nova_default", user_id: int | None = None) -> types.LiveConnectConfig:
+        system_prompt = self._prompt_loader.load(prompt_name, user_id=user_id)
         tools         = self._registry.load_schemas()
+        voice_name    = self._prompt_loader.get_voice(user_id=user_id)
 
         return types.LiveConnectConfig(
             response_modalities=["AUDIO"],
@@ -35,17 +36,17 @@ class GeminiLiveClient:
             tools=tools,
             speech_config=types.SpeechConfig(
                 voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Aoede")
+                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice_name)
                 )
             ),
         )
 
-    async def start_session(self, session: CallSession, prompt_name: str = "nova_default"):
+    async def start_session(self, session: CallSession, prompt_name: str = "nova_default", user_id: int | None = None):
         if not self._client:
             logger.error("No se puede iniciar sesión: GEMINI_API_KEY no configurada")
             return
 
-        config = self._build_config(prompt_name)
+        config = self._build_config(prompt_name, user_id=user_id)
         max_retries = 3
 
         for attempt in range(max_retries):

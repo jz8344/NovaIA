@@ -103,4 +103,109 @@ CREATE TRIGGER IF NOT EXISTS extensions_fts_update
     INSERT INTO extensions_fts(rowid, name, department)
     VALUES (new.id, new.name, new.department);
 END;
+-- Tablas para autenticación de administradores y aislamiento de prompts
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    email TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+    session_token TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_agents (
+    user_id INTEGER NOT NULL,
+    agent_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    system_prompt TEXT NOT NULL,
+    PRIMARY KEY (user_id, agent_id),
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
 """
+
+
+SCHEMA_POSTGRES_SQL = """
+CREATE TABLE IF NOT EXISTS extensions (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    extension TEXT NOT NULL UNIQUE,
+    department TEXT DEFAULT '',
+    email TEXT DEFAULT '',
+    available INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS inventory (
+    id SERIAL PRIMARY KEY,
+    product_name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    price DOUBLE PRECISION DEFAULT 0.0,
+    stock INTEGER DEFAULT 0,
+    category TEXT DEFAULT '',
+    brand TEXT DEFAULT '',
+    color TEXT DEFAULT '',
+    weight TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS call_logs (
+    id SERIAL PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    caller_id TEXT DEFAULT '',
+    source TEXT DEFAULT 'unknown',
+    duration DOUBLE PRECISION DEFAULT 0.0,
+    actions_taken TEXT DEFAULT '[]',
+    transcript TEXT DEFAULT '',
+    tokens_input INTEGER DEFAULT 0,
+    tokens_output INTEGER DEFAULT 0,
+    tokens_total INTEGER DEFAULT 0,
+    cost_usd DOUBLE PRECISION DEFAULT 0.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS token_usage_daily (
+    id SERIAL PRIMARY KEY,
+    date TEXT NOT NULL,
+    total_calls INTEGER DEFAULT 0,
+    tokens_input INTEGER DEFAULT 0,
+    tokens_output INTEGER DEFAULT 0,
+    tokens_total INTEGER DEFAULT 0,
+    cost_usd DOUBLE PRECISION DEFAULT 0.0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(date)
+);
+
+-- Tablas para autenticación de administradores y aislamiento de prompts en PostgreSQL
+CREATE TABLE IF NOT EXISTS admin_users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    email TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+    session_token TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_agents (
+    user_id INTEGER NOT NULL,
+    agent_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    system_prompt TEXT NOT NULL,
+    PRIMARY KEY (user_id, agent_id),
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
+"""
+

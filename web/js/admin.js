@@ -199,6 +199,9 @@ function getCookie(name) {
 
 class NovaAdmin {
     constructor() {
+        this.adminUser = null;
+        this.adminUserId = null;
+        
         this.setupTabDataLoading();
         this.setupExtensions();
         this.setupInventory();
@@ -207,7 +210,25 @@ class NovaAdmin {
         this.setupTools();
         this.setupSessions();
         this.setupLogs();
-        this.loadExtensions();
+        this.setupDatabase();
+        this.setupAuth();
+        this.init();
+    }
+
+    async init() {
+        try {
+            const res = await fetch('/api/auth/session');
+            if (res.ok) {
+                const d = await res.json();
+                if (d.authenticated && d.user) {
+                    this.adminUser = d.user;
+                    this.adminUserId = d.user.id;
+                }
+            }
+        } catch (e) {
+            console.error('Error verificando sesión', e);
+        }
+        await this.loadExtensions();
     }
 
     async api(method, path, body = null) {
@@ -219,11 +240,33 @@ class NovaAdmin {
         const opts = { method, headers };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(`${API_BASE}${path}`, opts);
+        
+        if (res.status === 401) {
+            window.location.reload();
+            throw new Error('Sesión expirada o no autorizada.');
+        }
+        
         if (!res.ok) {
             const e = await res.json().catch(() => ({ detail: res.statusText }));
             throw new Error(e.detail || 'Error de API');
         }
         return res.json();
+    }
+
+    setupAuth() {
+        const btnLogout = document.getElementById('btnLogout');
+        btnLogout?.addEventListener('click', async () => {
+            if (!confirm('¿Deseas cerrar sesión?')) return;
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') || '' }
+                });
+            } catch (err) {
+                console.error('Error al cerrar sesión', err);
+            }
+            window.location.reload();
+        });
     }
 
     toast(msg, type = 'success') {
@@ -256,6 +299,7 @@ class NovaAdmin {
             if (name === 'tools')      this.loadTools();
             if (name === 'sessions')   this.loadSessions();
             if (name === 'logs')       this.loadLogs();
+            if (name === 'database')   this.loadDatabaseConfig();
         });
 
         document.getElementById('promptModeTabs')?.addEventListener('click', e => {
@@ -836,6 +880,158 @@ class NovaAdmin {
                     <td style="font-size:.75rem;font-family:var(--font-mono)">${log.actions_taken || '—'}</td>
                 </tr>`).join('');
         } catch (err) { tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Error: ${err.message}</td></tr>`; }
+    }
+
+    // ── DATABASE ──────────────────────────────────────────────────────────────
+    setupDatabase() {
+        const select = document.getElementById('dbSelectType');
+        select?.addEventListener('change', () => {
+            const val = select.value;
+            const grpSqlite = document.getElementById('dbGroupSqlite');
+            const grpPostgres = document.getElementById('dbGroupPostgres');
+            if (val === 'sqlite') {
+                if (grpSqlite) grpSqlite.style.display = 'block';
+                if (grpPostgres) grpPostgres.style.display = 'none';
+            } else {
+                if (grpSqlite) grpSqlite.style.display = 'none';
+                if (grpPostgres) grpPostgres.style.display = 'block';
+            }
+        });
+
+        document.getElementById('btnTestDb')?.addEventListener('click', () => this.testDatabaseConnection());
+        document.getElementById('btnSaveDb')?.addEventListener('click', () => this.saveDatabaseConfig());
+    }
+
+    async loadDatabaseConfig() {
+        try {
+            const cfg = await this.api('GET', '/db/config');
+            
+            // Actualizar interfaz con estado actual
+            const dbActiveType = document.getElementById('dbActiveType');
+            const dbStatusDetails = document.getElementById('dbStatusDetails');
+            const dbStatusPill = document.getElementById('dbStatusPill');
+
+            if (dbActiveType) dbActiveType.textContent = cfg.db_type === 'postgres' ? 'PostgreSQL (Nube)' : 'SQLite (Local)';
+            
+            if (cfg.connected) {
+                if (dbStatusPill) {
+                    dbStatusPill.className = 'pill pill-green';
+                    dbStatusPill.textContent = 'Conectado';
+                }
+                if (dbStatusDetails) {
+                    dbStatusDetails.textContent = cfg.db_type === 'postgres'
+                        ? `Conectado al servidor remoto PostgreSQL (URL enmascarada: ${cfg.postgres_url})`
+                        : `Conectado al archivo SQLite local en: ${cfg.sqlite_path}`;
+                }
+            } else {
+                if (dbStatusPill) {
+                    dbStatusPill.className = 'pill pill-red';
+                    dbStatusPill.textContent = 'Desconectado';
+                }
+                if (dbStatusDetails) {
+                    dbStatusDetails.textContent = `Error: ${cfg.error || 'No se pudo establecer la conexión'}`;
+                }
+            }
+
+            // Llenar formulario
+            const selectType = document.getElementById('dbSelectType');
+            if (selectType) {
+                selectType.value = cfg.db_type;
+                selectType.dispatchEvent(new Event('change'));
+            }
+
+            const sqlitePathInput = document.getElementById('dbSqlitePath');
+            if (sqlitePathInput) sqlitePathInput.value = cfg.sqlite_path || './data/nova.db';
+
+            const postgresUrlInput = document.getElementById('dbPostgresUrl');
+            if (postgresUrlInput) postgresUrlInput.value = cfg.postgres_url || '';
+
+        } catch (err) {
+            this.toast(`Error cargando configuración de base de datos: ${err.message}`, 'error');
+        }
+    }
+
+    async testDatabaseConnection() {
+        const selectType = document.getElementById('dbSelectType');
+        const dbType = selectType ? selectType.value : 'sqlite';
+        const sqlitePath = document.getElementById('dbSqlitePath')?.value.trim() || './data/nova.db';
+        const postgresUrl = document.getElementById('dbPostgresUrl')?.value.trim() || '';
+
+        if (dbType === 'postgres' && !postgresUrl) {
+            this.toast('Debes proveer una URL de conexión de PostgreSQL', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btnTestDb');
+        const origText = btn ? btn.textContent : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Probando...';
+        }
+
+        try {
+            const res = await this.api('POST', '/db/test', {
+                db_type: dbType,
+                sqlite_path: sqlitePath,
+                postgres_url: postgresUrl
+            });
+
+            if (res.success) {
+                this.toast('🧪 Prueba de conexión exitosa', 'success');
+            } else {
+                this.toast(`❌ Falló la prueba: ${res.message}`, 'error');
+            }
+        } catch (err) {
+            this.toast(`Error en prueba: ${err.message}`, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
+    }
+
+    async saveDatabaseConfig() {
+        const selectType = document.getElementById('dbSelectType');
+        const dbType = selectType ? selectType.value : 'sqlite';
+        const sqlitePath = document.getElementById('dbSqlitePath')?.value.trim() || './data/nova.db';
+        const postgresUrl = document.getElementById('dbPostgresUrl')?.value.trim() || '';
+
+        if (dbType === 'postgres' && !postgresUrl) {
+            this.toast('Debes proveer una URL de conexión de PostgreSQL', 'error');
+            return;
+        }
+
+        if (!confirm('¿Deseas aplicar estos cambios de conexión y reconectar la base de datos ahora?')) return;
+
+        const btn = document.getElementById('btnSaveDb');
+        const origText = btn ? btn.textContent : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Guardando...';
+        }
+
+        try {
+            const res = await this.api('POST', '/db/config/update', {
+                db_type: dbType,
+                sqlite_path: sqlitePath,
+                postgres_url: postgresUrl
+            });
+
+            if (res.success) {
+                this.toast('💾 Configuración guardada y base de datos reconectada con éxito', 'success');
+                await this.loadDatabaseConfig();
+            } else {
+                this.toast(`❌ Error al reconectar: ${res.message}`, 'error');
+            }
+        } catch (err) {
+            this.toast(`Error al guardar: ${err.message}`, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
     }
 }
 
