@@ -662,6 +662,7 @@
             <button class="tab" data-tab="logs">📝 Logs</button>
             <button class="tab" data-tab="tokens">💰 Tokens</button>
             <button class="tab" data-tab="database">🗄️ Base de Datos</button>
+            <button class="tab" data-tab="users" id="tabUsersBtn" style="display: none;">👥 Usuarios</button>
         </div>
 
         <!-- ── EXTENSIONS ── -->
@@ -1189,6 +1190,54 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
             </div>
         </div>
 
+        <!-- ── USERS MANAGEMENT ── -->
+        <div class="panel" id="panel-users">
+            <div class="card">
+                <div class="card-title">Crear Nuevo Usuario / Administrador</div>
+                <div class="card-sub">Registra un nuevo usuario para acceder al panel con sus propios privilegios e independientes prompts</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre de Usuario</label>
+                        <input type="text" id="usrUsername" placeholder="Ej: asistente_ventas">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="usrPassword" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="usrEmail" placeholder="Ej: ventas@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Rol de Acceso</label>
+                        <select id="usrRole">
+                            <option value="user" selected>Normal (Usuario Standard - Sin gestión de usuarios)</option>
+                            <option value="admin">Administrador Principal (Acceso total)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" id="btnCreateUser">+ Crear Usuario</button>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-title">Usuarios del Sistema</div>
+                <div class="card-sub">Lista de usuarios administradores con acceso a Nova</div>
+                <table class="data-table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Nombre de Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Creado El</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr><td colspan="5" class="empty-state">Cargando usuarios…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
     <footer>
         <span>Nova Voice Agent v1.0</span>

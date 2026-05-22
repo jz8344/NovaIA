@@ -16,6 +16,7 @@ class CallSession:
     channel: str = ""
     caller_id: str = ""
     source: str = "unknown"
+    user_id: Optional[int] = None
     started_at: float = field(default_factory=time.time)
     active: bool = True
     gemini_session: Optional[object] = None
@@ -43,21 +44,22 @@ class SessionManager:
         self._sessions: dict[str, CallSession] = {}
         self._lock = asyncio.Lock()
 
-    async def create_session(self, source: str = "unknown", **kwargs) -> CallSession:
+    async def create_session(self, source: str = "unknown", user_id: int | None = None, **kwargs) -> CallSession:
         if source == "web":
             async with self._lock:
-                active_web_sessions = [
+                # Solo cerrar sesiones del mismo user_id; si no hay user_id, cerrar todas las anonimas
+                duplicate_ids = [
                     s_id for s_id, s in self._sessions.items()
-                    if s.source == "web" and s.active
+                    if s.source == "web" and s.active and s.user_id == user_id
                 ]
-            for old_id in active_web_sessions:
-                logger.info(f"Cerrando sesión web antigua duplicada: {old_id}")
+            for old_id in duplicate_ids:
+                logger.info(f"Cerrando sesión web duplicada para user_id={user_id}: {old_id}")
                 await self.end_session(old_id, reason="new_session_override")
 
-        session = CallSession(source=source, **kwargs)
+        session = CallSession(source=source, user_id=user_id, **kwargs)
         async with self._lock:
             self._sessions[session.session_id] = session
-        logger.info(f"Sesión creada: {session.session_id} (fuente: {source})")
+        logger.info(f"Sesión creada: {session.session_id} (fuente: {source}, user_id: {user_id})")
         await event_bus.emit("session_created", session=session)
         return session
 

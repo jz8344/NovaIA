@@ -82,6 +82,11 @@ class DatabaseManager:
             try:
                 self._db = await asyncpg.connect(self.postgres_url)
                 await self._db.execute(SCHEMA_POSTGRES_SQL)
+                # Migración dinámica para PostgreSQL si ya existía la tabla
+                try:
+                    await self._db.execute("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
+                except Exception as _mig_err:
+                    logger.debug(f"Migración PostgreSQL role: {_mig_err}")
                 logger.info("Base de datos PostgreSQL conectada")
                 return
             except Exception as e:
@@ -95,6 +100,13 @@ class DatabaseManager:
         self._db.row_factory = aiosqlite.Row
         await self._db.executescript(SCHEMA_SQL)
         await self._db.commit()
+        # Migración dinámica para SQLite si ya existía la tabla
+        try:
+            await self._db.execute("ALTER TABLE admin_users ADD COLUMN role TEXT DEFAULT 'user'")
+            await self._db.commit()
+            logger.info("Migración: Columna 'role' añadida exitosamente a 'admin_users' en SQLite")
+        except Exception:
+            pass
         await self._rebuild_fts_index()
         logger.info(f"Base de datos SQLite conectada: {self.sqlite_path}")
 
@@ -389,11 +401,11 @@ class DatabaseManager:
         sql = "SELECT * FROM admin_users WHERE username = ?"
         return await self.fetch_one(sql, (username,))
 
-    async def create_admin_user(self, username: str, password_plain: str, email: str = ""):
+    async def create_admin_user(self, username: str, password_plain: str, email: str = "", role: str = "user"):
         from auth.utils import hash_password
         password_hash = hash_password(password_plain)
-        sql = "INSERT INTO admin_users (username, password_hash, email) VALUES (?, ?, ?)"
-        await self.execute(sql, (username, password_hash, email))
+        sql = "INSERT INTO admin_users (username, password_hash, email, role) VALUES (?, ?, ?, ?)"
+        await self.execute(sql, (username, password_hash, email, role))
 
     async def create_session_token(self, user_id: int, duration_seconds: int = 24 * 3600) -> str:
         from auth.utils import generate_session_token
@@ -407,7 +419,7 @@ class DatabaseManager:
     async def validate_session_token(self, session_token: str) -> dict | None:
         from datetime import datetime
         sql = """
-            SELECT s.expires_at, u.id as user_id, u.username, u.email 
+            SELECT s.expires_at, u.id as user_id, u.username, u.email, u.role
             FROM admin_sessions s
             JOIN admin_users u ON s.user_id = u.id
             WHERE s.session_token = ?
@@ -435,7 +447,8 @@ class DatabaseManager:
         return {
             "id": row["user_id"],
             "username": row["username"],
-            "email": row["email"]
+            "email": row["email"],
+            "role": row.get("role", "user")
         }
 
     async def delete_session_token(self, session_token: str):

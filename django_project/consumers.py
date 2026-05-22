@@ -11,17 +11,12 @@ class VoiceConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Aceptar la conexión WebSocket
         await self.accept()
-        self.session = await state.session_manager.create_session(source="web")
-        logger.info(f"WebSocket de voz conectado (Django): {self.session.session_id}")
 
-        self.vad = VoiceActivityDetector()
-
-        # Obtener agente y user_id desde query params para aislamiento de prompts por sesión
         from urllib.parse import parse_qs
         query_string = self.scope.get("query_string", b"").decode("utf-8")
         params = parse_qs(query_string)
         agent = params.get("agent", ["nova_default"])[0]
-        
+
         user_id_raw = params.get("user_id", [None])[0]
         user_id = None
         if user_id_raw:
@@ -30,7 +25,11 @@ class VoiceConsumer(AsyncWebsocketConsumer):
             except ValueError:
                 pass
 
-        # Iniciar las tareas en segundo plano
+        self.session = await state.session_manager.create_session(source="web", user_id=user_id)
+        logger.info(f"WebSocket de voz conectado (Django): {self.session.session_id} [user_id={user_id}]")
+
+        self.vad = VoiceActivityDetector()
+
         self.gemini_task = asyncio.create_task(
             state.gemini_client.start_session(self.session, prompt_name=agent, user_id=user_id)
         )

@@ -226,7 +226,12 @@ class PromptLoader:
 
         filepath = None
         if mode == "raw":
-            filepath = os.path.join(self.prompts_dir, "nova_default.yaml")
+            if user_id:
+                filepath = os.path.join(self.prompts_dir, f"nova_default_{user_id}.yaml")
+                if not os.path.exists(filepath):
+                    filepath = os.path.join(self.prompts_dir, "nova_default.yaml")
+            else:
+                filepath = os.path.join(self.prompts_dir, "nova_default.yaml")
         elif mode == "builder":
             filepath = os.path.join(self.prompts_dir, f"nova_builder_{user_id}.md" if user_id else "nova_builder.md")
             if not os.path.exists(filepath) and os.path.exists(config_path):
@@ -258,16 +263,31 @@ class PromptLoader:
                     except Exception as e:
                         logger.warning(f"No se pudo auto-recuperar el prompt del agente personalizado: {e}")
             else:
-                filepath_yaml = os.path.join(self.prompts_dir, f"nova_{agent_id}.yaml")
-                if agent_id and os.path.exists(filepath_yaml):
-                    filepath = filepath_yaml
-                else:
-                    filepath = os.path.join(self.prompts_dir, "nova_agent.md")
+                if agent_id and user_id:
+                    filepath_user_yaml = os.path.join(self.prompts_dir, f"nova_{agent_id}_{user_id}.yaml")
+                    if os.path.exists(filepath_user_yaml):
+                        filepath = filepath_user_yaml
+                
+                if not filepath:
+                    filepath_yaml = os.path.join(self.prompts_dir, f"nova_{agent_id}.yaml")
+                    if agent_id and os.path.exists(filepath_yaml):
+                        filepath = filepath_yaml
+                    else:
+                        filepath = os.path.join(self.prompts_dir, "nova_agent.md")
 
         if not filepath or not os.path.exists(filepath):
-            filepath_yaml = os.path.join(self.prompts_dir, f"{prompt_name}.yaml")
-            filepath_md   = os.path.join(self.prompts_dir, f"{prompt_name}.md")
-            filepath      = filepath_yaml if os.path.exists(filepath_yaml) else filepath_md
+            if user_id:
+                filepath_user_yaml = os.path.join(self.prompts_dir, f"{prompt_name}_{user_id}.yaml")
+                filepath_user_md   = os.path.join(self.prompts_dir, f"{prompt_name}_{user_id}.md")
+                if os.path.exists(filepath_user_yaml):
+                    filepath = filepath_user_yaml
+                elif os.path.exists(filepath_user_md):
+                    filepath = filepath_user_md
+
+            if not filepath or not os.path.exists(filepath):
+                filepath_yaml = os.path.join(self.prompts_dir, f"{prompt_name}.yaml")
+                filepath_md   = os.path.join(self.prompts_dir, f"{prompt_name}.md")
+                filepath      = filepath_yaml if os.path.exists(filepath_yaml) else filepath_md
 
         if not os.path.exists(filepath):
             base_yaml = os.path.join(self.prompts_dir, "nova_default_base.yaml")

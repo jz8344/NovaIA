@@ -211,6 +211,7 @@ class NovaAdmin {
         this.setupSessions();
         this.setupLogs();
         this.setupDatabase();
+        this.setupUsers();
         this.setupAuth();
         this.init();
     }
@@ -223,6 +224,10 @@ class NovaAdmin {
                 if (d.authenticated && d.user) {
                     this.adminUser = d.user;
                     this.adminUserId = d.user.id;
+                    if (this.adminUser && this.adminUser.role === 'admin') {
+                        const tabBtn = document.getElementById('tabUsersBtn');
+                        if (tabBtn) tabBtn.style.display = 'inline-block';
+                    }
                 }
             }
         } catch (e) {
@@ -300,6 +305,7 @@ class NovaAdmin {
             if (name === 'sessions')   this.loadSessions();
             if (name === 'logs')       this.loadLogs();
             if (name === 'database')   this.loadDatabaseConfig();
+            if (name === 'users')      this.loadUsers();
         });
 
         document.getElementById('promptModeTabs')?.addEventListener('click', e => {
@@ -1031,6 +1037,93 @@ class NovaAdmin {
                 btn.disabled = false;
                 btn.textContent = origText;
             }
+        }
+    }
+
+    // ── USERS MANAGEMENT ──────────────────────────────────────────────────────
+    setupUsers() {
+        document.getElementById('btnCreateUser')?.addEventListener('click', () => this.createUser());
+    }
+
+    async loadUsers() {
+        const tbody = document.getElementById('usersBody');
+        try {
+            const data = await this.api('GET', '/users');
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay usuarios registrados</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(u => {
+                const isSelf = this.adminUserId && parseInt(u.id) === parseInt(this.adminUserId);
+                const roleClass = u.role === 'admin' ? 'pill-green' : 'pill-cyan';
+                const roleLabel = u.role === 'admin' ? 'Administrador' : 'Usuario Normal';
+                const deleteBtn = isSelf 
+                    ? `<span style="font-size: .8rem; color: var(--text-3); font-style: italic;">Actual (Tú)</span>` 
+                    : `<button class="btn-danger" onclick="window.admin.deleteUser(${u.id})">Eliminar</button>`;
+                
+                return `
+                <tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email || '—'}</td>
+                    <td><span class="pill ${roleClass}">${roleLabel}</span></td>
+                    <td>${u.created_at ? u.created_at.replace('T', ' ').substring(0, 19) : '—'}</td>
+                    <td>${deleteBtn}</td>
+                </tr>`;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Error: ${err.message}</td></tr>`;
+        }
+    }
+
+    async createUser() {
+        const username = document.getElementById('usrUsername')?.value.trim();
+        const password = document.getElementById('usrPassword')?.value;
+        const email = document.getElementById('usrEmail')?.value.trim();
+        const role = document.getElementById('usrRole')?.value || 'user';
+
+        if (!username || !password) {
+            this.toast('Nombre de usuario y contraseña son obligatorios', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btnCreateUser');
+        const origText = btn ? btn.textContent : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Creando...';
+        }
+
+        try {
+            await this.api('POST', '/users', { username, password, email, role });
+            this.toast(`Usuario "${username}" creado correctamente.`);
+            
+            // Limpiar formulario
+            ['usrUsername', 'usrPassword', 'usrEmail'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            const roleEl = document.getElementById('usrRole');
+            if (roleEl) roleEl.value = 'user';
+
+            await this.loadUsers();
+        } catch (err) {
+            this.toast(err.message, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
+    }
+
+    async deleteUser(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
+        try {
+            await this.api('DELETE', `/users/${id}`);
+            this.toast('Usuario eliminado exitosamente.');
+            await this.loadUsers();
+        } catch (err) {
+            this.toast(err.message, 'error');
         }
     }
 }

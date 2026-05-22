@@ -33,5 +33,8 @@ class AdminAuthMiddleware:
             # Adjuntar usuario a la petición
             request.admin_user = user
 
+            if path.startswith("/api/admin/users") and user.get("role") != "admin":
+                return JsonResponse({"detail": "No autorizado. Permisos insuficientes."}, status=403)
+
         return self.get_response(request)
 

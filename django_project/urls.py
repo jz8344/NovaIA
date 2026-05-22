@@ -22,7 +22,9 @@ from api.admin import (
     delete_custom_agent,
     get_db_config,
     update_db_config,
-    test_db_config
+    test_db_config,
+    users_list_create,
+    delete_user
 )
 from api.auth import login_handler, logout_handler, check_session_handler
 
@@ -60,4 +62,6 @@ urlpatterns = [
     path('api/admin/db/config', get_db_config),
     path('api/admin/db/config/update', csrf_exempt(update_db_config)),
     path('api/admin/db/test', csrf_exempt(test_db_config)),
+    path('api/admin/users', csrf_exempt(users_list_create)),
+    path('api/admin/users/<int:user_id>', csrf_exempt(delete_user)),
 ] + static('/static/', document_root=settings.STATICFILES_DIRS[0])

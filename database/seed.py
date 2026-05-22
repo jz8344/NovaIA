@@ -8,8 +8,11 @@ async def seed_database(db: DatabaseManager):
         admins_count = await db.fetch_one("SELECT COUNT(*) as count FROM admin_users")
         if not admins_count or admins_count.get("count", 0) == 0:
             logger.info("No se encontraron usuarios administradores. Sembrando administrador por defecto (admin/nova1234)...")
-            await db.create_admin_user("admin", "nova1234", "admin@nova-ia.app")
+            await db.create_admin_user("admin", "nova1234", "admin@nova-ia.app", role="admin")
             logger.info("Usuario administrador por defecto creado exitosamente.")
+        else:
+            # Asegurar que el usuario admin principal tenga el rol 'admin'
+            await db.execute("UPDATE admin_users SET role = 'admin' WHERE username = 'admin'")
     except Exception as e:
         logger.error(f"Error sembrando usuario administrador: {e}")
 

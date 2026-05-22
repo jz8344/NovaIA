@@ -444,3 +444,61 @@ async def test_db_config(request):
             return JsonResponse({"success": False, "message": str(e)})
     return HttpResponse(status=405)
 
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    email: str = ""
+    role: str = "user"
+
+
+# --- Gestión de Usuarios (CRUD) ---
+async def users_list_create(request):
+    if request.admin_user.get("role") != "admin":
+        return JsonResponse({"detail": "Permisos insuficientes."}, status=403)
+
+    if request.method == "GET":
+        try:
+            users = await _db.fetch_all("SELECT id, username, email, role, created_at FROM admin_users ORDER BY username")
+            return JsonResponse(users, safe=False)
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=500)
+
+    elif request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+            data = UserCreate(**body)
+            
+            username = data.username.strip()
+            if not username:
+                return JsonResponse({"detail": "El nombre de usuario es obligatorio."}, status=400)
+                
+            existing = await _db.get_user_by_username(username)
+            if existing:
+                return JsonResponse({"detail": f"El usuario '{username}' ya existe."}, status=400)
+                
+            role = data.role if data.role in ["admin", "user"] else "user"
+            await _db.create_admin_user(username, data.password, data.email, role)
+            return JsonResponse({"success": True, "message": f"Usuario '{username}' creado exitosamente"})
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+
+    return HttpResponse(status=405)
+
+
+async def delete_user(request, user_id: int):
+    if request.admin_user.get("role") != "admin":
+        return JsonResponse({"detail": "Permisos insuficientes."}, status=403)
+
+    if request.method == "DELETE":
+        try:
+            if int(user_id) == int(request.admin_user["id"]):
+                return JsonResponse({"detail": "No puedes eliminar tu propia cuenta de usuario."}, status=400)
+                
+            await _db.execute("DELETE FROM admin_users WHERE id = ?", (user_id,))
+            return JsonResponse({"success": True, "message": "Usuario eliminado exitosamente"})
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+
+    return HttpResponse(status=405)
+

@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     email TEXT DEFAULT '',
+    role TEXT DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -188,6 +189,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     email TEXT DEFAULT '',
+    role TEXT DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
