@@ -25,10 +25,10 @@ class FunctionRegistry:
         with open(filepath, "r", encoding="utf-8") as f:
             config = json.load(f)
 
-        self._schemas = config.get("tools", [])
+        tool_defs = config.get("tools", [])
 
         declarations = []
-        for tool_def in self._schemas:
+        for tool_def in tool_defs:
             declarations.append(
                 types.FunctionDeclaration(
                     name=tool_def["name"],

@@ -140,7 +140,10 @@ class InventoryWorker:
                     price_str = f"${price:,.0f} MXN (~${usd_price:,.2f} USD | ~£{gbp_price:,.2f} GBP | ~{ars_price:,.0f} ARS | ~{bob_price:,.2f} BOB | ~{cny_price:,.2f} CNY)"
                     stock_str = f"stock: {stock}" if stock > 0 else "agotado"
 
+                    tags = p.get("tags", "") or ""
                     line = f"    - {name} — {price_str} ({stock_str})"
+                    if tags:
+                        line += f" | [{tags}]"
                     if desc:
                         line += f" | {desc}"
                     lines.append(line)

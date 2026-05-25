@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     brand TEXT DEFAULT '',
     color TEXT DEFAULT '',
     weight TEXT DEFAULT '',
+    tags TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -153,6 +154,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     brand TEXT DEFAULT '',
     color TEXT DEFAULT '',
     weight TEXT DEFAULT '',
+    tags TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

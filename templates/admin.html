@@ -661,7 +661,6 @@
             <button class="tab" data-tab="sessions">📊 Sesiones</button>
             <button class="tab" data-tab="logs">📝 Logs</button>
             <button class="tab" data-tab="tokens">💰 Tokens</button>
-            <button class="tab" data-tab="database">🗄️ Base de Datos</button>
             <button class="tab" data-tab="users" id="tabUsersBtn" style="display: none;">👥 Usuarios</button>
         </div>
 
@@ -728,6 +727,14 @@
                         <label>Categoría</label>
                         <input type="text" id="prodCategory" placeholder="Computadoras">
                     </div>
+                    <div class="form-group">
+                        <label>Marca</label>
+                        <input type="text" id="prodBrand" placeholder="HP, Dell, Hikvision…">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Tags <span style="font-size:.7rem;color:var(--text-3);font-weight:400">(separados por coma — para búsquedas precisas)</span></label>
+                        <input type="text" id="prodTags" placeholder="HDD,almacenamiento,7200rpm,SATA — o bien: SSD,NVMe,M.2,500GB">
+                    </div>
                     <div class="form-group" style="grid-column:1/-1">
                         <label>Descripción</label>
                         <input type="text" id="prodDesc" placeholder="Laptop empresarial 15.6 pulgadas…">
@@ -740,10 +747,10 @@
                 <div class="card-title">Inventario de Productos</div>
                 <table class="data-table" id="inventoryTable">
                     <thead>
-                        <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th></th></tr>
+                        <tr><th>Producto</th><th>Marca</th><th>Categoría</th><th>Precio</th><th>Stock</th><th></th></tr>
                     </thead>
                     <tbody id="inventoryBody">
-                        <tr><td colspan="5" class="empty-state">Cargando inventario…</td></tr>
+                        <tr><td colspan="6" class="empty-state">Cargando inventario…</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1135,60 +1142,7 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
         </div>
 
 
-        <!-- ── DATABASE ── -->
-        <div class="panel" id="panel-database">
-            <div class="card">
-                <div class="card-title">Estado de la Base de Datos</div>
-                <div class="card-sub">Monitorea y cambia en caliente la conexión a la base de datos activa</div>
-                
-                <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius); background: var(--bg-input); border: 1px solid var(--border);">
-                        <div style="font-size: 1.8rem;">🗄️</div>
-                        <div style="flex: 1;">
-                            <div style="font-size: 0.88rem; font-weight: 600;">Motor Activo: <span id="dbActiveType" style="color: var(--accent); text-transform: uppercase;">Cargando...</span></div>
-                            <div style="font-size: 0.78rem; color: var(--text-2); margin-top: 3px;" id="dbStatusDetails">Obteniendo detalles de la base de datos...</div>
-                        </div>
-                        <div>
-                            <span id="dbStatusPill" class="pill pill-amber">Verificando</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-title">Configuración de Conexión</div>
-                <div class="card-sub">Selecciona el tipo de base de datos y define sus credenciales o ruta de acceso</div>
-                
-                <div class="form-grid" style="grid-template-columns: 1fr; gap: 18px; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label>Tipo de Base de Datos</label>
-                        <select id="dbSelectType" style="background: var(--bg-input); border: 1px solid var(--border-mid); color: var(--text-1); border-radius: var(--radius-sm); padding: 9px 12px; font-family: var(--font-body); font-size: 0.85rem; outline: none; width: 100%;">
-                            <option value="sqlite">Desarrollo Local (SQLite)</option>
-                            <option value="postgres">Nube / Producción (PostgreSQL)</option>
-                        </select>
-                    </div>
-
-                    <!-- Campos SQLite -->
-                    <div class="form-group" id="dbGroupSqlite">
-                        <label>Ruta del archivo SQLite</label>
-                        <input type="text" id="dbSqlitePath" placeholder="./data/nova.db" value="./data/nova.db">
-                        <span style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">Ruta local del archivo de base de datos SQLite (se creará automáticamente si no existe).</span>
-                    </div>
-
-                    <!-- Campos Postgres -->
-                    <div class="form-group" id="dbGroupPostgres" style="display: none;">
-                        <label>URL de Conexión PostgreSQL (Connection String)</label>
-                        <input type="text" id="dbPostgresUrl" placeholder="postgresql://usuario:contraseña@servidor:puerto/bd">
-                        <span style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">URL de conexión externa o interna provista by Railway u otro proveedor. Ej. postgresql://postgres:contraseña@kodama.proxy.rlwy.net:19011/railway_</span>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn-secondary" id="btnTestDb">🧪 Probar Conexión</button>
-                    <button class="btn-primary" id="btnSaveDb">💾 Aplicar y Guardar</button>
-                </div>
-            </div>
-        </div>
 
         <!-- ── USERS MANAGEMENT ── -->
         <div class="panel" id="panel-users">

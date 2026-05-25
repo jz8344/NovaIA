@@ -25,8 +25,19 @@ class GeminiLiveClient:
 
     def _build_config(self, prompt_name: str = "nova_default", user_id: int | None = None) -> types.LiveConnectConfig:
         system_prompt = self._prompt_loader.load(prompt_name, user_id=user_id)
-        tools         = self._registry.load_schemas()
-        voice_name    = self._prompt_loader.get_voice(user_id=user_id)
+
+        if not isinstance(system_prompt, str):
+            logger.error(
+                f"[_build_config] system_prompt no es string "
+                f"(type={type(system_prompt).__name__}, user_id={user_id}). "
+                f"Usando prompt base."
+            )
+            system_prompt = self._prompt_loader.load("nova_default")
+            if not isinstance(system_prompt, str):
+                system_prompt = "Eres un asistente de voz profesional. Responde en español."
+
+        tools      = self._registry.load_schemas()
+        voice_name = self._prompt_loader.get_voice(user_id=user_id)
 
         return types.LiveConnectConfig(
             response_modalities=["AUDIO"],
@@ -164,7 +175,14 @@ class GeminiLiveClient:
                                             session._ai_transcript_accumulator = []
                                         session._ai_transcript_accumulator.append(part.text)
                                     if part.inline_data:
-                                        await session.audio_queue_out.put(part.inline_data.data)
+                                        try:
+                                            session.audio_queue_out.put_nowait(part.inline_data.data)
+                                        except asyncio.QueueFull:
+                                            try:
+                                                session.audio_queue_out.get_nowait()
+                                            except asyncio.QueueEmpty:
+                                                pass
+                                            session.audio_queue_out.put_nowait(part.inline_data.data)
 
                             if server_content.turn_complete:
                                 logger.debug(f"[{session.session_id}] Turno de IA completado")

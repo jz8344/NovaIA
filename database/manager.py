@@ -13,6 +13,59 @@ def _normalize(text: str) -> str:
     return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn').lower()
 
 
+def _get_counterpart_word(word: str) -> str:
+    original = word.lower()
+    if original.endswith('ora') and len(original) >= 5:
+        return original[:-1]
+    if original.endswith('or') and len(original) >= 4:
+        return original + 'a'
+    if len(original) >= 4 and original.endswith('s'):
+        if original.endswith('ces'):
+            return original[:-3] + 'z'
+        if original.endswith('ches'):
+            return original[:-2]
+        if original.endswith('res'):
+            return original[:-2]
+        if original.endswith('les'):
+            return original[:-2]
+        if original.endswith('nes'):
+            return original[:-2]
+        if original.endswith('des'):
+            return original[:-2]
+        return original[:-1]
+    if len(original) >= 2:
+        if original.endswith('z'):
+            return original[:-1] + 'ces'
+        if original.endswith(('a', 'e', 'i', 'o', 'u')):
+            return original + 's'
+        if original.endswith(('r', 'l', 'n', 'd', 't', 'ch')):
+            if original.endswith('ch'):
+                return original + 'es'
+            return original + 'es'
+    return word
+
+
+def _get_counterpart_query(query: str) -> str:
+    words = query.split()
+    counterparts = []
+    for w in words:
+        clean_w = re.sub(r'[^\w]', '', w)
+        if not clean_w:
+            counterparts.append(w)
+            continue
+        cp = _get_counterpart_word(clean_w)
+        if w[0].isupper():
+            cp = cp.capitalize()
+        counterparts.append(cp)
+    return " ".join(counterparts)
+
+
+_STOPWORDS = {
+    "de", "la", "el", "en", "un", "los", "las", "del", "al", "por",
+    "con", "sin", "se", "le", "su", "es", "que", "para", "como", "una",
+    "and", "the", "for", "with", "from", "of", "in", "on", "at", "to",
+}
+
 def _tokenize_query(query: str) -> list[str]:
     norm = _normalize(query)
     terms = {norm}
@@ -78,20 +131,29 @@ class DatabaseManager:
         self.load_config()
         if self.db_type == "postgres":
             import asyncpg
-            logger.info("Conectando a PostgreSQL (Railway)...")
+            logger.info("Conectando a PostgreSQL (Railway) con pool de conexiones...")
             try:
-                self._db = await asyncpg.connect(self.postgres_url)
-                await self._db.execute(SCHEMA_POSTGRES_SQL)
-                # Migración dinámica para PostgreSQL si ya existía la tabla
-                try:
-                    await self._db.execute("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
-                except Exception as _mig_err:
-                    logger.debug(f"Migración PostgreSQL role: {_mig_err}")
-                logger.info("Base de datos PostgreSQL conectada")
+                self._db = await asyncpg.create_pool(
+                    self.postgres_url,
+                    min_size=2,
+                    max_size=10,
+                    command_timeout=30,
+                )
+                async with self._db.acquire() as conn:
+                    await conn.execute(SCHEMA_POSTGRES_SQL)
+                    try:
+                        await conn.execute("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
+                    except Exception as _mig_err:
+                        logger.debug(f"Migración PostgreSQL role: {_mig_err}")
+                    try:
+                        await conn.execute("ALTER TABLE inventory ADD COLUMN IF NOT EXISTS tags TEXT DEFAULT ''")
+                    except Exception as _mig_err:
+                        logger.debug(f"Migración PostgreSQL tags: {_mig_err}")
+                logger.info("Base de datos PostgreSQL conectada (pool activo)")
                 return
             except Exception as e:
                 logger.error(f"Falla al conectar a PostgreSQL (Railway): {e}")
-                logger.warning("Activando FALLBACK automático a SQLite local para evitar crash en el arranque del servidor...")
+                logger.warning("Activando FALLBACK automático a SQLite local...")
                 self.db_type = "sqlite"
                 self.sqlite_path = "./data/nova.db"
 
@@ -101,6 +163,12 @@ class DatabaseManager:
         await self._db.executescript(SCHEMA_SQL)
         await self._db.commit()
         # Migración dinámica para SQLite si ya existía la tabla
+        try:
+            await self._db.execute("ALTER TABLE inventory ADD COLUMN tags TEXT DEFAULT ''")
+            await self._db.commit()
+            logger.info("Migración: Columna 'tags' añadida a 'inventory' en SQLite")
+        except Exception:
+            pass
         try:
             await self._db.execute("ALTER TABLE admin_users ADD COLUMN role TEXT DEFAULT 'user'")
             await self._db.commit()
@@ -154,7 +222,8 @@ class DatabaseManager:
     async def fetch_all(self, sql: str, params: tuple = ()) -> list[dict]:
         sql = self._convert_query(sql)
         if self.db_type == "postgres":
-            rows = await self._db.fetch(sql, *params)
+            async with self._db.acquire() as conn:
+                rows = await conn.fetch(sql, *params)
             return [dict(r) for r in rows]
         else:
             async with self._db.execute(sql, params) as cursor:
@@ -164,7 +233,8 @@ class DatabaseManager:
     async def fetch_one(self, sql: str, params: tuple = ()) -> dict:
         sql = self._convert_query(sql)
         if self.db_type == "postgres":
-            row = await self._db.fetchrow(sql, *params)
+            async with self._db.acquire() as conn:
+                row = await conn.fetchrow(sql, *params)
             return dict(row) if row else {}
         else:
             async with self._db.execute(sql, params) as cursor:
@@ -174,7 +244,8 @@ class DatabaseManager:
     async def execute(self, sql: str, params: tuple = ()):
         sql = self._convert_query(sql)
         if self.db_type == "postgres":
-            await self._db.execute(sql, *params)
+            async with self._db.acquire() as conn:
+                await conn.execute(sql, *params)
         else:
             await self._db.execute(sql, params)
             await self._db.commit()
@@ -185,13 +256,45 @@ class DatabaseManager:
         norm_query = _normalize(query)
         logger.info(f"[SEARCH] extension='{query}'")
         if self.db_type == "postgres":
-            results = await self._token_search_extensions(norm_query)
+            results = await self._ilike_search_extensions(query)
+            if not results:
+                results = await self._token_search_extensions(norm_query)
         else:
             results = await self._fts_search_extensions(norm_query)
             if not results:
                 results = await self._token_search_extensions(norm_query)
         logger.info(f"[SEARCH] extension results: {len(results)}")
         return results
+
+    async def _ilike_search_extensions(self, query: str) -> list[dict]:
+        try:
+            raw_terms  = [t for t in query.split() if len(t) >= 3 and t.lower() not in _STOPWORDS]
+            norm_terms = [t for t in _normalize(query).split() if len(t) >= 3 and t not in _STOPWORDS]
+            all_terms  = list(dict.fromkeys(raw_terms + norm_terms)) or [_normalize(query)]
+
+            conditions = []
+            params = []
+            for term in all_terms[:6]:
+                pattern = f"%{term}%"
+                base = len(params)
+                conditions.append(
+                    f"(name ILIKE ${base+1} OR department ILIKE ${base+2} OR extension ILIKE ${base+3})"
+                )
+                params.extend([pattern, pattern, pattern])
+
+            where = " OR ".join(conditions)
+            sql = f"SELECT * FROM extensions WHERE {where} LIMIT 20"
+
+            async with self._db.acquire() as conn:
+                rows = await conn.fetch(sql, *params)
+            return [{
+                "name": r["name"], "extension": r["extension"],
+                "department": r["department"], "email": r["email"],
+                "available": r["available"]
+            } for r in rows]
+        except Exception as e:
+            logger.warning(f"ILIKE extensions search error: {e}")
+            return []
 
     async def _fts_search_extensions(self, query: str) -> list[dict]:
         try:
@@ -236,17 +339,99 @@ class DatabaseManager:
 
     # ── BÚSQUEDA INVENTARIO ────────────────────────────────────────────────────
 
-    async def search_inventory(self, query: str) -> list[dict]:
-        norm_query = _normalize(query)
-        logger.info(f"[SEARCH] inventory='{query}'")
+    async def _execute_search_pipeline(self, query: str, norm_query: str) -> list[dict]:
         if self.db_type == "postgres":
-            results = await self._token_search_inventory(norm_query)
+            results = await self._ilike_search_inventory_exact(query)
+            if not results:
+                results = await self._ilike_search_inventory(query, include_description=False, use_and=True)
+            if not results:
+                results = await self._ilike_search_inventory(query, include_description=False, use_and=False)
+            if not results:
+                results = await self._ilike_search_inventory(query, include_description=True, use_and=True)
+            if not results:
+                results = await self._token_search_inventory(norm_query)
         else:
             results = await self._fts_search_inventory(norm_query)
             if not results:
                 results = await self._token_search_inventory(norm_query)
+        return results
+
+    async def search_inventory(self, query: str) -> list[dict]:
+        norm_query = _normalize(query)
+        logger.info(f"[SEARCH] inventory='{query}'")
+        results = await self._execute_search_pipeline(query, norm_query)
+        if not results:
+            counterpart = _get_counterpart_query(query)
+            if counterpart != query:
+                logger.info(f"[SEARCH FALLBACK] Probando contraparte: '{counterpart}'")
+                norm_counterpart = _normalize(counterpart)
+                results = await self._execute_search_pipeline(counterpart, norm_counterpart)
         logger.info(f"[SEARCH] inventory results: {len(results)}")
         return results
+
+    async def _ilike_search_inventory_exact(self, query: str) -> list[dict]:
+        """Fase 1: frase exacta completa en nombre, marca, categoría o tags."""
+        try:
+            pattern = f"%{_normalize(query)}%"
+            sql = (
+                "SELECT * FROM inventory "
+                "WHERE product_name ILIKE $1 OR brand ILIKE $2 OR category ILIKE $3 OR tags ILIKE $4 "
+                "LIMIT 50"
+            )
+            async with self._db.acquire() as conn:
+                rows = await conn.fetch(sql, pattern, pattern, pattern, pattern)
+            return [{
+                "product_name": r["product_name"], "description": r["description"],
+                "price": r["price"], "stock": r["stock"],
+                "category": r["category"], "brand": r["brand"],
+                "color": r["color"], "weight": r["weight"],
+                "tags": r["tags"] or ""
+            } for r in rows]
+        except Exception as e:
+            logger.warning(f"ILIKE exact search error: {e}")
+            return []
+
+    async def _ilike_search_inventory(self, query: str, include_description: bool = False, use_and: bool = False) -> list[dict]:
+        """Fase 2/3: tokens significativos con AND (todos deben coincidir) o OR (fallback)."""
+        try:
+            raw_terms  = [t for t in query.split() if len(t) >= 3 and t.lower() not in _STOPWORDS]
+            norm_terms = [t for t in _normalize(query).split() if len(t) >= 3 and t not in _STOPWORDS]
+            all_terms  = list(dict.fromkeys(raw_terms + norm_terms)) or [_normalize(query)]
+            all_terms  = all_terms[:6]
+
+            conditions = []
+            params = []
+            for term in all_terms:
+                pattern = f"%{term}%"
+                base = len(params)
+                if include_description:
+                    conditions.append(
+                        f"(product_name ILIKE ${base+1} OR description ILIKE ${base+2} "
+                        f"OR category ILIKE ${base+3} OR brand ILIKE ${base+4} OR tags ILIKE ${base+5})"
+                    )
+                    params.extend([pattern, pattern, pattern, pattern, pattern])
+                else:
+                    conditions.append(
+                        f"(product_name ILIKE ${base+1} OR category ILIKE ${base+2} OR brand ILIKE ${base+3} OR tags ILIKE ${base+4})"
+                    )
+                    params.extend([pattern, pattern, pattern, pattern])
+
+            joiner = " AND " if use_and else " OR "
+            where = joiner.join(conditions)
+            sql = f"SELECT * FROM inventory WHERE {where} LIMIT 50"
+
+            async with self._db.acquire() as conn:
+                rows = await conn.fetch(sql, *params)
+            return [{
+                "product_name": r["product_name"], "description": r["description"],
+                "price": r["price"], "stock": r["stock"],
+                "category": r["category"], "brand": r["brand"],
+                "color": r["color"], "weight": r["weight"],
+                "tags": r["tags"] or ""
+            } for r in rows]
+        except Exception as e:
+            logger.warning(f"ILIKE search error: {e}")
+            return []
 
     async def _fts_search_inventory(self, query: str) -> list[dict]:
         try:
@@ -264,30 +449,47 @@ class DatabaseManager:
                 "product_name": r["product_name"], "description": r["description"],
                 "price": r["price"], "stock": r["stock"],
                 "category": r["category"], "brand": r["brand"],
-                "color": r["color"], "weight": r["weight"]
+                "color": r["color"], "weight": r["weight"],
+                "tags": r.get("tags") or ""
             } for r in rows]
         except Exception as e:
             logger.debug(f"FTS5 inventory error (usando fallback): {e}")
             return []
 
     async def _token_search_inventory(self, norm_query: str) -> list[dict]:
-        terms = _tokenize_query(norm_query)
+        sig_terms = [t for t in norm_query.split() if len(t) >= 3 and t not in _STOPWORDS]
+        all_terms = _tokenize_query(norm_query)
         all_rows = await self.fetch_all("SELECT * FROM inventory")
         seen, results = set(), []
         for row in all_rows:
             n = _normalize(row["product_name"])
             c = _normalize(row["category"])
-            d = _normalize(row["description"])
             b = _normalize(row["brand"])
-            for t in terms:
-                if t in n or t in c or t in d or t in b:
+            d = _normalize(row["description"])
+            tg = _normalize(row.get("tags") or "")
+
+            if sig_terms and all(t in n or t in c or t in b or t in tg for t in sig_terms):
+                if row["id"] not in seen:
+                    seen.add(row["id"])
+                    results.append({
+                        "product_name": row["product_name"], "description": row["description"],
+                        "price": row["price"], "stock": row["stock"],
+                        "category": row["category"], "brand": row["brand"],
+                        "color": row["color"], "weight": row["weight"],
+                        "tags": row.get("tags") or ""
+                    })
+                continue
+
+            for t in all_terms:
+                if t in n or t in c or t in b or t in tg or t in d:
                     if row["id"] not in seen:
                         seen.add(row["id"])
                         results.append({
                             "product_name": row["product_name"], "description": row["description"],
                             "price": row["price"], "stock": row["stock"],
                             "category": row["category"], "brand": row["brand"],
-                            "color": row["color"], "weight": row["weight"]
+                            "color": row["color"], "weight": row["weight"],
+                            "tags": row.get("tags") or ""
                         })
                     break
         return results
@@ -349,10 +551,11 @@ class DatabaseManager:
 
     async def add_inventory_item(self, product_name: str, description: str,
                                  price: float, stock: int, category: str,
-                                 brand: str = "", color: str = "", weight: str = ""):
-        sql = """INSERT INTO inventory (product_name, description, price, stock, category, brand, color, weight)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
-        await self.execute(sql, (product_name, description, price, stock, category, brand, color, weight))
+                                 brand: str = "", color: str = "", weight: str = "",
+                                 tags: str = ""):
+        sql = """INSERT INTO inventory (product_name, description, price, stock, category, brand, color, weight, tags)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        await self.execute(sql, (product_name, description, price, stock, category, brand, color, weight, tags))
 
     async def delete_inventory_item(self, item_id: int):
         await self.execute("DELETE FROM inventory WHERE id = ?", (item_id,))

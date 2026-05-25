@@ -40,6 +40,10 @@ class InventoryCreate(BaseModel):
     price: float = 0.0
     stock: int = 0
     category: str = ""
+    brand: str = ""
+    color: str = ""
+    weight: str = ""
+    tags: str = ""
 
 
 class PromptUpdate(BaseModel):
@@ -81,7 +85,8 @@ async def inventory_list_create(request):
             data = InventoryCreate(**body)
             await _db.add_inventory_item(
                 data.product_name, data.description,
-                data.price, data.stock, data.category
+                data.price, data.stock, data.category,
+                data.brand, data.color, data.weight, data.tags
             )
             return JsonResponse({"success": True, "message": f"Producto '{data.product_name}' creado"})
         except Exception as e:

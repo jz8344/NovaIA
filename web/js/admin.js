@@ -210,7 +210,6 @@ class NovaAdmin {
         this.setupTools();
         this.setupSessions();
         this.setupLogs();
-        this.setupDatabase();
         this.setupUsers();
         this.setupAuth();
         this.init();
@@ -364,13 +363,15 @@ class NovaAdmin {
                 description:  document.getElementById('prodDesc').value.trim(),
                 price:        parseFloat(document.getElementById('prodPrice').value) || 0,
                 stock:        parseInt(document.getElementById('prodStock').value) || 0,
-                category:     document.getElementById('prodCategory').value.trim()
+                category:     document.getElementById('prodCategory').value.trim(),
+                brand:        document.getElementById('prodBrand').value.trim(),
+                tags:         document.getElementById('prodTags').value.trim()
             };
             if (!data.product_name) { this.toast('El nombre es requerido', 'error'); return; }
             try {
                 await this.api('POST', '/inventory', data);
                 this.toast('Producto agregado');
-                ['prodName','prodDesc','prodPrice','prodStock','prodCategory'].forEach(id => document.getElementById(id).value = '');
+                ['prodName','prodDesc','prodPrice','prodStock','prodCategory','prodBrand','prodTags'].forEach(id => document.getElementById(id).value = '');
                 await this.loadInventory();
             } catch (err) { this.toast(err.message, 'error'); }
         });
@@ -380,20 +381,26 @@ class NovaAdmin {
         const tbody = document.getElementById('inventoryBody');
         try {
             const data = await this.api('GET', '/inventory');
-            if (!data.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay productos en inventario</td></tr>'; return; }
+            if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay productos en inventario</td></tr>'; return; }
             tbody.innerHTML = data.map(item => {
                 const stock = parseInt(item.stock);
                 const sc = stock > 5 ? 'pill-green' : stock > 0 ? 'pill-amber' : 'pill-red';
+                const tagsHtml = item.tags
+                    ? item.tags.split(',').map(t => t.trim()).filter(Boolean)
+                        .map(t => `<span style="display:inline-block;background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3);border-radius:4px;padding:1px 6px;font-size:.68rem;margin:1px">${t}</span>`).join('')
+                    : '';
                 return `<tr>
                     <td><div><strong>${item.product_name}</strong></div>
-                        ${item.description ? `<div style="font-size:.75rem;color:var(--text-3)">${item.description}</div>` : ''}</td>
+                        ${item.description ? `<div style="font-size:.75rem;color:var(--text-3)">${item.description}</div>` : ''}
+                        ${tagsHtml ? `<div style="margin-top:3px">${tagsHtml}</div>` : ''}</td>
+                    <td>${item.brand || '—'}</td>
                     <td>${item.category || '—'}</td>
                     <td style="color:#34d399;font-weight:500">$${parseFloat(item.price).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
                     <td><span class="pill ${sc}">${stock} uds.</span></td>
                     <td><button class="btn-danger" onclick="window.admin.deleteProduct(${item.id})">Eliminar</button></td>
                 </tr>`;
             }).join('');
-        } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Error: ${err.message}</td></tr>`; }
+        } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`; }
     }
 
     async deleteProduct(id) {
@@ -888,159 +895,8 @@ class NovaAdmin {
         } catch (err) { tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Error: ${err.message}</td></tr>`; }
     }
 
-    // ── DATABASE ──────────────────────────────────────────────────────────────
-    setupDatabase() {
-        const select = document.getElementById('dbSelectType');
-        select?.addEventListener('change', () => {
-            const val = select.value;
-            const grpSqlite = document.getElementById('dbGroupSqlite');
-            const grpPostgres = document.getElementById('dbGroupPostgres');
-            if (val === 'sqlite') {
-                if (grpSqlite) grpSqlite.style.display = 'block';
-                if (grpPostgres) grpPostgres.style.display = 'none';
-            } else {
-                if (grpSqlite) grpSqlite.style.display = 'none';
-                if (grpPostgres) grpPostgres.style.display = 'block';
-            }
-        });
-
-        document.getElementById('btnTestDb')?.addEventListener('click', () => this.testDatabaseConnection());
-        document.getElementById('btnSaveDb')?.addEventListener('click', () => this.saveDatabaseConfig());
-    }
-
-    async loadDatabaseConfig() {
-        try {
-            const cfg = await this.api('GET', '/db/config');
-            
-            // Actualizar interfaz con estado actual
-            const dbActiveType = document.getElementById('dbActiveType');
-            const dbStatusDetails = document.getElementById('dbStatusDetails');
-            const dbStatusPill = document.getElementById('dbStatusPill');
-
-            if (dbActiveType) dbActiveType.textContent = cfg.db_type === 'postgres' ? 'PostgreSQL (Nube)' : 'SQLite (Local)';
-            
-            if (cfg.connected) {
-                if (dbStatusPill) {
-                    dbStatusPill.className = 'pill pill-green';
-                    dbStatusPill.textContent = 'Conectado';
-                }
-                if (dbStatusDetails) {
-                    dbStatusDetails.textContent = cfg.db_type === 'postgres'
-                        ? `Conectado al servidor remoto PostgreSQL (URL enmascarada: ${cfg.postgres_url})`
-                        : `Conectado al archivo SQLite local en: ${cfg.sqlite_path}`;
-                }
-            } else {
-                if (dbStatusPill) {
-                    dbStatusPill.className = 'pill pill-red';
-                    dbStatusPill.textContent = 'Desconectado';
-                }
-                if (dbStatusDetails) {
-                    dbStatusDetails.textContent = `Error: ${cfg.error || 'No se pudo establecer la conexión'}`;
-                }
-            }
-
-            // Llenar formulario
-            const selectType = document.getElementById('dbSelectType');
-            if (selectType) {
-                selectType.value = cfg.db_type;
-                selectType.dispatchEvent(new Event('change'));
-            }
-
-            const sqlitePathInput = document.getElementById('dbSqlitePath');
-            if (sqlitePathInput) sqlitePathInput.value = cfg.sqlite_path || './data/nova.db';
-
-            const postgresUrlInput = document.getElementById('dbPostgresUrl');
-            if (postgresUrlInput) postgresUrlInput.value = cfg.postgres_url || '';
-
-        } catch (err) {
-            this.toast(`Error cargando configuración de base de datos: ${err.message}`, 'error');
-        }
-    }
-
-    async testDatabaseConnection() {
-        const selectType = document.getElementById('dbSelectType');
-        const dbType = selectType ? selectType.value : 'sqlite';
-        const sqlitePath = document.getElementById('dbSqlitePath')?.value.trim() || './data/nova.db';
-        const postgresUrl = document.getElementById('dbPostgresUrl')?.value.trim() || '';
-
-        if (dbType === 'postgres' && !postgresUrl) {
-            this.toast('Debes proveer una URL de conexión de PostgreSQL', 'error');
-            return;
-        }
-
-        const btn = document.getElementById('btnTestDb');
-        const origText = btn ? btn.textContent : '';
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '⏳ Probando...';
-        }
-
-        try {
-            const res = await this.api('POST', '/db/test', {
-                db_type: dbType,
-                sqlite_path: sqlitePath,
-                postgres_url: postgresUrl
-            });
-
-            if (res.success) {
-                this.toast('🧪 Prueba de conexión exitosa', 'success');
-            } else {
-                this.toast(`❌ Falló la prueba: ${res.message}`, 'error');
-            }
-        } catch (err) {
-            this.toast(`Error en prueba: ${err.message}`, 'error');
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = origText;
-            }
-        }
-    }
-
-    async saveDatabaseConfig() {
-        const selectType = document.getElementById('dbSelectType');
-        const dbType = selectType ? selectType.value : 'sqlite';
-        const sqlitePath = document.getElementById('dbSqlitePath')?.value.trim() || './data/nova.db';
-        const postgresUrl = document.getElementById('dbPostgresUrl')?.value.trim() || '';
-
-        if (dbType === 'postgres' && !postgresUrl) {
-            this.toast('Debes proveer una URL de conexión de PostgreSQL', 'error');
-            return;
-        }
-
-        if (!confirm('¿Deseas aplicar estos cambios de conexión y reconectar la base de datos ahora?')) return;
-
-        const btn = document.getElementById('btnSaveDb');
-        const origText = btn ? btn.textContent : '';
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '⏳ Guardando...';
-        }
-
-        try {
-            const res = await this.api('POST', '/db/config/update', {
-                db_type: dbType,
-                sqlite_path: sqlitePath,
-                postgres_url: postgresUrl
-            });
-
-            if (res.success) {
-                this.toast('💾 Configuración guardada y base de datos reconectada con éxito', 'success');
-                await this.loadDatabaseConfig();
-            } else {
-                this.toast(`❌ Error al reconectar: ${res.message}`, 'error');
-            }
-        } catch (err) {
-            this.toast(`Error al guardar: ${err.message}`, 'error');
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = origText;
-            }
-        }
-    }
-
     // ── USERS MANAGEMENT ──────────────────────────────────────────────────────
+
     setupUsers() {
         document.getElementById('btnCreateUser')?.addEventListener('click', () => this.createUser());
     }
