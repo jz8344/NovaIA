@@ -24,7 +24,10 @@ from api.admin import (
     update_db_config,
     test_db_config,
     users_list_create,
-    delete_user
+    delete_user,
+    get_agent_data_source,
+    save_agent_data_source,
+    test_agent_data_source,
 )
 from api.auth import login_handler, logout_handler, check_session_handler
 
@@ -64,4 +67,7 @@ urlpatterns = [
     path('api/admin/db/test', csrf_exempt(test_db_config)),
     path('api/admin/users', csrf_exempt(users_list_create)),
     path('api/admin/users/<int:user_id>', csrf_exempt(delete_user)),
+    path('api/admin/agent-data-source', csrf_exempt(get_agent_data_source)),
+    path('api/admin/agent-data-source/save', csrf_exempt(save_agent_data_source)),
+    path('api/admin/agent-data-source/test', csrf_exempt(test_agent_data_source)),
 ] + static('/static/', document_root=settings.STATICFILES_DIRS[0])

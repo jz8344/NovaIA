@@ -205,6 +205,7 @@ class NovaAdmin {
         this.setupTabDataLoading();
         this.setupExtensions();
         this.setupInventory();
+        this.setupDataSource();
         this.setupPrompts();
         this.setupAgents();
         this.setupTools();
@@ -299,6 +300,7 @@ class NovaAdmin {
             if (!tab) return;
             const name = tab.dataset.tab;
             if (name === 'inventory')  this.loadInventory();
+            if (name === 'datasource') this.loadDataSource();
             if (name === 'prompts')    this.loadPromptPanel();
             if (name === 'tools')      this.loadTools();
             if (name === 'sessions')   this.loadSessions();
@@ -380,6 +382,19 @@ class NovaAdmin {
     async loadInventory() {
         const tbody = document.getElementById('inventoryBody');
         try {
+            if (this.activeSourceType === undefined) {
+                try {
+                    const config = await this.api('GET', '/agent-data-source');
+                    this.activeSourceType = config.source_type || 'internal';
+                } catch (e) {
+                    this.activeSourceType = 'internal';
+                }
+            }
+            
+            const isOdoo = this.activeSourceType === 'odoo';
+            const addCard = document.getElementById('cardAddProduct');
+            if (addCard) addCard.style.display = isOdoo ? 'none' : 'block';
+
             const data = await this.api('GET', '/inventory');
             if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay productos en inventario</td></tr>'; return; }
             tbody.innerHTML = data.map(item => {
@@ -397,7 +412,10 @@ class NovaAdmin {
                     <td>${item.category || '—'}</td>
                     <td style="color:#34d399;font-weight:500">$${parseFloat(item.price).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
                     <td><span class="pill ${sc}">${stock} uds.</span></td>
-                    <td><button class="btn-danger" onclick="window.admin.deleteProduct(${item.id})">Eliminar</button></td>
+                    <td>${isOdoo 
+                        ? `<span style="font-size:.72rem;color:var(--text-3);border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);padding:2px 8px;border-radius:4px;">Solo Lectura</span>`
+                        : `<button class="btn-danger" onclick="window.admin.deleteProduct(${item.id})">Eliminar</button>`
+                    }</td>
                 </tr>`;
             }).join('');
         } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`; }
@@ -407,6 +425,121 @@ class NovaAdmin {
         if (!confirm('¿Eliminar este producto?')) return;
         try { await this.api('DELETE', `/inventory/${id}`); this.toast('Eliminado'); await this.loadInventory(); }
         catch (err) { this.toast(err.message, 'error'); }
+    }
+
+    // ── DATA SOURCE ──────────────────────────────────────────────────────────
+    setupDataSource() {
+        const select = document.getElementById('dsSourceType');
+        select?.addEventListener('change', () => this._toggleDsFields());
+
+        document.getElementById('btnSaveDataSource')?.addEventListener('click', () => this.saveDataSource());
+        document.getElementById('btnTestDataSource')?.addEventListener('click', () => this.testDataSource());
+    }
+
+    _toggleDsFields() {
+        const type = document.getElementById('dsSourceType')?.value || 'internal';
+        const pgFields = document.getElementById('dsPgFields');
+        const odooFields = document.getElementById('dsOdooFields');
+        if (pgFields) pgFields.style.display = (type === 'postgres_local' || type === 'postgres_railway') ? 'block' : 'none';
+        if (odooFields) odooFields.style.display = type === 'odoo' ? 'block' : 'none';
+        document.getElementById('dsTestResult').style.display = 'none';
+    }
+
+    _updateDsBadge(sourceType) {
+        const badge = document.getElementById('dsActiveBadge');
+        if (!badge) return;
+        const map = {
+            internal:        { text: '🗃️ BD Interna', bg: 'var(--accent-dim)', color: 'var(--accent)', border: 'rgba(79,142,247,.3)' },
+            postgres_local:  { text: '🐘 PostgreSQL Local', bg: 'rgba(52,211,153,.1)', color: '#34d399', border: 'rgba(52,211,153,.3)' },
+            postgres_railway: { text: '🚂 PostgreSQL Railway', bg: 'rgba(251,191,36,.1)', color: '#fbbf24', border: 'rgba(251,191,36,.3)' },
+            odoo:            { text: '🟣 Odoo JSON-2', bg: 'rgba(124,94,245,.12)', color: '#7c5ef5', border: 'rgba(124,94,245,.3)' },
+        };
+        const m = map[sourceType] || map.internal;
+        badge.textContent = m.text;
+        badge.style.background = m.bg;
+        badge.style.color = m.color;
+        badge.style.borderColor = m.border;
+    }
+
+    async loadDataSource() {
+        try {
+            const config = await this.api('GET', '/agent-data-source');
+            const select = document.getElementById('dsSourceType');
+            if (select) select.value = config.source_type || 'internal';
+
+            document.getElementById('dsPgConnString').value = config.pg_connection_string || '';
+            document.getElementById('dsOdooUrl').value = config.odoo_url || '';
+            document.getElementById('dsOdooDb').value = config.odoo_db || '';
+            document.getElementById('dsOdooApiKey').value = config.odoo_api_key || '';
+            document.getElementById('dsOdooUser').value = config.odoo_user || '';
+
+            this.activeSourceType = config.source_type || 'internal';
+            this._toggleDsFields();
+            this._updateDsBadge(config.source_type || 'internal');
+        } catch (err) {
+            this.activeSourceType = 'internal';
+            this._updateDsBadge('internal');
+        }
+    }
+
+    async saveDataSource() {
+        const sourceType = document.getElementById('dsSourceType')?.value || 'internal';
+        const payload = {
+            source_type: sourceType,
+            pg_connection_string: document.getElementById('dsPgConnString')?.value || '',
+            odoo_url: document.getElementById('dsOdooUrl')?.value || '',
+            odoo_db: document.getElementById('dsOdooDb')?.value || '',
+            odoo_api_key: document.getElementById('dsOdooApiKey')?.value || '',
+            odoo_user: document.getElementById('dsOdooUser')?.value || '',
+        };
+        try {
+            const res = await this.api('POST', '/agent-data-source/save', payload);
+            this.activeSourceType = sourceType;
+            this._updateDsBadge(sourceType);
+            this.toast(res.message || 'Configuración guardada');
+        } catch (err) {
+            this.toast(err.message, 'error');
+        }
+    }
+
+    async testDataSource() {
+        const sourceType = document.getElementById('dsSourceType')?.value || 'internal';
+        const resultEl = document.getElementById('dsTestResult');
+        const innerEl = resultEl?.querySelector('div');
+        resultEl.style.display = 'block';
+        innerEl.textContent = '⏳ Probando conexión...';
+        innerEl.style.background = 'var(--bg-input)';
+        innerEl.style.color = 'var(--text-2)';
+        innerEl.style.border = '1px solid var(--border)';
+
+        const payload = {
+            source_type: sourceType,
+            pg_connection_string: document.getElementById('dsPgConnString')?.value || '',
+            odoo_url: document.getElementById('dsOdooUrl')?.value || '',
+            odoo_db: document.getElementById('dsOdooDb')?.value || '',
+            odoo_api_key: document.getElementById('dsOdooApiKey')?.value || '',
+            odoo_user: document.getElementById('dsOdooUser')?.value || '',
+        };
+
+        try {
+            const res = await this.api('POST', '/agent-data-source/test', payload);
+            if (res.success) {
+                innerEl.textContent = `✅ ${res.message}`;
+                innerEl.style.background = 'rgba(52,211,153,.08)';
+                innerEl.style.color = '#34d399';
+                innerEl.style.border = '1px solid rgba(52,211,153,.3)';
+            } else {
+                innerEl.textContent = `❌ ${res.message}`;
+                innerEl.style.background = 'rgba(248,113,113,.08)';
+                innerEl.style.color = '#f87171';
+                innerEl.style.border = '1px solid rgba(248,113,113,.3)';
+            }
+        } catch (err) {
+            innerEl.textContent = `❌ Error: ${err.message}`;
+            innerEl.style.background = 'rgba(248,113,113,.08)';
+            innerEl.style.color = '#f87171';
+            innerEl.style.border = '1px solid rgba(248,113,113,.3)';
+        }
     }
 
     // ── PROMPTS ───────────────────────────────────────────────────────────────

@@ -55,6 +55,28 @@
         },
         "required": ["reason"]
       }
+    },
+    {
+      "name": "create_odoo_order",
+      "description": "Crea una requisición de compra o presupuesto borrador en Odoo con los productos que el cliente ha decidido comprar. Úsala UNICAMENTE después de que el usuario haya confirmado verbalmente de manera explícita y afirmativa que desea proceder con la compra de los productos y cantidades exactos que le recitaste.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "products_names": {
+            "type": "string",
+            "description": "Nombres de los productos a comprar separados por comas (ejemplo: 'Laptop Gamer ASUS, Teclado Mecánico RGB')"
+          },
+          "quantities": {
+            "type": "string",
+            "description": "Cantidades de cada producto en el mismo orden, separadas por comas (ejemplo: '2, 1')"
+          },
+          "customer_name": {
+            "type": "string",
+            "description": "Nombre del cliente en llamada si fue provisto"
+          }
+        },
+        "required": ["products_names", "quantities"]
+      }
     }
   ]
 }

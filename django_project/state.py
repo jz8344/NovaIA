@@ -18,6 +18,7 @@ from actions.lookup_extension import (
 from actions.lookup_inventory import (
     handle_lookup_inventory,
     set_worker as set_lookup_inv_worker,
+    set_db as set_lookup_inv_db,
 )
 from ai.inventory_worker import InventoryWorker
 from actions.transfer_call import (
@@ -25,6 +26,7 @@ from actions.transfer_call import (
     set_dependencies as set_transfer_deps,
 )
 from actions.end_call import handle_end_call
+from actions.create_odoo_order import handle_create_odoo_order
 from api.admin import set_dependencies as set_admin_deps
 
 from core.exchange_updater import ExchangeRateUpdater
@@ -54,6 +56,7 @@ async def init_resources():
     await seed_database(db)
 
     set_lookup_ext_db(db)
+    set_lookup_inv_db(db)
     worker = InventoryWorker(db)
     set_lookup_inv_worker(worker)
     set_transfer_deps(db, ami_client)
@@ -63,6 +66,7 @@ async def init_resources():
     function_registry.register("lookup_extension", handle_lookup_extension)
     function_registry.register("lookup_inventory", handle_lookup_inventory)
     function_registry.register("end_call", handle_end_call)
+    function_registry.register("create_odoo_order", handle_create_odoo_order)
     logger.info(f"Funciones registradas: {function_registry.registered_functions}")
 
     await ami_client.connect()

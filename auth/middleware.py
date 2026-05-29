@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
 from django_project.state import db
 
@@ -14,11 +16,12 @@ class AdminAuthMiddleware:
     def __call__(self, request):
         path = request.path
 
-        # Endpoints excluidos del middleware de autenticación
+        if path.startswith("/api/"):
+            request._dont_enforce_csrf_checks = True
+
         if path in ["/api/auth/login", "/api/auth/logout"]:
             return self.get_response(request)
 
-        # Validar cookies en rutas de API administrativas
         if path.startswith("/api/admin"):
             token = request.COOKIES.get("session_token")
             if not token:
@@ -30,7 +33,6 @@ class AdminAuthMiddleware:
                 response.delete_cookie("session_token", path="/")
                 return response
 
-            # Adjuntar usuario a la petición
             request.admin_user = user
 
             if path.startswith("/api/admin/users") and user.get("role") != "admin":

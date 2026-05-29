@@ -76,11 +76,82 @@ async def delete_extension(request, ext_id: int):
 
 # --- Inventario ---
 async def inventory_list_create(request):
+    from loguru import logger
     if request.method == "GET":
+        try:
+            source_type = "internal"
+            config = None
+            if _db:
+                config = await _db.get_agent_data_source(1)
+                if config:
+                    source_type = config.get("source_type", "internal")
+
+            if source_type == "odoo" and config:
+                odoo_url = config.get("odoo_url", "")
+                odoo_api_key = config.get("odoo_api_key", "")
+                odoo_db = config.get("odoo_db", "")
+                odoo_user = config.get("odoo_user", "")
+
+                if odoo_url and odoo_api_key:
+                    from ai.odoo_worker import OdooInventoryWorker
+                    worker = OdooInventoryWorker(
+                        base_url=odoo_url,
+                        api_key=odoo_api_key,
+                        db_name=odoo_db,
+                        odoo_user=odoo_user
+                    )
+                    
+                    fields = [
+                        "name", "default_code", "barcode",
+                        "list_price", "qty_available",
+                        "categ_id"
+                    ]
+                    
+                    odoo_products = await worker._search_read(
+                        model="product.product",
+                        domain=[["sale_ok", "=", True]],
+                        fields=fields,
+                        limit=100
+                    )
+                    
+                    formatted = []
+                    for idx, p in enumerate(odoo_products):
+                        categ_name = "General"
+                        categ = p.get("categ_id")
+                        if isinstance(categ, (list, tuple)) and len(categ) >= 2:
+                            categ_name = categ[1]
+                        elif isinstance(categ, str):
+                            categ_name = categ
+
+                        formatted.append({
+                            "id": p.get("id", idx + 1),
+                            "product_name": p.get("name", "Producto Odoo"),
+                            "description": f"SKU: {p.get('default_code') or '—'}" + (f" | Código de barras: {p.get('barcode')}" if p.get('barcode') else ""),
+                            "price": float(p.get("list_price", 0.0) or 0.0),
+                            "stock": int(p.get("qty_available", 0.0) or 0.0),
+                            "category": categ_name,
+                            "brand": "Odoo API",
+                            "color": "",
+                            "weight": "",
+                            "tags": "Odoo"
+                        })
+                    return JsonResponse(formatted, safe=False)
+        except Exception as e:
+            logger.error(f"Error cargando inventario Odoo para admin: {e}")
+
         data = await _db.get_all_inventory()
         return JsonResponse(data, safe=False)
     elif request.method == "POST":
         try:
+            source_type = "internal"
+            if _db:
+                config = await _db.get_agent_data_source(1)
+                if config:
+                    source_type = config.get("source_type", "internal")
+
+            if source_type == "odoo":
+                return JsonResponse({"detail": "El inventario de Odoo es de sólo lectura. Modifícalo directamente en Odoo."}, status=400)
+
             body = json.loads(request.body.decode("utf-8"))
             data = InventoryCreate(**body)
             await _db.add_inventory_item(
@@ -96,6 +167,15 @@ async def inventory_list_create(request):
 
 async def delete_inventory_item(request, item_id: int):
     if request.method == "DELETE":
+        source_type = "internal"
+        if _db:
+            config = await _db.get_agent_data_source(1)
+            if config:
+                source_type = config.get("source_type", "internal")
+
+        if source_type == "odoo":
+            return JsonResponse({"detail": "El inventario de Odoo es de sólo lectura."}, status=400)
+
         await _db.delete_inventory_item(item_id)
         return JsonResponse({"success": True})
     return HttpResponse(status=405)
@@ -505,5 +585,130 @@ async def delete_user(request, user_id: int):
         except Exception as e:
             return JsonResponse({"detail": str(e)}, status=400)
 
+    return HttpResponse(status=405)
+
+
+# --- Agent Data Source ---
+class DataSourceConfig(BaseModel):
+    source_type: str
+    pg_connection_string: Optional[str] = ""
+    odoo_url: Optional[str] = ""
+    odoo_db: Optional[str] = ""
+    odoo_api_key: Optional[str] = ""
+    odoo_user: Optional[str] = ""
+
+
+def _mask_sensitive(value: str, visible_chars: int = 4) -> str:
+    if not value or len(value) <= visible_chars:
+        return "****"
+    return value[:visible_chars] + "****" + value[-2:]
+
+
+async def get_agent_data_source(request):
+    if request.method == "GET":
+        user_id = request.admin_user["id"]
+        config = await _db.get_agent_data_source(user_id)
+        if not config:
+            return JsonResponse({
+                "source_type": "internal",
+                "pg_connection_string": "",
+                "odoo_url": "",
+                "odoo_db": "",
+                "odoo_api_key": "",
+                "odoo_user": "",
+            })
+        return JsonResponse({
+            "source_type": config.get("source_type", "internal"),
+            "pg_connection_string": _mask_sensitive(config.get("pg_connection_string", "")) if config.get("pg_connection_string") else "",
+            "odoo_url": config.get("odoo_url", ""),
+            "odoo_db": config.get("odoo_db", ""),
+            "odoo_api_key": _mask_sensitive(config.get("odoo_api_key", "")) if config.get("odoo_api_key") else "",
+            "odoo_user": config.get("odoo_user", ""),
+        })
+    return HttpResponse(status=405)
+
+
+async def save_agent_data_source(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+            data = DataSourceConfig(**body)
+            user_id = request.admin_user["id"]
+
+            existing = await _db.get_agent_data_source(user_id)
+            pg_conn = data.pg_connection_string or ""
+            odoo_key = data.odoo_api_key or ""
+            if pg_conn and "****" in pg_conn and existing:
+                pg_conn = existing.get("pg_connection_string", "")
+            if odoo_key and "****" in odoo_key and existing:
+                odoo_key = existing.get("odoo_api_key", "")
+
+            await _db.save_agent_data_source(
+                user_id=user_id,
+                source_type=data.source_type,
+                pg_connection_string=pg_conn,
+                odoo_url=data.odoo_url or "",
+                odoo_db=data.odoo_db or "",
+                odoo_api_key=odoo_key,
+                odoo_user=data.odoo_user or "",
+            )
+            return JsonResponse({"success": True, "message": f"Fuente de datos '{data.source_type}' configurada exitosamente"})
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+    return HttpResponse(status=405)
+
+
+async def test_agent_data_source(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+            source_type = body.get("source_type", "internal")
+            user_id = request.admin_user["id"]
+
+            if source_type == "internal":
+                connected = _db._db is not None
+                if connected:
+                    return JsonResponse({"success": True, "message": "Base de datos interna conectada correctamente"})
+                return JsonResponse({"success": False, "message": "Base de datos interna desconectada"})
+
+            if source_type in ("postgres_local", "postgres_railway"):
+                pg_conn = body.get("pg_connection_string", "")
+                if pg_conn and "****" in pg_conn:
+                    existing = await _db.get_agent_data_source(user_id)
+                    if existing:
+                        pg_conn = existing.get("pg_connection_string", "")
+                if not pg_conn:
+                    return JsonResponse({"success": False, "message": "URL de conexión PostgreSQL requerida"})
+                try:
+                    import asyncpg
+                    conn = await asyncpg.connect(pg_conn, timeout=10)
+                    version = await conn.fetchval("SELECT version()")
+                    await conn.close()
+                    return JsonResponse({"success": True, "message": f"Conexión PostgreSQL exitosa. {version[:50]}"})
+                except Exception as e:
+                    return JsonResponse({"success": False, "message": f"Error PostgreSQL: {str(e)[:200]}"})
+
+            if source_type == "odoo":
+                odoo_url = body.get("odoo_url", "")
+                odoo_api_key = body.get("odoo_api_key", "")
+                if odoo_api_key and "****" in odoo_api_key:
+                    existing = await _db.get_agent_data_source(user_id)
+                    if existing:
+                        odoo_api_key = existing.get("odoo_api_key", "")
+                if not odoo_url or not odoo_api_key:
+                    return JsonResponse({"success": False, "message": "URL de Odoo y API Key son requeridos"})
+                from ai.odoo_worker import OdooInventoryWorker
+                worker = OdooInventoryWorker(
+                    base_url=odoo_url,
+                    api_key=odoo_api_key,
+                    db_name=body.get("odoo_db", ""),
+                    odoo_user=body.get("odoo_user", ""),
+                )
+                result = await worker.test_connection()
+                return JsonResponse(result)
+
+            return JsonResponse({"success": False, "message": f"Tipo de fuente '{source_type}' no soportado"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
     return HttpResponse(status=405)
 

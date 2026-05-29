@@ -130,6 +130,21 @@ CREATE TABLE IF NOT EXISTS admin_agents (
     PRIMARY KEY (user_id, agent_id),
     FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS agent_data_source (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    source_type TEXT NOT NULL DEFAULT 'internal',
+    pg_connection_string TEXT DEFAULT '',
+    odoo_url TEXT DEFAULT '',
+    odoo_db TEXT DEFAULT '',
+    odoo_api_key TEXT DEFAULT '',
+    odoo_user TEXT DEFAULT '',
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
 """
 
 
@@ -209,6 +224,21 @@ CREATE TABLE IF NOT EXISTS admin_agents (
     name TEXT NOT NULL,
     system_prompt TEXT NOT NULL,
     PRIMARY KEY (user_id, agent_id),
+    FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS agent_data_source (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE,
+    source_type TEXT NOT NULL DEFAULT 'internal',
+    pg_connection_string TEXT DEFAULT '',
+    odoo_url TEXT DEFAULT '',
+    odoo_db TEXT DEFAULT '',
+    odoo_api_key TEXT DEFAULT '',
+    odoo_user TEXT DEFAULT '',
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES admin_users(id) ON DELETE CASCADE
 );
 """

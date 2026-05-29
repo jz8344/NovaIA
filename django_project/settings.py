@@ -16,13 +16,16 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
 ]
 
-# Añadir dinámicamente el dominio asignado por Railway si está presente
 railway_url = os.environ.get("RAILWAY_STATIC_URL")
 if railway_url:
     if not railway_url.startswith("http"):
         CSRF_TRUSTED_ORIGINS.append(f"https://{railway_url}")
     else:
         CSRF_TRUSTED_ORIGINS.append(railway_url)
+
+railway_public = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
+if railway_public:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{railway_public}")
 
 
 INSTALLED_APPS = [

@@ -678,3 +678,55 @@ class DatabaseManager:
         sql = "SELECT * FROM admin_agents WHERE user_id = ? ORDER BY agent_id"
         return await self.fetch_all(sql, (user_id,))
 
+    # ── AGENT DATA SOURCE ──────────────────────────────────────────────────
+
+    async def get_agent_data_source(self, user_id: int) -> dict | None:
+        sql = "SELECT * FROM agent_data_source WHERE user_id = ?"
+        row = await self.fetch_one(sql, (user_id,))
+        return row if row else None
+
+    async def save_agent_data_source(self, user_id: int, source_type: str,
+                                      pg_connection_string: str = "",
+                                      odoo_url: str = "", odoo_db: str = "",
+                                      odoo_api_key: str = "", odoo_user: str = ""):
+        from datetime import datetime
+        now = datetime.now()
+        if self.db_type == "postgres":
+            sql = """
+                INSERT INTO agent_data_source
+                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    source_type = EXCLUDED.source_type,
+                    pg_connection_string = EXCLUDED.pg_connection_string,
+                    odoo_url = EXCLUDED.odoo_url,
+                    odoo_db = EXCLUDED.odoo_db,
+                    odoo_api_key = EXCLUDED.odoo_api_key,
+                    odoo_user = EXCLUDED.odoo_user,
+                    updated_at = EXCLUDED.updated_at
+            """
+            async with self._db.acquire() as conn:
+                await conn.execute(sql, user_id, source_type, pg_connection_string,
+                                   odoo_url, odoo_db, odoo_api_key, odoo_user, now)
+        else:
+            sql = """
+                INSERT INTO agent_data_source
+                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    source_type = excluded.source_type,
+                    pg_connection_string = excluded.pg_connection_string,
+                    odoo_url = excluded.odoo_url,
+                    odoo_db = excluded.odoo_db,
+                    odoo_api_key = excluded.odoo_api_key,
+                    odoo_user = excluded.odoo_user,
+                    updated_at = excluded.updated_at
+            """
+            await self._db.execute(sql, (user_id, source_type, pg_connection_string,
+                                          odoo_url, odoo_db, odoo_api_key, odoo_user, now))
+            await self._db.commit()
+        logger.info(f"Agent data source guardada para user_id={user_id}, tipo={source_type}")
+
+    async def delete_agent_data_source(self, user_id: int):
+        await self.execute("DELETE FROM agent_data_source WHERE user_id = ?", (user_id,))
+

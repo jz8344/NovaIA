@@ -656,6 +656,7 @@
         <div class="tabs" id="adminTabs">
             <button class="tab active" data-tab="extensions">📞 Extensiones</button>
             <button class="tab" data-tab="inventory">📦 Inventario</button>
+            <button class="tab" data-tab="datasource">🗄️ Base de Datos</button>
             <button class="tab" data-tab="prompts">🧠 System Prompt</button>
             <button class="tab" data-tab="tools">⚙️ Herramientas</button>
             <button class="tab" data-tab="sessions">📊 Sesiones</button>
@@ -707,7 +708,7 @@
 
         <!-- ── INVENTORY ── -->
         <div class="panel" id="panel-inventory">
-            <div class="card">
+            <div class="card" id="cardAddProduct">
                 <div class="card-title">Agregar Producto</div>
                 <div class="card-sub">Añade un producto al catálogo consultable por el agente</div>
                 <div class="form-grid">
@@ -753,6 +754,73 @@
                         <tr><td colspan="6" class="empty-state">Cargando inventario…</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- ── DATA SOURCE ── -->
+        <div class="panel" id="panel-datasource">
+            <div class="card">
+                <div class="card-title">Fuente de Datos del Agente</div>
+                <div class="card-sub">
+                    Selecciona qué base de datos utilizará Nova para consultar inventario durante las llamadas.
+                    Las credenciales se almacenan de forma segura y no se exponen en logs.
+                </div>
+
+                <div class="source-bar" style="margin-bottom:20px">
+                    <span class="source-label">FUENTE ACTIVA</span>
+                    <span class="source-badge" id="dsActiveBadge">⏳ Cargando...</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px">
+                    <label>Tipo de Base de Datos</label>
+                    <select id="dsSourceType" style="max-width:400px">
+                        <option value="internal">🗃️ BD Interna (SQLite / PostgreSQL del sistema)</option>
+                        <option value="postgres_local">🐘 PostgreSQL Local (conexión directa)</option>
+                        <option value="postgres_railway">🚂 PostgreSQL Railway (conexión externa)</option>
+                        <option value="odoo">🟣 Odoo (JSON-2 API)</option>
+                    </select>
+                </div>
+
+                <!-- PostgreSQL fields -->
+                <div id="dsPgFields" style="display:none">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column:1/-1">
+                            <label>URL de Conexión PostgreSQL</label>
+                            <input type="password" id="dsPgConnString" placeholder="postgresql://user:pass@host:5432/dbname" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Odoo fields -->
+                <div id="dsOdooFields" style="display:none">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>URL de Odoo</label>
+                            <input type="text" id="dsOdooUrl" placeholder="https://mi-empresa.odoo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre de Base de Datos</label>
+                            <input type="text" id="dsOdooDb" placeholder="mi-empresa">
+                        </div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" id="dsOdooApiKey" placeholder="Tu API Key de Odoo" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Usuario / Email (opcional)</label>
+                            <input type="text" id="dsOdooUser" placeholder="admin@mi-empresa.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:20px">
+                    <button class="btn-primary" id="btnSaveDataSource">💾 Guardar Configuración</button>
+                    <button class="btn-secondary" id="btnTestDataSource">🔌 Probar Conexión</button>
+                </div>
+
+                <div id="dsTestResult" style="margin-top:14px;display:none">
+                    <div style="padding:12px 16px;border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font-mono)"></div>
+                </div>
             </div>
         </div>
 
@@ -1361,6 +1429,6 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
 </script>
 
 <script src="/static/js/neural-bg.js"></script>
-<script src="/static/js/admin.js?v=1.0.2"></script>
+<script src="/static/js/admin.js?v=1.1.0"></script>
 </body>
 </html>
