@@ -556,10 +556,12 @@ class NovaAdmin {
             r.addEventListener('change', () => this.updateBuilderPreview());
         });
 
-        document.getElementById('btnSaveBuilder')?.addEventListener('click', () => this.saveBuilderPrompt());
+        document.getElementById('btnActivateBuilder')?.addEventListener('click', () => this.saveBuilderPrompt());
+        document.getElementById('btnSaveBuilderAgent')?.addEventListener('click', () => this.saveBuilderAgent());
         document.getElementById('btnActivateRaw')?.addEventListener('click', () => this.saveRawPrompt());
 
         this.updateBuilderPreview();
+        this.renderBuilderAgentCards();
     }
 
     updateSourceBadge(mode) {
@@ -654,6 +656,7 @@ class NovaAdmin {
             }
 
             await this.renderAgentCards();
+            await this.renderBuilderAgentCards();
 
             if (mode === 'agent' && this._selectedAgentId && this._selectedAgentSource) {
                 this.selectAgent(this._selectedAgentId, this._selectedAgentSource);
@@ -698,8 +701,82 @@ class NovaAdmin {
         try {
             await this.api('POST', '/prompt-config', payload);
             this.updateSourceBadge('builder');
-            this.toast('✅ Prompt del Constructor guardado y activado.');
+            this.toast('✅ Prompt activado.');
         } catch (err) { this.toast(err.message, 'error'); }
+    }
+
+    async saveBuilderAgent() {
+        const nameInput = document.getElementById('b-agent-name');
+        const profileName = (nameInput?.value || '').trim();
+        if (!profileName) {
+            nameInput?.focus();
+            nameInput?.style && (nameInput.style.borderColor = 'rgba(248,113,113,.6)');
+            this.toast('Escribe un nombre para el agente antes de guardar', 'error');
+            return;
+        }
+        const cfg = this.getBuilderConfig();
+        const traits = [
+            { key: 'amabilidad', label: 'Amabilidad', value: 7 },
+            { key: 'formalidad', label: 'Formalidad', value: 5 },
+            { key: 'paciencia', label: 'Paciencia', value: 7 },
+            { key: 'proactividad', label: 'Proactividad', value: 7 },
+            { key: 'detalle', label: 'Detalle', value: 5 },
+            { key: 'empatia', label: 'Empatía', value: 7 },
+            { key: 'persuasion', label: 'Persuasión', value: 6 },
+            { key: 'concision', label: 'Concisión', value: 6 },
+        ];
+        try {
+            await this.api('POST', '/custom-agents', { profile_name: profileName, builder: cfg, traits, _source: 'builder' });
+            this.toast(`💾 Agente "${profileName}" guardado en la base de datos.`);
+            if (nameInput) { nameInput.value = ''; nameInput.style.borderColor = ''; }
+            await this.renderBuilderAgentCards();
+        } catch (err) { this.toast(err.message, 'error'); }
+    }
+
+    async renderBuilderAgentCards() {
+        const container = document.getElementById('builderSavedAgents');
+        if (!container) return;
+        let agents = [];
+        try { agents = await this.api('GET', '/custom-agents'); } catch { agents = []; }
+        if (!agents.length) {
+            container.innerHTML = '<div style="color:var(--text-2);font-size:.8rem;padding:8px 0;">Aún no has guardado ningún agente.</div>';
+            return;
+        }
+        container.innerHTML = agents.map(a => `
+            <div class="agent-card custom${this._selectedBuilderAgent === a.id ? ' selected' : ''}" data-bid="${a.id}" style="cursor:pointer;position:relative;min-width:120px;max-width:160px;">
+                <button class="agent-card-delete" data-bdel="${a.id}" title="Eliminar" style="position:absolute;top:6px;right:6px;z-index:2;">✕</button>
+                <span class="agent-card-badge">Guardado</span>
+                <span class="agent-card-icon">🧩</span>
+                <span class="agent-card-name">${a.profile_name || 'Sin nombre'}</span>
+                <span class="agent-card-desc">${a.builder?.identity?.role || 'Constructor Visual'}</span>
+            </div>
+        `).join('');
+        container.querySelectorAll('[data-bid]').forEach(card => {
+            card.addEventListener('click', e => {
+                if (e.target.closest('[data-bdel]')) return;
+                const agent = agents.find(a => a.id === card.dataset.bid);
+                if (agent?.builder) {
+                    this.restoreBuilder(agent.builder);
+                    this._selectedBuilderAgent = agent.id;
+                    const nameInput = document.getElementById('b-agent-name');
+                    if (nameInput) nameInput.value = agent.profile_name || '';
+                    this.toast(`📂 Agente "${agent.profile_name}" cargado.`);
+                    this.renderBuilderAgentCards();
+                }
+            });
+        });
+        container.querySelectorAll('[data-bdel]').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.stopPropagation();
+                if (!confirm('¿Eliminar este agente guardado?')) return;
+                try {
+                    await this.api('DELETE', `/custom-agents/${btn.dataset.bdel}`);
+                    if (this._selectedBuilderAgent === btn.dataset.bdel) this._selectedBuilderAgent = null;
+                    this.toast('Agente eliminado.');
+                    await this.renderBuilderAgentCards();
+                } catch (err) { this.toast(err.message, 'error'); }
+            });
+        });
     }
 
     async saveRawPrompt() {

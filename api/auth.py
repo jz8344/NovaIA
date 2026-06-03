@@ -13,13 +13,17 @@ async def login_handler(request):
 
     try:
         body = json.loads(request.body.decode("utf-8"))
-        username = body.get("username", "").strip()
+        identifier = body.get("username", "").strip()
         password = body.get("password", "").strip()
 
-        if not username or not password:
+        if not identifier or not password:
             return JsonResponse({"detail": "Usuario y contraseña son requeridos."}, status=400)
 
-        user = await db.get_user_by_username(username)
+        if "@" in identifier:
+            user = await db.get_user_by_email(identifier)
+        else:
+            user = await db.get_user_by_username(identifier)
+
         if not user:
             return JsonResponse({"detail": "Credenciales inválidas."}, status=401)
 

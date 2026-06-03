@@ -604,6 +604,10 @@ class DatabaseManager:
         sql = "SELECT * FROM admin_users WHERE username = ?"
         return await self.fetch_one(sql, (username,))
 
+    async def get_user_by_email(self, email: str) -> dict:
+        sql = "SELECT * FROM admin_users WHERE email = ?"
+        return await self.fetch_one(sql, (email,))
+
     async def create_admin_user(self, username: str, password_plain: str, email: str = "", role: str = "user"):
         from auth.utils import hash_password
         password_hash = hash_password(password_plain)

@@ -937,18 +937,6 @@
                                 <label class="check-card" title="El agente puede guiar al usuario en pasos básicos de soporte técnico antes de transferir."><input type="checkbox" value="support"><span class="check-box"></span>🔧 Soporte técnico</label>
                                 <label class="check-card" title="El agente puede responder FAQs predefinidas o consultar una base de conocimiento."><input type="checkbox" value="faq"><span class="check-box"></span>❓ Preguntas frecuentes</label>
                                 <label class="check-card" title="El agente informa sobre estatus de pedidos o solicitudes si tiene acceso al sistema."><input type="checkbox" value="order_status"><span class="check-box"></span>📦 Estado de pedidos</label>
-                            </div>
-                        </div>
-
-                        <!-- Seguridad -->
-                        <div class="section">
-                            <div class="section-title">🔒 Reglas de Seguridad</div>
-                            <div class="checkbox-grid">
-                                <label class="check-card" title="El agente no puede salirse de su personaje. Si alguien pide que actúe diferente, rechazará amablemente."><input type="checkbox" value="character_lock" checked><span class="check-box"></span>🎭 Bloqueo de personaje</label>
-                                <label class="check-card" title="El agente NO inventará extensiones, nombres o productos que no existan en la base de datos."><input type="checkbox" value="no_hallucinations" checked><span class="check-box"></span>🚫 Sin alucinaciones</label>
-                                <label class="check-card" title="Antes de transferir, el agente verifica que el departamento encontrado coincida con lo solicitado."><input type="checkbox" value="cross_validation"><span class="check-box"></span>🔍 Validar departamento</label>
-                                <label class="check-card" title="Si la búsqueda falla, el agente intenta con variaciones del término e informa al usuario si no encuentra nada."><input type="checkbox" value="synonym_search"><span class="check-box"></span>🔤 Búsqueda flexible</label>
-                                <label class="check-card" title="El agente nunca comparte datos personales de empleados (email, teléfono personal) con el usuario."><input type="checkbox" value="no_personal_data"><span class="check-box"></span>🔐 No divulgar datos personales</label>
                                 <label class="check-card" title="El agente finaliza la llamada de forma amigable si detecta intención de abuso o lenguaje inapropiado."><input type="checkbox" value="abuse_protection"><span class="check-box"></span>🛡️ Protección contra abuso</label>
                             </div>
                         </div>
@@ -962,9 +950,19 @@
                             </div>
                         </div>
 
-                        <button class="btn-primary btn-full" id="btnSaveBuilder" style="margin-top:22px">
-                            💾 Guardar y Activar Prompt
-                        </button>
+                        <div style="margin-top:22px">
+                            <div style="margin-bottom:10px">
+                                <input type="text" id="b-agent-name" placeholder="Nombre del agente (ej: Nova Inttelec)" style="width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#e3e3e3;font-size:.88rem;padding:10px 14px;outline:none;transition:border-color .2s;">
+                            </div>
+                            <div style="display:flex;gap:10px">
+                                <button class="btn-primary" id="btnActivateBuilder" style="flex:1">
+                                    🚀 Activar
+                                </button>
+                                <button class="btn-secondary" id="btnSaveBuilderAgent" style="min-width:140px">
+                                    💾 Guardar Agente
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Preview column -->
@@ -976,8 +974,15 @@
                             </span>
                             <button class="btn-icon" id="btnCopyPreview" title="Copiar">📋</button>
                         </div>
-                        <textarea id="promptPreview" readonly rows="40"
+                        <textarea id="promptPreview" readonly rows="28"
                             placeholder="El prompt generado aparecerá aquí en tiempo real…"></textarea>
+
+                        <div style="margin-top:16px">
+                            <div style="font-size:.75rem;font-weight:600;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">
+                                🧩 Agentes Guardados
+                            </div>
+                            <div id="builderSavedAgents" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                        </div>
                     </div>
 
                 </div>

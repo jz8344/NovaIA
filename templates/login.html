@@ -1,305 +1,460 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova — Iniciar Sesión</title>
+    <meta name="description" content="Panel de administración Nova AI. Inicia sesión para gestionar tu asistente de voz inteligente.">
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg-base: #000000;
-            --text-1: #e3e3e3;
-            --text-2: #8e959f;
-            --glass-bg: rgba(20, 20, 25, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #a8c7fa;
-            --accent-glow: #669df6;
-            --danger: #f28b82;
-            --radius-card: 28px;
-            --radius-btn: 20px;
-            --radius-input: 16px;
-            --font-display: 'Google Sans', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            --transition: 250ms cubic-bezier(0.2, 0, 0, 1);
+            --bg:         #05070f;
+            --surface:    rgba(255,255,255,0.04);
+            --border:     rgba(255,255,255,0.08);
+            --border-focus: rgba(99,179,237,0.6);
+            --text-1:     #f0f4ff;
+            --text-2:     #8892a4;
+            --text-3:     #4a5568;
+            --accent:     #4f8ef7;
+            --accent-2:   #7c3aed;
+            --danger:     #fc8181;
+            --success:    #68d391;
+            --font:       'Inter', system-ui, sans-serif;
+            --ease:       cubic-bezier(0.16,1,0.3,1);
         }
 
-        body {
-            font-family: var(--font-body);
-            background: var(--bg-base);
+        html, body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg);
             color: var(--text-1);
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        /* ── CANVAS DE FONDO ── */
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% -10%, rgba(79,142,247,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 110%, rgba(124,58,237,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 60% 50%, rgba(16,185,129,0.06) 0%, transparent 50%),
+                #05070f;
+        }
+
+        .grid-lines {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%);
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.55;
+            z-index: 0;
+        }
+        .orb-1 { width: 55vw; height: 55vw; top: -20%; left: -15%; background: radial-gradient(circle, #1e3a8a, transparent 70%); animation: drift 22s var(--ease) infinite alternate; }
+        .orb-2 { width: 40vw; height: 40vw; bottom: -20%; right: -10%; background: radial-gradient(circle, #4c1d95, transparent 70%); animation: drift 28s var(--ease) infinite alternate-reverse; }
+        .orb-3 { width: 25vw; height: 25vw; top: 40%; left: 55%; background: radial-gradient(circle, #065f46, transparent 70%); animation: drift 18s var(--ease) infinite alternate; }
+
+        @keyframes drift {
+            from { transform: translate(0,0) scale(1); }
+            to   { transform: translate(4vw, -6vh) scale(1.12); }
+        }
+
+        /* ── LAYOUT ── */
+        .page {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            position: relative;
+            padding: 24px;
         }
 
-        /* Anti-gravity animated background */
-        .ambient {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #1a1a24 0%, #000000 80%);
-        }
-
-        .mesh-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: antiGravity 20s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
-        }
-
-        .blob-1 { width: 50vw; height: 50vw; top: -10%; left: -10%; background: #2f2a5c; animation-delay: -5s; }
-        .blob-2 { width: 40vw; height: 40vw; bottom: -20%; right: -10%; background: #1b3d5c; animation-duration: 25s; }
-        .blob-3 { width: 30vw; height: 30vw; top: 40%; left: 60%; background: #3d2247; animation-delay: -12s; animation-duration: 30s; }
-
-        .anti-gravity-particles {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
-                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
-                radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-                radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
-            background-size: 200px 200px;
-            animation: driftUp 40s linear infinite;
-            opacity: 0.3;
-        }
-
-        @keyframes antiGravity {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(5vw, -5vh) scale(1.1) rotate(10deg); }
-            100% { transform: translate(-5vw, 10vh) scale(0.9) rotate(-5deg); }
-        }
-
-        @keyframes driftUp {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-200px); }
-        }
-
-        /* Login Card */
-        .login-container {
-            position: relative;
-            z-index: 1;
+        /* ── CARD ── */
+        .card {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            perspective: 1000px;
+            max-width: 420px;
+            background: rgba(10,14,26,0.75);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 44px 40px 40px;
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.05) inset,
+                0 32px 80px rgba(0,0,0,0.6),
+                0 0 60px rgba(79,142,247,0.06);
+            animation: rise 0.7s var(--ease) both;
         }
 
-        .login-card {
-            width: 100%;
-            max-width: 380px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-card);
-            padding: 40px;
-            backdrop-filter: blur(40px) saturate(150%);
-            -webkit-backdrop-filter: blur(40px) saturate(150%);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transform-style: preserve-3d;
-            animation: levitate 6s ease-in-out infinite alternate;
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes levitate {
-            0% { transform: translateY(0px); }
-            100% { transform: translateY(-10px); }
-        }
-
-        .logo-header {
+        /* ── HEADER ── */
+        .header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 32px;
+            gap: 16px;
+            margin-bottom: 36px;
             text-align: center;
         }
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
+        .logo-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(79,142,247,0.2), rgba(124,58,237,0.2));
+            border: 1px solid rgba(79,142,247,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 24px rgba(79,142,247,0.2);
+        }
+
+        .logo-ring svg { width: 28px; height: 28px; }
+
+        .brand-name {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, #e0eaff 0%, #a8c7fa 50%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .brand-sub {
+            font-size: 0.82rem;
+            color: var(--text-2);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-text { font-size: 0.75rem; color: var(--text-3); white-space: nowrap; }
+
+        /* ── FORM ── */
+        .form-field {
             margin-bottom: 16px;
         }
 
-        .logo-title {
-            font-family: var(--font-display);
+        .field-label {
+            display: block;
+            font-size: 0.78rem;
             font-weight: 500;
-            font-size: 1.8rem;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fff, #a8c7fa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-2);
+            margin-bottom: 7px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
+        .input-wrap {
+            position: relative;
         }
 
-        .form-group input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-input);
-            color: var(--text-1);
-            font-family: var(--font-body);
-            font-size: 1rem;
-            padding: 16px;
-            outline: none;
+        .input-wrap input {
             width: 100%;
-            transition: var(--transition);
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-1);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            padding: 13px 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
 
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+        .input-wrap input:focus {
+            border-color: var(--border-focus);
+            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 0 3px rgba(99,179,237,0.12);
         }
 
-        .form-group input:focus {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.15);
+        .input-wrap input::placeholder {
+            color: var(--text-3);
         }
 
-        .btn-primary {
+        .input-wrap.has-icon input {
+            padding-right: 46px;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            right: 13px;
+            transform: translateY(-50%);
+        }
+
+        .btn-eye {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-3);
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-btn);
-            background: var(--accent);
-            color: #0b111a;
-            font-family: var(--font-display);
-            font-weight: 500;
-            font-size: 1rem;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 12px;
+            border-radius: 6px;
+            transition: color 0.15s;
         }
+        .btn-eye:hover { color: var(--text-2); }
+        .btn-eye svg { width: 18px; height: 18px; }
 
-        .btn-primary:hover {
-            box-shadow: 0 0 24px rgba(168, 199, 250, 0.4);
-            transform: scale(1.02);
-            background: #d3e2fe;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .login-error {
-            color: var(--danger);
-            font-size: 0.85rem;
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(242, 139, 130, 0.1);
-            border: 1px solid rgba(242, 139, 130, 0.2);
+        /* ── ERROR ── */
+        .error-box {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(252,129,129,0.08);
+            border: 1px solid rgba(252,129,129,0.2);
+            border-radius: 10px;
+            padding: 11px 14px;
             margin-bottom: 20px;
-            text-align: center;
+            font-size: 0.84rem;
+            color: var(--danger);
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
+        .error-box.visible { display: flex; }
 
         @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-            40%, 60% { transform: translate3d(3px, 0, 0); }
+            10%, 90% { transform: translate3d(-1px,0,0); }
+            20%, 80% { transform: translate3d(2px,0,0); }
+            30%, 50%, 70% { transform: translate3d(-3px,0,0); }
+            40%, 60% { transform: translate3d(3px,0,0); }
+        }
+
+        /* ── SUBMIT ── */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: #fff;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            margin-top: 8px;
+            box-shadow: 0 4px 20px rgba(79,142,247,0.3);
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(79,142,247,0.4);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .btn-submit .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer-note {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-3);
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 32px 24px 28px; }
         }
     </style>
 </head>
 <body>
-    <div class="ambient">
-        <div class="mesh-blob blob-1"></div>
-        <div class="mesh-blob blob-2"></div>
-        <div class="mesh-blob blob-3"></div>
-        <div class="anti-gravity-particles"></div>
-    </div>
+    <div class="bg"></div>
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-header">
-                <svg class="logo-icon" viewBox="0 0 34 34" fill="none">
-                    <circle cx="17" cy="17" r="15.5" stroke="url(#g-nova)" stroke-width="2" fill="none"/>
-                    <path d="M12 22V12l10 5-10 5z" fill="url(#g-nova)"/>
-                    <defs>
-                        <linearGradient id="g-nova" x1="0" y1="0" x2="34" y2="34">
-                            <stop offset="0%" stop-color="#a8c7fa"/>
-                            <stop offset="100%" stop-color="#ffffff"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
-                <div class="logo-title">Nova</div>
+    <div class="page">
+        <div class="card">
+
+            <div class="header">
+                <div class="logo-ring">
+                    <svg viewBox="0 0 28 28" fill="none">
+                        <circle cx="14" cy="14" r="12.5" stroke="url(#g1)" stroke-width="1.5"/>
+                        <path d="M10 19V9l10 5-10 5z" fill="url(#g1)"/>
+                        <defs>
+                            <linearGradient id="g1" x1="0" y1="0" x2="28" y2="28">
+                                <stop offset="0%" stop-color="#a8c7fa"/>
+                                <stop offset="100%" stop-color="#c4b5fd"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-name">Nova</div>
+                    <div class="brand-sub">Panel de Administración</div>
+                </div>
             </div>
 
-            <div id="loginError" class="login-error" style="display: none;"></div>
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">Inicia sesión para continuar</span>
+                <div class="divider-line"></div>
+            </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <input type="text" id="username" autocomplete="username" required placeholder="User">
+            <div id="loginError" class="error-box" role="alert">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="loginErrorMsg"></span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+                <div class="form-field">
+                    <label class="field-label" for="identifier">Usuario o correo electrónico</label>
+                    <div class="input-wrap">
+                        <input
+                            type="text"
+                            id="identifier"
+                            name="identifier"
+                            autocomplete="username"
+                            required
+                            placeholder="admin o correo@empresa.com"
+                            spellcheck="false"
+                            autocapitalize="none"
+                        >
+                    </div>
                 </div>
-                <div class="form-group">
-                    <input type="password" id="password" autocomplete="current-password" required placeholder="Password">
+
+                <div class="form-field">
+                    <label class="field-label" for="password">Contraseña</label>
+                    <div class="input-wrap has-icon">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="current-password"
+                            required
+                            placeholder="••••••••"
+                        >
+                        <span class="input-icon">
+                            <button type="button" class="btn-eye" id="btnTogglePwd" aria-label="Mostrar contraseña">
+                                <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </span>
+                    </div>
                 </div>
-                <button type="submit" id="btnLogin" class="btn-primary">Continue</button>
+
+                <button type="submit" id="btnLogin" class="btn-submit">
+                    Iniciar sesión
+                </button>
             </form>
+
+            <div class="footer-note">
+                Acceso restringido — Solo administradores
+            </div>
+
         </div>
     </div>
 
     <script>
+        const pwdInput  = document.getElementById('password');
+        const eyeBtn    = document.getElementById('btnTogglePwd');
+        const eyeIcon   = document.getElementById('eyeIcon');
+
+        const EYE_OPEN  = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+        const EYE_SLASH = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+        eyeBtn.addEventListener('click', () => {
+            const show = pwdInput.type === 'password';
+            pwdInput.type = show ? 'text' : 'password';
+            eyeIcon.innerHTML = show ? EYE_SLASH : EYE_OPEN;
+            eyeBtn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+
         async function handleLogin(event) {
             event.preventDefault();
-            const btn = document.getElementById("btnLogin");
-            const errDiv = document.getElementById("loginError");
-            const uInput = document.getElementById("username");
-            const pInput = document.getElementById("password");
+            const btn       = document.getElementById('btnLogin');
+            const errBox    = document.getElementById('loginError');
+            const errMsg    = document.getElementById('loginErrorMsg');
+            const identifier = document.getElementById('identifier').value.trim();
 
             btn.disabled = true;
-            btn.innerText = "Ingresando...";
-            errDiv.style.display = "none";
+            btn.innerHTML = '<span class="spinner"></span>Ingresando…';
+            errBox.classList.remove('visible');
 
             try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: uInput.value.trim(),
-                        password: pInput.value.trim()
+                        username: identifier,
+                        password: pwdInput.value
                     })
                 });
 
                 const data = await response.json();
                 if (response.ok && data.success) {
+                    btn.innerHTML = '✓ Accediendo…';
                     window.location.reload();
                 } else {
-                    errDiv.innerText = data.detail || "Error al iniciar sesión.";
-                    errDiv.style.display = "block";
-                    errDiv.style.animation = 'none';
-                    errDiv.offsetHeight;
-                    errDiv.style.animation = null;
+                    errMsg.textContent = data.detail || 'Credenciales incorrectas. Intenta de nuevo.';
+                    errBox.classList.remove('visible');
+                    void errBox.offsetWidth;
+                    errBox.classList.add('visible');
                 }
-            } catch (e) {
-                errDiv.innerText = "Error de red al conectar con el servidor.";
-                errDiv.style.display = "block";
+            } catch {
+                errMsg.textContent = 'Error de red. Verifica tu conexión e intenta de nuevo.';
+                errBox.classList.add('visible');
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Continue";
+                if (btn.disabled) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Iniciar sesión';
+                }
             }
         }
     </script>
