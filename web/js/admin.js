@@ -213,6 +213,7 @@ class NovaAdmin {
         this.setupLogs();
         this.setupUsers();
         this.setupAuth();
+        this.setupOdooAgents();
         this.init();
     }
 
@@ -234,6 +235,7 @@ class NovaAdmin {
             console.error('Error verificando sesión', e);
         }
         await this.loadExtensions();
+        await this.checkOdooVisibility();
     }
 
     async api(method, path, body = null) {
@@ -312,6 +314,7 @@ class NovaAdmin {
         document.getElementById('promptModeTabs')?.addEventListener('click', e => {
             const btn = e.target.closest('.mode-tab');
             if (btn?.dataset.mode === 'agents') this.renderAgentCards();
+            if (btn?.dataset.mode === 'odoo-agents') this.loadOdooAgents();
         });
     }
 
@@ -496,6 +499,7 @@ class NovaAdmin {
             const res = await this.api('POST', '/agent-data-source/save', payload);
             this.activeSourceType = sourceType;
             this._updateDsBadge(sourceType);
+            await this.checkOdooVisibility();
             this.toast(res.message || 'Configuración guardada');
         } catch (err) {
             this.toast(err.message, 'error');
@@ -629,6 +633,7 @@ class NovaAdmin {
 
     async loadPromptPanel() {
         try {
+            await this.checkOdooVisibility();
             const config = await this.api('GET', '/prompt-config');
             const mode = config.mode || 'none';
             this.updateSourceBadge(mode);
@@ -1188,6 +1193,120 @@ class NovaAdmin {
             await this.api('DELETE', `/users/${id}`);
             this.toast('Usuario eliminado exitosamente.');
             await this.loadUsers();
+        } catch (err) {
+            this.toast(err.message, 'error');
+        }
+    }
+
+    setupOdooAgents() {
+        this._selectedOdooAgentId = null;
+        this._odooPresets = [];
+        document.getElementById('btnApplyOdooAgent')?.addEventListener('click', () => {
+            if (this._selectedOdooAgentId) {
+                this.applyOdooAgent(this._selectedOdooAgentId);
+            } else {
+                this.toast('Selecciona un agente de Odoo primero', 'error');
+            }
+        });
+    }
+
+    async checkOdooVisibility() {
+        try {
+            const config = await this.api('GET', '/agent-data-source');
+            console.log("CheckOdooVisibility: active source_type is", config.source_type, config);
+            const tab = document.getElementById('odooAgentsTab');
+            if (tab) {
+                if (config.source_type === 'odoo') {
+                    tab.style.display = 'inline-block';
+                } else {
+                    tab.style.display = 'none';
+                    if (tab.classList.contains('active')) {
+                        document.querySelector('[data-mode="builder"]')?.click();
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error al verificar visibilidad de Odoo:', e);
+        }
+    }
+
+    async loadOdooAgents() {
+        const grid = document.getElementById('odooAgentGrid');
+        if (!grid) return;
+
+        try {
+            const res = await this.api('GET', '/odoo-agents');
+            if (!res.available) {
+                grid.innerHTML = '<div style="color:var(--text-2);font-size:.8rem;padding:8px 0;">La integración de Odoo no está disponible o activa.</div>';
+                return;
+            }
+
+            this._odooPresets = res.presets || [];
+            
+            let html = this._odooPresets.map(a => `
+                <div class="agent-card${this._selectedOdooAgentId === a.id ? ' selected' : ''}" data-odoo-agent="${a.id}">
+                    <span class="agent-card-icon">${a.icon}</span>
+                    <span class="agent-card-name">${a.name}</span>
+                    <span class="agent-card-desc">${a.description}</span>
+                </div>
+            `).join('');
+
+            grid.innerHTML = html;
+
+            grid.querySelectorAll('[data-odoo-agent]').forEach(card => {
+                card.addEventListener('click', () => {
+                    this.selectOdooAgent(card.dataset.odooAgent);
+                });
+            });
+
+            const config = await this.api('GET', '/prompt-config');
+            if (config.mode === 'agent' && (config.agent_id === 'odoo_sales' || config.agent_id === 'odoo_vendor_support')) {
+                this.selectOdooAgent(config.agent_id);
+            }
+        } catch (err) {
+            grid.innerHTML = `<div style="color:var(--text-2);font-size:.8rem;padding:8px 0;">Error al cargar agentes de Odoo: ${err.message}</div>`;
+        }
+    }
+
+    selectOdooAgent(agentId) {
+        this._selectedOdooAgentId = agentId;
+        const preset = this._odooPresets.find(a => a.id === agentId);
+        if (!preset) return;
+
+        document.querySelectorAll('[data-odoo-agent]').forEach(c => c.classList.remove('selected'));
+        const sel = document.querySelector(`[data-odoo-agent="${agentId}"]`);
+        if (sel) sel.classList.add('selected');
+
+        const configPanel = document.getElementById('odooAgentConfigPanel');
+        if (configPanel) {
+            configPanel.style.display = 'block';
+            configPanel.classList.add('active');
+        }
+
+        document.getElementById('odooAgentCfgIcon').textContent = preset.icon;
+        document.getElementById('odooAgentCfgTitle').textContent = `Configurar: ${preset.name}`;
+        document.getElementById('odooAgentCfgSub').textContent = preset.description;
+        document.getElementById('odooAgentProfileName').value = preset.name;
+
+        const capGrid = document.getElementById('odooCapabilitiesGrid');
+        if (capGrid) {
+            capGrid.innerHTML = preset.capabilities.map(c => {
+                const label = CAP_MAP[c] || c;
+                return `
+                <label class="check-card" style="cursor: default; pointer-events: none; opacity: 0.9;">
+                    <input type="checkbox" checked disabled>
+                    <span class="check-box" style="border-color: var(--accent); background: var(--accent-dim);"></span>
+                    <span>${label.replace(/^- /, '')}</span>
+                </label>`;
+            }).join('');
+        }
+    }
+
+    async applyOdooAgent(agentId) {
+        try {
+            const res = await this.api('POST', '/odoo-agents', { agent_id: agentId });
+            this.updateSourceBadge('agent');
+            this.toast(`✅ Agente Odoo activado con éxito: ${res.message || ''}`);
         } catch (err) {
             this.toast(err.message, 'error');
         }

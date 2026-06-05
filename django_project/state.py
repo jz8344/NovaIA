@@ -27,6 +27,8 @@ from actions.transfer_call import (
 )
 from actions.end_call import handle_end_call
 from actions.create_odoo_order import handle_create_odoo_order
+from actions.search_odoo_contacts import handle_search_odoo_contacts
+from actions.create_odoo_mailing import handle_create_odoo_mailing
 from api.admin import set_dependencies as set_admin_deps
 
 from core.exchange_updater import ExchangeRateUpdater
@@ -67,6 +69,8 @@ async def init_resources():
     function_registry.register("lookup_inventory", handle_lookup_inventory)
     function_registry.register("end_call", handle_end_call)
     function_registry.register("create_odoo_order", handle_create_odoo_order)
+    function_registry.register("search_odoo_contacts", handle_search_odoo_contacts)
+    function_registry.register("create_odoo_mailing", handle_create_odoo_mailing)
     logger.info(f"Funciones registradas: {function_registry.registered_functions}")
 
     await ami_client.connect()

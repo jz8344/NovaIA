@@ -32,7 +32,7 @@ PERSONALITY_MAP = {
 
 CAPABILITY_MAP = {
     "transfer":   "- Transferir llamadas: Busca la extensión en el directorio y transfiere.",
-    "directory":  "- Consultar directorio: Informa extensiones y departamentos.",
+    "directory":  "- Consultar directorio: Informa extensiones and departamentos.",
     "inventory":  "- Consultar inventario: Busca productos, precios y stock.",
     "messages":   "- Tomar mensajes: Si la persona no está disponible.",
     "general":    "- Información general: Responde preguntas sobre la empresa (horarios, ubicación).",
@@ -40,6 +40,9 @@ CAPABILITY_MAP = {
     "support":    "- Soporte técnico básico.",
     "faq":        "- Responder preguntas frecuentes (FAQs) del sistema.",
     "order_status": "- Informar sobre el estatus de pedidos o solicitudes.",
+    "odoo_contacts": "- Buscar contactos y clientes en Odoo por historial de compras/ventas con filtros geográficos y temporales.",
+    "odoo_mailing":  "- Crear borradores de correo masivo (mailing) en Odoo con listas de destinatarios pre-filtradas.",
+    "odoo_sales_history": "- Consultar historial de órdenes de venta y compra en Odoo.",
 }
 
 RULE_MAP = {
@@ -57,6 +60,9 @@ RULE_MAP = {
         "(3) Intenta con términos más generales o abreviaciones. "
         "Realiza hasta 3 intentos diferentes. Solo informa al usuario que no existe si todos los intentos fallaron."
     ),
+    "no_send_email":    "NUNCA envíes el correo masivo. Solo crea el borrador en Odoo y deja el cuerpo (body) VACÍO para que el vendedor lo complete en Odoo.",
+    "vendor_confirm":   "Siempre confirma con el vendedor la lista de destinatarios y el asunto antes de crear el mailing.",
+    "no_modify_orders": "No modifiques ni canceles órdenes de venta o compra. Solo consulta.",
 }
 
 TONE_MAP = {
@@ -112,6 +118,18 @@ Solo consulta el inventario de nuevo si el usuario pide algo que NO está en tu 
   
 Si el usuario muestra interés real de compra, ofrécele transferirlo con un agente de ventas para que lo asesore personalmente.
 Si ya se creo la cotización, presupuesto o requisición en Odoo, mencionale directamente que sera transferido con un agente de ventas para el cierre de la venta.
+"""
+
+VENDOR_SUPPORT_BLOCK = """INSTRUCCIONES DE SOPORTE A VENDEDORES:
+- Eres un asistente interno para vendedores de la empresa.
+- Puedes buscar clientes por historial de compras usando filtros complejos.
+- Cuando el vendedor pida buscar clientes, usa search_odoo_contacts con todos los filtros que mencione.
+- Si el vendedor pide "crear una lista de correo" o "mandar un correo", primero confirma los destinatarios.
+- El mailing se crea SIEMPRE como borrador. NUNCA lo envíes.
+- Deja el body_html VACÍO para que el vendedor lo complete en Odoo.
+- Al crear el mailing, informa el folio y la cantidad de destinatarios.
+- Si la búsqueda retorna muchos resultados (>50), sugiere crear una mailing.list reutilizable.
+- NO inventes contactos ni emails. Solo usa datos reales de Odoo.
 """
 
 class PromptLoader:
@@ -186,6 +204,30 @@ class PromptLoader:
                 "capabilities": ["support", "faq", "transfer", "general"],
                 "rules": ["character_lock", "no_hallucinations", "cross_validation", "synonym_search"],
                 "custom_instructions": "Realiza diagnósticos técnicos paso a paso. Pide información específica del sistema, versiones y logs. Si el problema excede tu capacidad, transfiere al equipo de ingeniería."
+            },
+            "odoo_sales": {
+                "name": "Nova",
+                "company": "la empresa",
+                "role": "asistente de ventas conectado a Odoo",
+                "greeting": "¡Hola! Soy Nova, tu asistente de ventas. ¿En qué puedo ayudarte?",
+                "language": "es",
+                "tone": "friendly",
+                "personality": ["human_sales", "warm", "proactive", "empathetic"],
+                "capabilities": ["inventory", "transfer", "general"],
+                "rules": ["character_lock", "no_hallucinations", "synonym_search"],
+                "custom_instructions": ""
+            },
+            "odoo_vendor_support": {
+                "name": "Nova",
+                "company": "la empresa",
+                "role": "asistente de soporte interno para vendedores",
+                "greeting": "Hola, soy Nova. ¿En qué puedo ayudarte hoy con tus ventas?",
+                "language": "es",
+                "tone": "friendly",
+                "personality": ["concise", "proactive", "confirm", "detailed"],
+                "capabilities": ["odoo_contacts", "odoo_mailing", "odoo_sales_history", "inventory"],
+                "rules": ["character_lock", "no_hallucinations", "no_send_email", "vendor_confirm", "no_modify_orders"],
+                "custom_instructions": ""
             }
         }
 
@@ -447,7 +489,10 @@ class PromptLoader:
         if custom_instr:
             lines += ["Instrucciones adicionales:", custom_instr, ""]
 
-        lines += ["", INVENTORY_SALES_BLOCK]
+        if "odoo_mailing" in capabilities or "odoo_contacts" in capabilities:
+            lines += ["", VENDOR_SUPPORT_BLOCK]
+        else:
+            lines += ["", INVENTORY_SALES_BLOCK]
 
         return "\n".join(lines)
 

@@ -1,4 +1,5 @@
 import asyncio
+import os
 import json
 from google import genai
 from google.genai import types
@@ -36,7 +37,22 @@ class GeminiLiveClient:
             if not isinstance(system_prompt, str):
                 system_prompt = "Eres un asistente de voz profesional. Responde en español."
 
-        tools      = self._registry.load_schemas()
+        tools_config = "default_tools"
+        config_path = self._prompt_loader._get_config_path(user_id)
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                if config.get("odoo_agent_type"):
+                    agent_type = config.get("odoo_agent_type")
+                    if agent_type == "odoo_vendor_support":
+                        tools_config = "odoo_vendor_tools"
+                    else:
+                        tools_config = "odoo_sales_tools"
+            except Exception as e:
+                logger.error(f"Error cargando tools_config de odoo en _build_config: {e}")
+
+        tools      = self._registry.load_schemas(tools_config)
         voice_name = self._prompt_loader.get_voice(user_id=user_id)
 
         return types.LiveConnectConfig(
@@ -225,7 +241,7 @@ class GeminiLiveClient:
 
             args = dict(fc.args) if fc.args else {}
 
-            if fc.name in ("transfer_call", "end_call", "lookup_inventory"):
+            if fc.name in ("transfer_call", "end_call", "lookup_inventory", "search_odoo_contacts", "create_odoo_mailing"):
                 args["session"] = session
 
             result = await self._registry.execute(fc.name, args)

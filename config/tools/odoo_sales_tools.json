@@ -1,0 +1,82 @@
+{
+  "tools": [
+    {
+      "name": "transfer_call",
+      "description": "Transfiere la llamada telefónica actual a la extensión de un empleado o departamento específico. Usa esta función cuando el usuario pida hablar con alguien o ser transferido.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_name": {
+            "type": "string",
+            "description": "Nombre de la persona o departamento al que se desea transferir la llamada"
+          }
+        },
+        "required": ["target_name"]
+      }
+    },
+    {
+      "name": "lookup_extension",
+      "description": "Busca la extensión telefónica de un empleado o departamento en el directorio corporativo. Usa esta función para consultar información de contacto.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Nombre o departamento a buscar en el directorio"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "lookup_inventory",
+      "description": "Consulta el catálogo de productos. Envía TODA la consulta del usuario en un solo llamado, incluso si menciona varias categorías (ejemplo: 'laptops y periféricos'). NUNCA hagas múltiples llamadas a esta función por turno. Recibirás un catálogo estructurado que es tu conocimiento del inventario para responder como vendedor.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_query": {
+            "type": "string",
+            "description": "La consulta completa del usuario tal como la dijo"
+          }
+        },
+        "required": ["product_query"]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "Finaliza la llamada telefónica actual. Usa esta función solo cuando el usuario se despida o pida explícitamente colgar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Razón por la que se finaliza la llamada"
+          }
+        },
+        "required": ["reason"]
+      }
+    },
+    {
+      "name": "create_odoo_order",
+      "description": "Crea una requisición de compra o presupuesto borrador en Odoo con los productos que el cliente ha decidido comprar. Úsala UNICAMENTE después de que el usuario haya confirmado verbalmente de manera explícita y afirmativa que desea proceder con la compra de los productos y cantidades exactos que le recitaste.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "products_names": {
+            "type": "string",
+            "description": "Nombres de los productos a comprar separados por comas (ejemplo: 'Laptop Gamer ASUS, Teclado Mecánico RGB')"
+          },
+          "quantities": {
+            "type": "string",
+            "description": "Cantidades de cada producto en el mismo orden, separadas por comas (ejemplo: '2, 1')"
+          },
+          "customer_name": {
+            "type": "string",
+            "description": "Nombre del cliente en llamada si fue provisto. Si no fue provisto, envía un string vacío ''."
+          }
+        },
+        "required": ["products_names", "quantities", "customer_name"]
+      }
+    }
+  ]
+}

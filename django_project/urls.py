@@ -28,6 +28,7 @@ from api.admin import (
     get_agent_data_source,
     save_agent_data_source,
     test_agent_data_source,
+    odoo_agents_handler,
 )
 from api.auth import login_handler, logout_handler, check_session_handler
 
@@ -70,4 +71,5 @@ urlpatterns = [
     path('api/admin/agent-data-source', csrf_exempt(get_agent_data_source)),
     path('api/admin/agent-data-source/save', csrf_exempt(save_agent_data_source)),
     path('api/admin/agent-data-source/test', csrf_exempt(test_agent_data_source)),
+    path('api/admin/odoo-agents', csrf_exempt(odoo_agents_handler)),
 ] + static('/static/', document_root=settings.STATICFILES_DIRS[0])

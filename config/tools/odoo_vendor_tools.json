@@ -1,0 +1,105 @@
+{
+  "tools": [
+    {
+      "name": "search_odoo_contacts",
+      "description": "Busca clientes en Odoo basándose en su historial de compras y filtros geográficos/temporales. Úsala cuando el vendedor pida buscar clientes que cumplan condiciones de compra de productos, ubicación, fechas o montos.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_query": {
+            "type": "string",
+            "description": "Nombre o término del producto que compraron (ejemplo: 'PTZ', 'cámaras'). Dejar vacío si no se especifica un producto."
+          },
+          "days_back": {
+            "type": "integer",
+            "description": "Rango de días hacia atrás para la búsqueda de compras (ejemplo: 30 para los últimos 30 días). Por defecto es 30."
+          },
+          "state_filter": {
+            "type": "string",
+            "description": "Nombre del estado de residencia del cliente (ejemplo: 'Jalisco'). Dejar vacío si no se filtra por estado."
+          },
+          "city_filter": {
+            "type": "string",
+            "description": "Nombre de la ciudad del cliente (ejemplo: 'Guadalajara'). Dejar vacío si no se filtra por ciudad."
+          },
+          "category_filter": {
+            "type": "string",
+            "description": "Categoría de producto en Odoo (ejemplo: 'Seguridad'). Dejar vacío si no aplica."
+          },
+          "min_amount": {
+            "type": "number",
+            "description": "Monto total mínimo de la orden (ejemplo: 5000.00). Por defecto es 0."
+          },
+          "source": {
+            "type": "string",
+            "description": "Origen de la transacción ('sales' para ventas, 'purchases' para compras de proveedores). Por defecto es 'sales'."
+          }
+        }
+      }
+    },
+    {
+      "name": "create_odoo_mailing",
+      "description": "Crea un borrador de correo masivo (mailing.mailing) en Odoo para los destinatarios resultantes de la última búsqueda. Úsala únicamente después de confirmar verbalmente con el vendedor los destinatarios y el asunto del correo.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "description": "Asunto del correo masivo"
+          },
+          "create_list": {
+            "type": "string",
+            "description": "Define si se crea una lista de contactos independiente en Odoo. 'auto' decide automáticamente (lista si >50 destinatarios), 'yes' fuerza la creación de lista, 'no' usa dominio directo. Por defecto es 'auto'."
+          },
+          "list_name": {
+            "type": "string",
+            "description": "Nombre opcional para la lista de contactos si se crea una. Dejar vacío para que sea automático."
+          }
+        },
+        "required": ["subject"]
+      }
+    },
+    {
+      "name": "lookup_inventory",
+      "description": "Consulta el catálogo de productos de manera rápida en Odoo para verificar precios y disponibilidad. Úsala si el vendedor te pregunta sobre el stock o precio de un producto en inventario.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_query": {
+            "type": "string",
+            "description": "La consulta del producto tal como la dijo el vendedor"
+          }
+        },
+        "required": ["product_query"]
+      }
+    },
+    {
+      "name": "lookup_extension",
+      "description": "Busca la extensión telefónica de un empleado o departamento en el directorio corporativo. Usa esta función para consultar información de contacto.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Nombre o departamento a buscar en el directorio"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "Finaliza la llamada telefónica actual. Usa esta función solo cuando el usuario se despida o pida explícitamente colgar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Razón por la que se finaliza la llamada"
+          }
+        },
+        "required": ["reason"]
+      }
+    }
+  ]
+}

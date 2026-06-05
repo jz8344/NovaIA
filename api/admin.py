@@ -690,3 +690,77 @@ async def test_agent_data_source(request):
             return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
     return HttpResponse(status=405)
 
+
+async def odoo_agents_handler(request):
+    user_id = request.admin_user["id"]
+    loader = _get_prompt_loader()
+    config_path = loader._get_config_path(user_id)
+
+    if request.method == "GET":
+        config = await _db.get_agent_data_source(user_id)
+        if not config or config.get("source_type") != "odoo":
+            return JsonResponse({"available": False, "presets": [], "custom": []})
+
+        presets = [
+            {
+                "id": "odoo_sales",
+                "name": "Soporte en Ventas",
+                "icon": "🛒",
+                "description": "Atiende clientes, consulta inventario Odoo, crea cotizaciones y transfiere a ventas",
+                "type": "customer_facing",
+                "tools_config": "odoo_sales_tools",
+                "capabilities": ["inventory", "transfer", "general"]
+            },
+            {
+                "id": "odoo_vendor_support",
+                "name": "Soporte a Vendedores",
+                "icon": "📧",
+                "description": "Ayuda a vendedores internos: buscar clientes por compras, consultar historial y crear borradores de mailing",
+                "type": "internal",
+                "tools_config": "odoo_vendor_tools",
+                "capabilities": ["odoo_contacts", "odoo_mailing", "odoo_sales_history", "inventory"]
+            }
+        ]
+        
+        custom_agents = await _db.get_all_admin_agents(user_id)
+        odoo_custom = []
+        for a in custom_agents:
+            builder = a.get("builder") or {}
+            caps = builder.get("capabilities") or []
+            if builder.get("odoo_agent_type") or any(c in caps for c in ["odoo_contacts", "odoo_mailing"]):
+                odoo_custom.append(a)
+
+        return JsonResponse({"available": True, "presets": presets, "custom": odoo_custom})
+
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            agent_id = data.get("agent_id")
+            
+            existing_config = {}
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        existing_config = json.load(f)
+                except Exception:
+                    pass
+
+            existing_config["mode"] = "agent"
+            existing_config["agent_id"] = agent_id
+            existing_config["agent_source"] = "preset"
+            existing_config["odoo_agent_type"] = agent_id
+
+            preset_prompt = loader.load(f"nova_{agent_id}", user_id=user_id)
+            agent_name = "Soporte en Ventas (Odoo)" if agent_id == "odoo_sales" else "Soporte a Vendedores (Odoo)"
+            
+            await _db.save_admin_agent(user_id, "active_agent", agent_name, preset_prompt)
+
+            os.makedirs(os.path.dirname(config_path), exist_ok=True)
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(existing_config, f, ensure_ascii=False, indent=2)
+
+            return JsonResponse({"success": True, "message": f"Agente Odoo '{agent_name}' activado con éxito"})
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+
+    return HttpResponse(status=405)
