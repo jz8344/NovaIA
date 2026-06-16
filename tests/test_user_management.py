@@ -153,8 +153,8 @@ class TestUserManagement(unittest.IsolatedAsyncioTestCase):
         with open(p2_path, "w", encoding="utf-8") as f:
             f.write("system_prompt: Eres el asistente exclusivo del Usuario Dos")
 
-        prompt_one = loader.load(user_id=user_one_id)
-        prompt_two = loader.load(user_id=user_two_id)
+        prompt_one = await loader.load(user_id=user_one_id)
+        prompt_two = await loader.load(user_id=user_two_id)
 
         self.assertEqual(prompt_one, "Eres el asistente exclusivo del Usuario Uno")
         self.assertEqual(prompt_two, "Eres el asistente exclusivo del Usuario Dos")

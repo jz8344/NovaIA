@@ -1,0 +1,104 @@
+{
+  "tools": [
+    {
+      "name": "transfer_call",
+      "description": "Transfiere la llamada telefónica actual a la extensión de un empleado o departamento específico. Usa esta función cuando el huésped pida hablar con alguien o ser transferido.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_name": {
+            "type": "string",
+            "description": "Nombre de la persona o departamento al que se desea transferir la llamada"
+          }
+        },
+        "required": ["target_name"]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "Finaliza la llamada. Usa esta función solo cuando el huésped se despida o pida explícitamente terminar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Razón por la que se finaliza la llamada"
+          }
+        },
+        "required": ["reason"]
+      }
+    },
+    {
+      "name": "pms_check_rooms",
+      "description": "Consulta las habitaciones disponibles en el hotel. Puedes filtrar por tipo de habitación (Suite, Doble, Estándar, Familiar, etc.). Úsala cuando el huésped pregunte por disponibilidad, habitaciones libres o precios.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "room_type": {
+            "type": "string",
+            "description": "Tipo de habitación a filtrar (Suite, Doble, Estándar, Familiar, Presidencial, Junior Suite). Envía cadena vacía para ver todas."
+          }
+        },
+        "required": ["room_type"]
+      }
+    },
+    {
+      "name": "pms_room_status",
+      "description": "Consulta el estado detallado de una habitación específica: si está ocupada, disponible, en limpieza, el nombre del huésped, precio y estado del teléfono.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "room_number": {
+            "type": "string",
+            "description": "Número de la habitación a consultar (ej: '101', '205')"
+          }
+        },
+        "required": ["room_number"]
+      }
+    },
+    {
+      "name": "pms_get_reservations",
+      "description": "Consulta las reservas del hotel. Puedes buscar por nombre del huésped. Úsala cuando pregunten por una reservación existente.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "guest_name": {
+            "type": "string",
+            "description": "Nombre del huésped para buscar su reserva. Envía cadena vacía para ver todas las reservas."
+          }
+        },
+        "required": ["guest_name"]
+      }
+    },
+    {
+      "name": "pms_create_reservation",
+      "description": "Crea una nueva reserva de habitación en el sistema hotelero. Úsala ÚNICAMENTE cuando el huésped haya confirmado explícitamente que desea hacer la reserva con todos los datos correctos.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "guest_name": {
+            "type": "string",
+            "description": "Nombre completo del huésped"
+          },
+          "room_number": {
+            "type": "string",
+            "description": "Número de habitación a reservar"
+          },
+          "check_in": {
+            "type": "string",
+            "description": "Fecha de entrada en formato YYYY-MM-DD (ej: '2025-07-15')"
+          },
+          "check_out": {
+            "type": "string",
+            "description": "Fecha de salida en formato YYYY-MM-DD (ej: '2025-07-18')"
+          },
+          "adults": {
+            "type": "string",
+            "description": "Número de adultos como texto (ej: '2'). Por defecto '1'."
+          }
+        },
+        "required": ["guest_name", "room_number", "check_in", "check_out", "adults"]
+      }
+    }
+  ]
+}

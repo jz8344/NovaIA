@@ -21,7 +21,10 @@ class Settings(BaseSettings):
     nova_debug: bool = Field(default=False)
 
     db_path: str = Field(default="./data/nova.db")
-    database_url: str = Field(default="postgresql://postgres:UfukxyHgiawVrdxrBwbDdEgvldvsDYaO@postgres.railway.internal:5432/railway")
+    database_url: str = Field(default="", description="URL de la base de datos PostgreSQL")
+
+    redis_url: str = Field(default="redis://localhost:6379/0", description="URL de conexión a Redis")
+    run_mode: str = Field(default="hybrid", description="Modo de ejecución: hybrid, django, realtime")
 
 
     prompts_dir: str = Field(default="./config/prompts")

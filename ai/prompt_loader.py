@@ -43,6 +43,10 @@ CAPABILITY_MAP = {
     "odoo_contacts": "- Buscar contactos y clientes en Odoo por historial de compras/ventas con filtros geográficos y temporales.",
     "odoo_mailing":  "- Crear borradores de correo masivo (mailing) en Odoo con listas de destinatarios pre-filtradas.",
     "odoo_sales_history": "- Consultar historial de órdenes de venta y compra en Odoo.",
+    "pms_rooms_status": "- Consultar estado de habitaciones en el PMS.",
+    "pms_check_rooms": "- Buscar habitaciones disponibles en el PMS.",
+    "pms_get_reservations": "- Consultar reservas activas en el PMS.",
+    "pms_create_reservation": "- Crear una nueva reserva en el PMS.",
 }
 
 RULE_MAP = {
@@ -229,6 +233,40 @@ class PromptLoader:
                 "capabilities": ["odoo_contacts", "odoo_mailing", "odoo_sales_history", "inventory"],
                 "rules": ["character_lock", "no_hallucinations", "no_send_email", "vendor_confirm", "no_modify_orders"],
                 "custom_instructions": ""
+            },
+            "pms_receptionist": {
+                "name": "Nova",
+                "company": "el hotel",
+                "role": "recepcionista virtual de hotel",
+                "greeting": "¡Hola! Bienvenido al hotel. Soy Nova, tu recepcionista virtual. ¿En qué puedo ayudarte hoy?",
+                "language": "es",
+                "tone": "friendly",
+                "personality": ["warm", "concise", "proactive", "empathetic", "confirm"],
+                "capabilities": ["pms_rooms_status", "pms_check_rooms", "pms_get_reservations", "pms_create_reservation", "general"],
+                "rules": ["character_lock", "no_hallucinations"],
+                "custom_instructions": (
+                    "INSTRUCCIONES OBLIGATORIAS DE OPERACIÓN:\n"
+                    "- Al consultar disponibilidad, debes mencionar a fuerzas la Habitación 104, indicando que es Suite, detallando su costo correspondiente y que está Disponible.\n"
+                    "- Si el usuario te pregunta qué incluye la habitación, infórmale que incluye: Wi-Fi premium de alta velocidad, minibar con bebidas y snacks (consumibles de cortesía), cafetera express con cápsulas de cortesía, room service 24 horas y amenities premium.\n"
+                    "- Si el usuario desea realizar la reserva de la habitación, debes preguntarle: su Nombre completo, su Fecha de ingreso y su Fecha de egreso. Al confirmarle el registro, dile de forma explícita que la reserva quedó registrada pero que debe presentarse en recepción para validar la reserva."
+                )
+            },
+            "pms_concierge": {
+                "name": "Nova",
+                "company": "el hotel",
+                "role": "concierge inteligente de hotel",
+                "greeting": "Hola, bienvenido. Soy Nova, tu concierge de confianza. ¿Deseas saber sobre nuestras habitaciones, servicios disponibles o realizar alguna consulta sobre tu estancia?",
+                "language": "es",
+                "tone": "friendly",
+                "personality": ["warm", "detailed", "proactive", "empathetic"],
+                "capabilities": ["pms_rooms_status", "pms_check_rooms", "general"],
+                "rules": ["character_lock", "no_hallucinations"],
+                "custom_instructions": (
+                    "INSTRUCCIONES OBLIGATORIAS DE CONCIERGE:\n"
+                    "- Al consultar disponibilidad, menciona a fuerzas la Habitación 104 como Suite disponible con su costo.\n"
+                    "- Si preguntan qué incluye, detalla los servicios incluidos (Wi-Fi, minibar de cortesía, cafetera express, room service).\n"
+                    "- Si solicitan reservar, pide su Nombre completo, Fecha de ingreso y Fecha de egreso, y adviértele que al llegar deberá presentarse en recepción para validar la reserva."
+                )
             }
         }
 
@@ -275,22 +313,73 @@ class PromptLoader:
             return None
         return dict(cached)
 
-    def load(self, prompt_name: str = "nova_default", user_id: int | None = None) -> str:
+    async def load(self, prompt_name: str = "nova_default", user_id: int | None = None) -> str:
         """Carga el prompt activo. Prioriza config guardada; luego archivos."""
         config_data = None
 
         if user_id is not None:
             config_data = self.get_prompt_config_cache(user_id)
             if config_data is None:
-                config_path = self._get_config_path(user_id)
-                if os.path.exists(config_path):
+                # 1. Intentar obtener desde Redis de forma asíncrona
+                from django_project import state
+                if state.redis_client is not None:
                     try:
-                        with open(config_path, "r", encoding="utf-8") as f:
-                            config_data = json.load(f)
-                        self.set_prompt_config_cache(user_id, config_data)
-                        logger.info(f"Config cargada desde archivo para user_id={user_id} (modo={config_data.get('mode', 'none')})")
-                    except Exception as e:
-                        logger.warning(f"Error leyendo config en {config_path}: {e}")
+                        redis_val = await state.redis_client.get(f"prompt_config:{user_id}")
+                        if redis_val:
+                            config_data = json.loads(redis_val)
+                            self.set_prompt_config_cache(user_id, config_data)
+                            logger.info(f"Config cargada desde Redis para user_id={user_id}")
+                    except Exception as re:
+                        logger.error(f"Error consultando Redis en PromptLoader: {re}")
+
+                # 2. Fallback a la Base de Datos de forma asíncrona
+                if config_data is None and state.db is not None and state.db._db is not None:
+                    try:
+                        sql = "SELECT mode, use_custom, voice, builder, raw_content, agent_id, agent_source, agent_builder FROM prompt_config WHERE user_id = ?"
+                        r = await state.db.fetch_one(sql, (user_id,))
+                        if r:
+                            try:
+                                b_val = r["builder"]
+                                builder = json.loads(b_val) if b_val and b_val != "null" else {}
+                                ab_val = r["agent_builder"]
+                                agent_builder = json.loads(ab_val) if ab_val and ab_val != "null" else {}
+                            except Exception:
+                                builder = {}
+                                agent_builder = {}
+
+                            config_data = {
+                                "mode": r["mode"],
+                                "use_custom": bool(r["use_custom"]),
+                                "voice": r["voice"] or "Nova",
+                                "builder": builder,
+                                "raw_content": r["raw_content"] or "",
+                                "agent_id": r["agent_id"] or "",
+                                "agent_source": r["agent_source"] or "preset",
+                                "agent_builder": agent_builder,
+                            }
+                            self.set_prompt_config_cache(user_id, config_data)
+                            logger.info(f"Config recuperada de BD compartida para user_id={user_id}")
+                            
+                            # Guardar en Redis para futuras consultas
+                            if state.redis_client is not None:
+                                try:
+                                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_data))
+                                except Exception as se:
+                                    logger.error(f"Error escribiendo en Redis: {se}")
+                    except Exception as dbe:
+                        logger.error(f"Error consultando base de datos en PromptLoader: {dbe}")
+
+                # 3. Fallback al archivo local
+                if config_data is None:
+                    config_path = self._get_config_path(user_id)
+                    if os.path.exists(config_path):
+                        try:
+                            with open(config_path, "r", encoding="utf-8") as f:
+                                config_data = json.load(f)
+                            self.set_prompt_config_cache(user_id, config_data)
+                            logger.info(f"Config cargada desde archivo para user_id={user_id} (modo={config_data.get('mode', 'none')})")
+                        except Exception as e:
+                            logger.warning(f"Error leyendo config en {config_path}: {e}")
 
         if isinstance(config_data, dict):
             compiled = self._load_from_config(config_data, user_id)

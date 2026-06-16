@@ -24,8 +24,8 @@ class GeminiLiveClient:
         else:
             logger.warning("GEMINI_API_KEY no configurada. Configúrala en .env para habilitar la IA.")
 
-    def _build_config(self, prompt_name: str = "nova_default", user_id: int | None = None) -> types.LiveConnectConfig:
-        system_prompt = self._prompt_loader.load(prompt_name, user_id=user_id)
+    async def _build_config(self, prompt_name: str = "nova_default", user_id: int | None = None) -> types.LiveConnectConfig:
+        system_prompt = await self._prompt_loader.load(prompt_name, user_id=user_id)
 
         if not isinstance(system_prompt, str):
             logger.error(
@@ -33,7 +33,7 @@ class GeminiLiveClient:
                 f"(type={type(system_prompt).__name__}, user_id={user_id}). "
                 f"Usando prompt base."
             )
-            system_prompt = self._prompt_loader.load("nova_default")
+            system_prompt = await self._prompt_loader.load("nova_default")
             if not isinstance(system_prompt, str):
                 system_prompt = "Eres un asistente de voz profesional. Responde en español."
 
@@ -57,6 +57,8 @@ class GeminiLiveClient:
                 tools_config = "odoo_vendor_tools"
             else:
                 tools_config = "odoo_sales_tools"
+        elif isinstance(config, dict) and config.get("pms_agent_type"):
+            tools_config = "pms_hotel_tools"
 
         tools      = self._registry.load_schemas(tools_config)
         voice_name = self._prompt_loader.get_voice(user_id=user_id)
@@ -87,7 +89,7 @@ class GeminiLiveClient:
             logger.error("No se puede iniciar sesión: GEMINI_API_KEY no configurada")
             return
 
-        config = self._build_config(prompt_name, user_id=user_id)
+        config = await self._build_config(prompt_name, user_id=user_id)
         max_retries = 3
 
         for attempt in range(max_retries):

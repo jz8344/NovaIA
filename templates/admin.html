@@ -1284,6 +1284,7 @@
                                 <option value="postgres_local">PostgreSQL Local (conexión directa)</option>
                                 <option value="postgres_railway">PostgreSQL Railway (conexión externa)</option>
                                 <option value="odoo">Odoo (JSON-2 API)</option>
+                                <option value="pms">🏨 PMS Hotelero (REST + JWT)</option>
                             </select>
                         </div>
 
@@ -1318,10 +1319,27 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- PMS Hotelero fields -->
+                        <div id="dsPmsFields" style="display:none">
+                            <div class="form-grid" style="display: flex; flex-direction: column; gap: 14px;">
+                                <div style="background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:.8rem;color:#fbbf24">
+                                    🏨 Conecta Nova con tu sistema PMS hotelero (backend REST con autenticación JWT). Las credenciales se guardan de forma segura.
+                                </div>
+                                <div class="form-group">
+                                    <label>URL del PMS</label>
+                                    <input type="text" id="dsPmsUrl" placeholder="https://hoteleria-backend.onrender.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Usuario</label>
+                                    <input type="text" id="dsPmsUsername" placeholder="admin" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contraseña</label>
+                                    <input type="password" id="dsPmsPassword" placeholder="Tu contraseña del PMS" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
 
-
-
-                        
 
                         <div style="display:flex; flex-direction: column; gap:10px; margin-top:24px">
                             <button class="btn-primary btn-full" id="btnSaveDataSource">💾 Guardar Configuración</button>
@@ -1527,6 +1545,7 @@
                 <button class="mode-tab" data-mode="raw">📝 Texto / JSON</button>
                 <button class="mode-tab" data-mode="agents">🤖 Agentes Preconfigurados</button>
                 <button class="mode-tab" data-mode="odoo-agents" id="odooAgentsTab" style="display:none">🟣 Agentes Odoo</button>
+                <button class="mode-tab" data-mode="pms-agents" id="pmsAgentsTab" style="display:none">🏨 Agentes PMS</button>
             </div>
 
             <!-- ── BUILDER ── -->
@@ -1783,6 +1802,42 @@ Eres Nova, asistente de Tech Solutions…'></textarea>
                         
                         <div style="display:flex;gap:10px;margin-top:18px">
                             <button class="btn-primary" id="btnApplyOdooAgent" style="flex:1">🚀 Activar Agente Odoo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PMS AGENTS ── -->
+            <div class="mode-panel" id="mode-pms-agents">
+                <div class="card">
+                    <div class="card-title">Agentes para PMS Hotelero</div>
+                    <div class="card-sub">
+                        Selecciona un agente optimizado para tu integración con el PMS Hotelero.
+                        Cada agente tiene capacidades y herramientas específicas.
+                    </div>
+
+                    <div class="agent-grid" id="pmsAgentGrid"></div>
+
+                    <div class="agent-config" id="pmsAgentConfigPanel" style="display:none">
+                        <div class="agent-config-header">
+                            <span class="agent-config-icon" id="pmsAgentCfgIcon">🏨</span>
+                            <div>
+                                <div class="agent-config-title" id="pmsAgentCfgTitle"></div>
+                                <div class="agent-config-sub" id="pmsAgentCfgSub"></div>
+                            </div>
+                        </div>
+                        <div class="agent-profile-name" style="margin-top:14px">
+                            <label>📛 Nombre del perfil</label>
+                            <input type="text" id="pmsAgentProfileName" placeholder="Ej: Mi Recepcionista Virtual" readonly>
+                        </div>
+                        
+                        <div class="section" style="border-bottom: 1px solid var(--border); padding: 16px 0;">
+                            <div class="section-title">🏨 Capacidades del Agente</div>
+                            <div class="checkbox-grid" id="pmsCapabilitiesGrid"></div>
+                        </div>
+                        
+                        <div style="display:flex;gap:10px;margin-top:18px">
+                            <button class="btn-primary" id="btnApplyPmsAgent" style="flex:1">🚀 Activar Agente PMS</button>
                         </div>
                     </div>
                 </div>

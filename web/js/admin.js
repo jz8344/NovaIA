@@ -65,7 +65,11 @@ const CAP_MAP = {
     schedule:'- Agendar citas o reuniones.',
     support:'- Soporte técnico básico.',
     faq:'- Responder preguntas frecuentes (FAQs).',
-    order_status:'- Informar estatus de pedidos o solicitudes.'
+    order_status:'- Informar estatus de pedidos o solicitudes.',
+    pms_rooms_status: '- Consultar estado de habitaciones en el PMS.',
+    pms_check_rooms: '- Buscar habitaciones disponibles en el PMS.',
+    pms_get_reservations: '- Consultar reservas activas en el PMS.',
+    pms_create_reservation: '- Crear una nueva reserva en el PMS.'
 };
 const RULE_MAP = {
     character_lock:'BAJO NINGUNA CIRCUNSTANCIA debes salirte de tu personaje.',
@@ -241,6 +245,7 @@ class NovaAdmin {
         this.setupUsers();
         this.setupAuth();
         this.setupOdooAgents();
+        this.setupPmsAgents();
         this.init();
     }
 
@@ -264,6 +269,7 @@ class NovaAdmin {
         }
         await this.loadExtensions();
         await this.checkOdooVisibility();
+        await this.checkPmsVisibility();
         this.updatePageHeader('extensions');
     }
 
@@ -341,6 +347,7 @@ class NovaAdmin {
             const btn = e.target.closest('.mode-tab');
             if (btn?.dataset.mode === 'agents') this.renderAgentCards();
             if (btn?.dataset.mode === 'odoo-agents') this.loadOdooAgents();
+            if (btn?.dataset.mode === 'pms-agents') this.loadPmsAgents();
         });
 
         document.getElementById('btnProfile')?.addEventListener('click', () => {
@@ -599,6 +606,12 @@ class NovaAdmin {
             return 'El campo Usuario / Email de Odoo debe tener un formato de correo válido.';
         }
 
+        if (sourceType === 'pms') {
+            if (!payload.pms_url) return 'La URL del PMS es requerida.';
+            if (!payload.pms_username) return 'El usuario del PMS es requerido.';
+            if (!payload.pms_password) return 'La contraseña del PMS es requerida.';
+        }
+
         return '';
     }
 
@@ -606,8 +619,10 @@ class NovaAdmin {
         const type = document.getElementById('dsSourceType')?.value || 'internal';
         const pgFields = document.getElementById('dsPgFields');
         const odooFields = document.getElementById('dsOdooFields');
+        const pmsFields = document.getElementById('dsPmsFields');
         if (pgFields) pgFields.style.display = (type === 'postgres_local' || type === 'postgres_railway') ? 'block' : 'none';
         if (odooFields) odooFields.style.display = type === 'odoo' ? 'block' : 'none';
+        if (pmsFields) pmsFields.style.display = type === 'pms' ? 'block' : 'none';
         document.getElementById('dsTestResult').style.display = 'none';
     }
 
@@ -619,6 +634,7 @@ class NovaAdmin {
             postgres_local:  { text: '🐘 PostgreSQL Local', bg: 'rgba(52,211,153,.1)', color: '#34d399', border: 'rgba(52,211,153,.3)' },
             postgres_railway: { text: '🚂 PostgreSQL Railway', bg: 'rgba(251,191,36,.1)', color: '#fbbf24', border: 'rgba(251,191,36,.3)' },
             odoo:            { text: '🟣 Odoo JSON-2', bg: 'rgba(124,94,245,.12)', color: '#7c5ef5', border: 'rgba(124,94,245,.3)' },
+            pms:             { text: '🏨 PMS Hotelero', bg: 'rgba(251,191,36,.1)', color: '#f59e0b', border: 'rgba(251,191,36,.3)' },
         };
         const m = map[sourceType] || map.internal;
         badge.textContent = m.text;
@@ -638,6 +654,12 @@ class NovaAdmin {
             document.getElementById('dsOdooDb').value = config.odoo_db || '';
             document.getElementById('dsOdooApiKey').value = config.odoo_api_key || '';
             document.getElementById('dsOdooUser').value = config.odoo_user || '';
+            const pmsUrl = document.getElementById('dsPmsUrl');
+            const pmsUsername = document.getElementById('dsPmsUsername');
+            const pmsPassword = document.getElementById('dsPmsPassword');
+            if (pmsUrl) pmsUrl.value = config.pms_url || '';
+            if (pmsUsername) pmsUsername.value = config.pms_username || '';
+            if (pmsPassword) pmsPassword.value = config.pms_password || '';
 
             this.activeSourceType = config.source_type || 'internal';
             this._toggleDsFields();
@@ -657,6 +679,9 @@ class NovaAdmin {
             odoo_db: document.getElementById('dsOdooDb')?.value || '',
             odoo_api_key: document.getElementById('dsOdooApiKey')?.value || '',
             odoo_user: document.getElementById('dsOdooUser')?.value || '',
+            pms_url: document.getElementById('dsPmsUrl')?.value || '',
+            pms_username: document.getElementById('dsPmsUsername')?.value || '',
+            pms_password: document.getElementById('dsPmsPassword')?.value || '',
         };
 
         const validationError = this._validateDataSourceForm(sourceType, payload);
@@ -670,6 +695,7 @@ class NovaAdmin {
             this.activeSourceType = sourceType;
             this._updateDsBadge(sourceType);
             await this.checkOdooVisibility();
+            await this.checkPmsVisibility();
             this.toast(res.message || 'Configuración guardada');
         } catch (err) {
             this.toast(err.message, 'error');
@@ -693,6 +719,9 @@ class NovaAdmin {
             odoo_db: document.getElementById('dsOdooDb')?.value || '',
             odoo_api_key: document.getElementById('dsOdooApiKey')?.value || '',
             odoo_user: document.getElementById('dsOdooUser')?.value || '',
+            pms_url: document.getElementById('dsPmsUrl')?.value || '',
+            pms_username: document.getElementById('dsPmsUsername')?.value || '',
+            pms_password: document.getElementById('dsPmsPassword')?.value || '',
         };
 
         const validationError = this._validateDataSourceForm(sourceType, payload);
@@ -773,6 +802,8 @@ class NovaAdmin {
         } else if (mode === 'agent') {
             if (agentId === 'odoo_sales' || agentId === 'odoo_vendor_support' || (agentId && agentId.startsWith('odoo_'))) {
                 m = { text: '🟣 Agente Odoo', bg: 'rgba(168,85,247,.1)', color: '#a855f7', border: 'rgba(168,85,247,.3)' };
+            } else if (agentId === 'pms_receptionist' || agentId === 'pms_concierge' || (agentId && agentId.startsWith('pms_'))) {
+                m = { text: '🏨 Agente PMS', bg: 'rgba(251,191,36,.1)', color: '#f59e0b', border: 'rgba(251,191,36,.3)' };
             } else {
                 m = { text: '🤖 Agente Preconfigurado', bg: 'rgba(251,191,36,.1)', color: '#fbbf24', border: 'rgba(251,191,36,.3)' };
             }
@@ -837,13 +868,14 @@ class NovaAdmin {
     async loadPromptPanel() {
         try {
             await this.checkOdooVisibility();
+            await this.checkPmsVisibility();
             const config = await this.api('GET', '/prompt-config');
             const mode = config.mode || 'none';
             const agentId = config.agent_id || null;
             this.updateSourceBadge(mode, agentId);
 
             // Cambiar la pestaña de modo activa en la UI de forma programática
-            const tabName = mode === 'agent' ? 'agents' : (mode === 'raw' ? 'raw' : 'builder');
+            const tabName = mode === 'agent' ? (agentId && agentId.startsWith('pms_') ? 'pms-agents' : (agentId && agentId.startsWith('odoo_') ? 'odoo-agents' : 'agents')) : (mode === 'raw' ? 'raw' : 'builder');
             document.querySelectorAll('.mode-tab').forEach(t => {
                 if (t.dataset.mode === tabName) t.classList.add('active');
                 else t.classList.remove('active');
@@ -869,11 +901,17 @@ class NovaAdmin {
 
             if (mode === 'agent' && this._selectedAgentId && this._selectedAgentSource) {
                 const isOdoo = this._selectedAgentId.startsWith('odoo_');
+                const isPms = this._selectedAgentId.startsWith('pms_');
                 if (isOdoo) {
                     const odooTab = document.querySelector('[data-mode="odoo-agents"]');
                     if (odooTab) odooTab.click();
                     await this.loadOdooAgents();
                     this.selectOdooAgent(this._selectedAgentId);
+                } else if (isPms) {
+                    const pmsTab = document.querySelector('[data-mode="pms-agents"]');
+                    if (pmsTab) pmsTab.click();
+                    await this.loadPmsAgents();
+                    this.selectPmsAgent(this._selectedAgentId);
                 } else {
                     this.selectAgent(this._selectedAgentId, this._selectedAgentSource);
                     const ab = config.agent_builder || config.builder;
@@ -1480,6 +1518,120 @@ class NovaAdmin {
             const res = await this.api('POST', '/odoo-agents', { agent_id: agentId });
             this.updateSourceBadge('agent', agentId);
             this.toast(`✅ Agente Odoo activado con éxito: ${res.message || ''}`);
+        } catch (err) {
+            this.toast(err.message, 'error');
+        }
+    }
+
+    setupPmsAgents() {
+        this._selectedPmsAgentId = null;
+        this._pmsPresets = [];
+        document.getElementById('btnApplyPmsAgent')?.addEventListener('click', () => {
+            if (this._selectedPmsAgentId) {
+                this.applyPmsAgent(this._selectedPmsAgentId);
+            } else {
+                this.toast('Selecciona un agente de PMS primero', 'error');
+            }
+        });
+    }
+
+    async checkPmsVisibility() {
+        try {
+            const config = await this.api('GET', '/agent-data-source');
+            console.log("CheckPmsVisibility: active source_type is", config.source_type, config);
+            const tab = document.getElementById('pmsAgentsTab');
+            if (tab) {
+                if (config.source_type === 'pms') {
+                    tab.style.display = 'inline-block';
+                } else {
+                    tab.style.display = 'none';
+                    if (tab.classList.contains('active')) {
+                        document.querySelector('[data-mode="builder"]')?.click();
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error al verificar visibilidad de PMS:', e);
+        }
+    }
+
+    async loadPmsAgents() {
+        const grid = document.getElementById('pmsAgentGrid');
+        if (!grid) return;
+
+        try {
+            const res = await this.api('GET', '/pms-agents');
+            if (!res.available) {
+                grid.innerHTML = '<div style="color:var(--text-2);font-size:.8rem;padding:8px 0;">La integración de PMS no está disponible o activa.</div>';
+                return;
+            }
+
+            this._pmsPresets = res.presets || [];
+            
+            let html = this._pmsPresets.map(a => `
+                <div class="agent-card${this._selectedPmsAgentId === a.id ? ' selected' : ''}" data-pms-agent="${a.id}">
+                    <span class="agent-card-icon">${a.icon}</span>
+                    <span class="agent-card-name">${a.name}</span>
+                    <span class="agent-card-desc">${a.description}</span>
+                </div>
+            `).join('');
+
+            grid.innerHTML = html;
+
+            grid.querySelectorAll('[data-pms-agent]').forEach(card => {
+                card.addEventListener('click', () => {
+                    this.selectPmsAgent(card.dataset.pmsAgent || card.getAttribute('data-pms-agent'));
+                });
+            });
+
+            const config = await this.api('GET', '/prompt-config');
+            if (config.mode === 'agent' && (config.agent_id === 'pms_receptionist' || config.agent_id === 'pms_concierge')) {
+                this.selectPmsAgent(config.agent_id);
+            }
+        } catch (err) {
+            grid.innerHTML = `<div style="color:var(--text-2);font-size:.8rem;padding:8px 0;">Error al cargar agentes de PMS: ${err.message}</div>`;
+        }
+    }
+
+    selectPmsAgent(agentId) {
+        this._selectedPmsAgentId = agentId;
+        const preset = this._pmsPresets.find(a => a.id === agentId);
+        if (!preset) return;
+
+        document.querySelectorAll('[data-pms-agent]').forEach(c => c.classList.remove('selected'));
+        const sel = document.querySelector(`[data-pms-agent="${agentId}"]`);
+        if (sel) sel.classList.add('selected');
+
+        const configPanel = document.getElementById('pmsAgentConfigPanel');
+        if (configPanel) {
+            configPanel.style.display = 'block';
+            configPanel.classList.add('active');
+        }
+
+        document.getElementById('pmsAgentCfgIcon').textContent = preset.icon;
+        document.getElementById('pmsAgentCfgTitle').textContent = `Configurar: ${preset.name}`;
+        document.getElementById('pmsAgentCfgSub').textContent = preset.description;
+        document.getElementById('pmsAgentProfileName').value = preset.name;
+
+        const capGrid = document.getElementById('pmsCapabilitiesGrid');
+        if (capGrid) {
+            capGrid.innerHTML = preset.capabilities.map(c => {
+                const label = CAP_MAP[c] || c;
+                return `
+                <label class="check-card" style="cursor: default; pointer-events: none; opacity: 0.9;">
+                    <input type="checkbox" checked disabled>
+                    <span class="check-box" style="border-color: var(--accent); background: var(--accent-dim);"></span>
+                    <span>${label.replace(/^- /, '')}</span>
+                </label>`;
+            }).join('');
+        }
+    }
+
+    async applyPmsAgent(agentId) {
+        try {
+            const res = await this.api('POST', '/pms-agents', { agent_id: agentId });
+            this.updateSourceBadge('agent', agentId);
+            this.toast(`✅ Agente PMS activado con éxito: ${res.message || ''}`);
         } catch (err) {
             this.toast(err.message, 'error');
         }

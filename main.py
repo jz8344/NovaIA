@@ -19,13 +19,16 @@ if __name__ == "__main__":
 
     settings = get_settings()
     port = int(os.environ.get("PORT", settings.nova_port))
+    run_mode = os.environ.get("SERVICE_TYPE", settings.run_mode).lower()
 
     if settings.nova_host == "0.0.0.0":
         local_ip = get_local_ip()
         print("\n" + "=" * 80)
-        print(" [*] SERVIDOR HABILITADO EN TU RED LOCAL")
-        print(f" [*] Accede localmente en: http://localhost:{port}/")
-        print(f" [*] Accede desde otros dispositivos (celular/otra PC): http://{local_ip}:{port}/")
+        print(f" [*] INICIANDO NOVA VOICE AGENT EN MODO: {run_mode.upper()}")
+        if run_mode in ("hybrid", "django"):
+            print(f" [*] Accede al Portal Admin en: http://localhost:{port}/admin (o http://{local_ip}:{port}/admin)")
+        if run_mode in ("hybrid", "realtime"):
+            print(f" [*] Conexión WebSocket de voz en: ws://localhost:{port}/ws/voice (o ws://{local_ip}:{port}/ws/voice)")
         print("=" * 80 + "\n")
 
     is_production = "PORT" in os.environ or "RAILWAY_STATIC_URL" in os.environ

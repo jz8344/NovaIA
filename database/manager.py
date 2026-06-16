@@ -161,6 +161,18 @@ class DatabaseManager:
                         await conn.execute("CREATE INDEX IF NOT EXISTS idx_call_logs_cost ON call_logs (cost_usd DESC)")
                     except Exception as _mig_err:
                         logger.debug(f"Migración PostgreSQL index cost: {_mig_err}")
+                    try:
+                        await conn.execute("ALTER TABLE agent_data_source ADD COLUMN IF NOT EXISTS pms_url TEXT DEFAULT ''")
+                    except Exception as _mig_err:
+                        logger.debug(f"Migración PostgreSQL pms_url: {_mig_err}")
+                    try:
+                        await conn.execute("ALTER TABLE agent_data_source ADD COLUMN IF NOT EXISTS pms_username TEXT DEFAULT ''")
+                    except Exception as _mig_err:
+                        logger.debug(f"Migración PostgreSQL pms_username: {_mig_err}")
+                    try:
+                        await conn.execute("ALTER TABLE agent_data_source ADD COLUMN IF NOT EXISTS pms_password TEXT DEFAULT ''")
+                    except Exception as _mig_err:
+                        logger.debug(f"Migración PostgreSQL pms_password: {_mig_err}")
                 logger.info("✅ Base de datos PostgreSQL conectada (pool activo)")
                 return
             except Exception as e:
@@ -198,6 +210,21 @@ class DatabaseManager:
                 pass
             try:
                 await self._db.execute("CREATE INDEX IF NOT EXISTS idx_call_logs_cost ON call_logs (cost_usd DESC)")
+                await self._db.commit()
+            except Exception:
+                pass
+            try:
+                await self._db.execute("ALTER TABLE agent_data_source ADD COLUMN pms_url TEXT DEFAULT ''")
+                await self._db.commit()
+            except Exception:
+                pass
+            try:
+                await self._db.execute("ALTER TABLE agent_data_source ADD COLUMN pms_username TEXT DEFAULT ''")
+                await self._db.commit()
+            except Exception:
+                pass
+            try:
+                await self._db.execute("ALTER TABLE agent_data_source ADD COLUMN pms_password TEXT DEFAULT ''")
                 await self._db.commit()
             except Exception:
                 pass
@@ -739,14 +766,16 @@ class DatabaseManager:
     async def save_agent_data_source(self, user_id: int, source_type: str,
                                       pg_connection_string: str = "",
                                       odoo_url: str = "", odoo_db: str = "",
-                                      odoo_api_key: str = "", odoo_user: str = ""):
+                                      odoo_api_key: str = "", odoo_user: str = "",
+                                      pms_url: str = "", pms_username: str = "", pms_password: str = ""):
         from datetime import datetime
         now = datetime.now()
         if self.db_type == "postgres":
             sql = """
                 INSERT INTO agent_data_source
-                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user,
+                     pms_url, pms_username, pms_password, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 ON CONFLICT(user_id) DO UPDATE SET
                     source_type = EXCLUDED.source_type,
                     pg_connection_string = EXCLUDED.pg_connection_string,
@@ -754,16 +783,21 @@ class DatabaseManager:
                     odoo_db = EXCLUDED.odoo_db,
                     odoo_api_key = EXCLUDED.odoo_api_key,
                     odoo_user = EXCLUDED.odoo_user,
+                    pms_url = EXCLUDED.pms_url,
+                    pms_username = EXCLUDED.pms_username,
+                    pms_password = EXCLUDED.pms_password,
                     updated_at = EXCLUDED.updated_at
             """
             async with self._db.acquire() as conn:
                 await conn.execute(sql, user_id, source_type, pg_connection_string,
-                                   odoo_url, odoo_db, odoo_api_key, odoo_user, now)
+                                   odoo_url, odoo_db, odoo_api_key, odoo_user,
+                                   pms_url, pms_username, pms_password, now)
         else:
             sql = """
                 INSERT INTO agent_data_source
-                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (user_id, source_type, pg_connection_string, odoo_url, odoo_db, odoo_api_key, odoo_user,
+                     pms_url, pms_username, pms_password, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(user_id) DO UPDATE SET
                     source_type = excluded.source_type,
                     pg_connection_string = excluded.pg_connection_string,
@@ -771,10 +805,14 @@ class DatabaseManager:
                     odoo_db = excluded.odoo_db,
                     odoo_api_key = excluded.odoo_api_key,
                     odoo_user = excluded.odoo_user,
+                    pms_url = excluded.pms_url,
+                    pms_username = excluded.pms_username,
+                    pms_password = excluded.pms_password,
                     updated_at = excluded.updated_at
             """
             await self._db.execute(sql, (user_id, source_type, pg_connection_string,
-                                          odoo_url, odoo_db, odoo_api_key, odoo_user, now))
+                                          odoo_url, odoo_db, odoo_api_key, odoo_user,
+                                          pms_url, pms_username, pms_password, now))
             await self._db.commit()
         logger.info(f"Agent data source guardada para user_id={user_id}, tipo={source_type}")
 

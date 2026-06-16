@@ -11,9 +11,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from core.odoo_client import OdooJson2Client, OdooAPIError
 
-ODOO_BASE_URL = "https://tilyngo.odoo.com"
-ODOO_DB = "tilyngo"
-ODOO_API_KEY = "3de59600d375286d00b1814383fb8566c3b123cf"
+from dotenv import load_dotenv
+load_dotenv()
+
+ODOO_BASE_URL = os.environ.get("ODOO_BASE_URL", "https://tilyngo.odoo.com")
+ODOO_DB = os.environ.get("ODOO_DB", "tilyngo")
+ODOO_API_KEY = os.environ.get("ODOO_API_KEY", "")
 
 
 async def test_odoo_connection():

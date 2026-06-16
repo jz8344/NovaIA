@@ -1,5 +1,7 @@
 import asyncio
+import os
 from loguru import logger
+import redis.asyncio as aioredis
 
 from config.settings import get_settings
 from core.session import SessionManager
@@ -29,6 +31,13 @@ from actions.end_call import handle_end_call
 from actions.create_odoo_order import handle_create_odoo_order
 from actions.search_odoo_contacts import handle_search_odoo_contacts
 from actions.create_odoo_mailing import handle_create_odoo_mailing
+from actions.pms_hotel import (
+    handle_pms_check_rooms,
+    handle_pms_room_status,
+    handle_pms_get_reservations,
+    handle_pms_create_reservation,
+    handle_pms_query,
+)
 from api.admin import set_dependencies as set_admin_deps
 
 from core.exchange_updater import ExchangeRateUpdater
@@ -43,6 +52,7 @@ ami_client = AMIClient()
 gemini_client: GeminiLiveClient | None = None
 audiosocket_server: AudioSocketServer | None = None
 exchange_updater: ExchangeRateUpdater | None = None
+redis_client: aioredis.Redis | None = None
 
 async def _restore_prompt_configs():
     try:
@@ -169,19 +179,31 @@ async def _restore_prompt_configs():
 
 
 async def init_resources():
-    global gemini_client, audiosocket_server, exchange_updater
+    global gemini_client, audiosocket_server, exchange_updater, redis_client
 
+    run_mode = os.environ.get("SERVICE_TYPE", settings.run_mode).lower()
     logger.info("=" * 60)
-    logger.info("  Nova Voice Agent — Iniciando...")
+    logger.info(f"  Nova Voice Agent — Iniciando en modo: {run_mode.upper()}...")
     logger.info("=" * 60)
 
-    exchange_updater = ExchangeRateUpdater()
-    exchange_updater.start()
-
+    # Conectar base de datos primero (compartida en todos los modos)
     await db.connect()
-    await seed_database(db)
-    await _restore_prompt_configs()
 
+    # Inicializar Redis (compartido en todos los modos, con fallback silencioso)
+    if settings.redis_url:
+        try:
+            redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+            await asyncio.wait_for(redis_client.ping(), timeout=2.0)
+            logger.info("✅ Conectado exitosamente a Redis")
+        except Exception as re:
+            redis_client = None
+            logger.warning(f"⚠️ No se pudo conectar a Redis: {re}. Continuando sin caché de Redis.")
+
+    if run_mode in ("hybrid", "django"):
+        await seed_database(db)
+        await _restore_prompt_configs()
+
+    # Configurar dependencias
     set_lookup_ext_db(db)
     set_lookup_inv_db(db)
     worker = InventoryWorker(db)
@@ -189,6 +211,7 @@ async def init_resources():
     set_transfer_deps(db, ami_client)
     set_admin_deps(db, session_manager, prompt_loader)
 
+    # Registrar funciones comunes
     function_registry.register("transfer_call", handle_transfer_call)
     function_registry.register("lookup_extension", handle_lookup_extension)
     function_registry.register("lookup_inventory", handle_lookup_inventory)
@@ -196,23 +219,35 @@ async def init_resources():
     function_registry.register("create_odoo_order", handle_create_odoo_order)
     function_registry.register("search_odoo_contacts", handle_search_odoo_contacts)
     function_registry.register("create_odoo_mailing", handle_create_odoo_mailing)
-    logger.info(f"Funciones registradas: {function_registry.registered_functions}")
+    function_registry.register("pms_check_rooms", handle_pms_check_rooms)
+    function_registry.register("pms_room_status", handle_pms_room_status)
+    function_registry.register("pms_get_reservations", handle_pms_get_reservations)
+    function_registry.register("pms_create_reservation", handle_pms_create_reservation)
+    function_registry.register("pms_query", handle_pms_query)
 
-    await ami_client.connect()
+    # Solo levantar servicios de voz en modo realtime u híbrido
+    if run_mode in ("hybrid", "realtime"):
+        exchange_updater = ExchangeRateUpdater()
+        exchange_updater.start()
 
-    gemini_client = GeminiLiveClient(function_registry, prompt_loader)
+        logger.info(f"Funciones registradas: {function_registry.registered_functions}")
+        await ami_client.connect()
+        gemini_client = GeminiLiveClient(function_registry, prompt_loader)
 
-    audiosocket_server = AudioSocketServer(session_manager)
-    await audiosocket_server.start()
+        audiosocket_server = AudioSocketServer(session_manager)
+        await audiosocket_server.start()
 
     logger.info("=" * 60)
-    logger.info(f"  Nova lista en http://{settings.nova_host}:{settings.nova_port}")
-    logger.info(f"  AudioSocket en {settings.audiosocket_host}:{settings.audiosocket_port}")
-    logger.info(f"  Panel Admin: http://{settings.nova_host}:{settings.nova_port}/admin")
+    if run_mode in ("hybrid", "django"):
+        logger.info(f"  Nova Admin listo en http://{settings.nova_host}:{settings.nova_port}")
+        logger.info(f"  Panel Admin: http://{settings.nova_host}:{settings.nova_port}/admin")
+    if run_mode in ("hybrid", "realtime"):
+        logger.info(f"  AudioSocket escuchando en {settings.audiosocket_host}:{settings.audiosocket_port}")
+        logger.info(f"  FastAPI WebSocket listo en ws://{settings.nova_host}:{settings.nova_port}/ws/voice")
     logger.info("=" * 60)
 
 async def close_resources():
-    global audiosocket_server, exchange_updater
+    global audiosocket_server, exchange_updater, redis_client
     logger.info("Nova Voice Agent — Cerrando...")
     if exchange_updater:
         try:
@@ -228,6 +263,11 @@ async def close_resources():
         await ami_client.disconnect()
     except Exception as e:
         logger.error(f"Error desconectando AMI Client: {e}")
+    if redis_client:
+        try:
+            await redis_client.close()
+        except Exception as e:
+            logger.error(f"Error cerrando cliente Redis: {e}")
     try:
         await db.disconnect()
     except Exception as e:

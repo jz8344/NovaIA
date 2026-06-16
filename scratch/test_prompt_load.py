@@ -26,7 +26,7 @@ async def main():
         config = await db.load_prompt_config(u_id)
         loader.set_prompt_config_cache(u_id, config)
         
-        prompt = loader.load(user_id=u_id)
+        prompt = await loader.load(user_id=u_id)
         print(f"\nUser ID: {u_id} | Mode: {mode} | Agent ID: {agent_id}")
         print(f"Longitud del prompt cargado: {len(prompt)} caracteres")
         print("Inicio del prompt:")

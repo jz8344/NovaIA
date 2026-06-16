@@ -1,14 +1,17 @@
 import asyncio
+import os
 import httpx
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 
 async def run_diagnostico():
     print("=" * 60)
     print("  DIAGNÓSTICO: BÚSQUEDA DE VARIANTES EN ODOO EN VIVO")
     print("=" * 60)
 
-    base_url = "https://tilyngo.odoo.com"
-    api_key = "3de59600d375286d00b1814383fb8566c3b123cf"
+    base_url = os.environ.get("ODOO_BASE_URL", "https://tilyngo.odoo.com")
+    api_key = os.environ.get("ODOO_API_KEY", "")
     headers = {
         "Authorization": f"bearer {api_key}",
         "Content-Type": "application/json",

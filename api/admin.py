@@ -367,6 +367,15 @@ async def prompt_config_handler(request):
             await _db.save_prompt_config(user_id, config_to_save)
             loader.set_prompt_config_cache(user_id, config_to_save)
 
+            # Publicar configuración actualizada en Redis
+            from django_project import state
+            if state.redis_client is not None:
+                try:
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_to_save))
+                    logger.info(f"Config publicada en Redis para user_id={user_id}")
+                except Exception as re:
+                    logger.error(f"Error actualizando Redis en api/admin: {re}")
+
             # Guardar también en archivo JSON local como respaldo
             os.makedirs(str(_PROJECT_ROOT / "data"), exist_ok=True)
             config_path = loader._get_config_path(user_id)
@@ -393,7 +402,7 @@ async def get_active_prompt_preview(request):
         loader = PromptLoader()
         
         # Cargar texto del prompt
-        text = loader.load(user_id=user_id)
+        text = await loader.load(user_id=user_id)
         
         # Cargar config desde BD
         config_data = await _db.load_prompt_config(user_id)
@@ -583,6 +592,9 @@ class DataSourceConfig(BaseModel):
     odoo_db: Optional[str] = ""
     odoo_api_key: Optional[str] = ""
     odoo_user: Optional[str] = ""
+    pms_url: Optional[str] = ""
+    pms_username: Optional[str] = ""
+    pms_password: Optional[str] = ""
 
 
 def _mask_sensitive(value: str, visible_chars: int = 4) -> str:
@@ -611,6 +623,9 @@ async def get_agent_data_source(request):
             "odoo_db": config.get("odoo_db", ""),
             "odoo_api_key": _mask_sensitive(config.get("odoo_api_key", "")) if config.get("odoo_api_key") else "",
             "odoo_user": config.get("odoo_user", ""),
+            "pms_url": config.get("pms_url", ""),
+            "pms_username": config.get("pms_username", ""),
+            "pms_password": _mask_sensitive(config.get("pms_password", "")) if config.get("pms_password") else "",
         })
     return HttpResponse(status=405)
 
@@ -625,10 +640,13 @@ async def save_agent_data_source(request):
             existing = await _db.get_agent_data_source(user_id)
             pg_conn = data.pg_connection_string or ""
             odoo_key = data.odoo_api_key or ""
+            pms_pass = data.pms_password or ""
             if pg_conn and "****" in pg_conn and existing:
                 pg_conn = existing.get("pg_connection_string", "")
             if odoo_key and "****" in odoo_key and existing:
                 odoo_key = existing.get("odoo_api_key", "")
+            if pms_pass and "****" in pms_pass and existing:
+                pms_pass = existing.get("pms_password", "")
 
             if data.source_type in ("postgres_local", "postgres_railway"):
                 validation_error = _validate_postgres_connection_string(pg_conn)
@@ -638,6 +656,9 @@ async def save_agent_data_source(request):
             if data.source_type == "odoo" and data.odoo_user and not _is_valid_email(data.odoo_user):
                 return JsonResponse({"detail": "El campo Usuario / Email de Odoo debe tener un formato de correo válido."}, status=400)
 
+            if data.source_type == "pms" and (not data.pms_url or not data.pms_username):
+                return JsonResponse({"detail": "Para PMS se requieren: URL, Usuario y Contraseña."}, status=400)
+
             await _db.save_agent_data_source(
                 user_id=user_id,
                 source_type=data.source_type,
@@ -646,6 +667,9 @@ async def save_agent_data_source(request):
                 odoo_db=data.odoo_db or "",
                 odoo_api_key=odoo_key,
                 odoo_user=data.odoo_user or "",
+                pms_url=data.pms_url or "",
+                pms_username=data.pms_username or "",
+                pms_password=pms_pass,
             )
             return JsonResponse({"success": True, "message": f"Fuente de datos '{data.source_type}' configurada exitosamente"})
         except Exception as e:
@@ -705,6 +729,21 @@ async def test_agent_data_source(request):
                     db_name=body.get("odoo_db", ""),
                     odoo_user=odoo_user,
                 )
+                result = await worker.test_connection()
+                return JsonResponse(result)
+
+            if source_type == "pms":
+                pms_url = body.get("pms_url", "")
+                pms_username = body.get("pms_username", "")
+                pms_password = body.get("pms_password", "")
+                if pms_password and "****" in pms_password:
+                    existing = await _db.get_agent_data_source(user_id)
+                    if existing:
+                        pms_password = existing.get("pms_password", "")
+                if not pms_url or not pms_username or not pms_password:
+                    return JsonResponse({"success": False, "message": "URL, Usuario y Contraseña del PMS son requeridos"})
+                from ai.pms_worker import get_pms_worker
+                worker = get_pms_worker(pms_url, pms_username, pms_password, user_id=user_id)
                 result = await worker.test_connection()
                 return JsonResponse(result)
 
@@ -773,12 +812,21 @@ async def odoo_agents_handler(request):
             existing_config["agent_source"] = "preset"
             existing_config["odoo_agent_type"] = agent_id
 
-            preset_prompt = loader.load(f"nova_{agent_id}")
+            preset_prompt = await loader.load(f"nova_{agent_id}")
             agent_name = "Soporte en Ventas (Odoo)" if agent_id == "odoo_sales" else "Soporte a Vendedores (Odoo)"
             
             await _db.save_admin_agent(user_id, "active_agent", agent_name, preset_prompt, existing_config)
             await _db.save_prompt_config(user_id, existing_config)
             loader.set_prompt_config_cache(user_id, existing_config)
+
+            # Publicar configuración actualizada en Redis
+            from django_project import state
+            if state.redis_client is not None:
+                try:
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config))
+                    logger.info(f"Preset Odoo publicado en Redis para user_id={user_id}")
+                except Exception as re:
+                    logger.error(f"Error actualizando Redis en api/admin para agente Odoo: {re}")
 
             os.makedirs(os.path.dirname(config_path), exist_ok=True)
             with open(config_path, "w", encoding="utf-8") as f:
@@ -789,3 +837,90 @@ async def odoo_agents_handler(request):
             return JsonResponse({"detail": str(e)}, status=400)
 
     return HttpResponse(status=405)
+
+
+async def pms_agents_handler(request):
+    user_id = request.admin_user["id"]
+    loader = _get_prompt_loader()
+    config_path = loader._get_config_path(user_id)
+
+    if request.method == "GET":
+        config = await _db.get_agent_data_source(user_id)
+        if not config or config.get("source_type") != "pms":
+            return JsonResponse({"available": False, "presets": [], "custom": []})
+
+        presets = [
+            {
+                "id": "pms_receptionist",
+                "name": "Recepcionista Virtual",
+                "icon": "🏨",
+                "description": "Atiende huéspedes, consulta disponibilidad de habitaciones, busca reservas y crea nuevas reservaciones.",
+                "type": "customer_facing",
+                "tools_config": "pms_hotel_tools",
+                "capabilities": ["pms_rooms_status", "pms_check_rooms", "pms_get_reservations", "pms_create_reservation", "general"]
+            },
+            {
+                "id": "pms_concierge",
+                "name": "Concierge Inteligente",
+                "icon": "🔑",
+                "description": "Brinda un servicio premium de conserjería, informa disponibilidad y estado de habitaciones y responde dudas de servicios.",
+                "type": "customer_facing",
+                "tools_config": "pms_hotel_tools",
+                "capabilities": ["pms_rooms_status", "pms_check_rooms", "general"]
+            }
+        ]
+        
+        custom_agents = await _db.get_all_admin_agents(user_id)
+        pms_custom = []
+        for a in custom_agents:
+            builder = a.get("builder") or {}
+            caps = builder.get("capabilities") or []
+            if builder.get("pms_agent_type") or any(c in caps for c in ["pms_rooms_status", "pms_check_rooms", "pms_get_reservations", "pms_create_reservation"]):
+                pms_custom.append(a)
+
+        return JsonResponse({"available": True, "presets": presets, "custom": pms_custom})
+
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            agent_id = data.get("agent_id")
+            
+            existing_config = {}
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        existing_config = json.load(f)
+                except Exception:
+                    pass
+
+            existing_config["mode"] = "agent"
+            existing_config["agent_id"] = agent_id
+            existing_config["agent_source"] = "preset"
+            existing_config["pms_agent_type"] = agent_id
+
+            preset_prompt = await loader.load(f"nova_{agent_id}")
+            agent_name = "Recepcionista Virtual (PMS)" if agent_id == "pms_receptionist" else "Concierge Inteligente (PMS)"
+            
+            await _db.save_admin_agent(user_id, "active_agent", agent_name, preset_prompt, existing_config)
+            await _db.save_prompt_config(user_id, existing_config)
+            loader.set_prompt_config_cache(user_id, existing_config)
+
+            # Publicar configuración actualizada en Redis
+            from django_project import state
+            if state.redis_client is not None:
+                try:
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config))
+                    logger.info(f"Preset PMS publicado en Redis para user_id={user_id}")
+                except Exception as re:
+                    logger.error(f"Error actualizando Redis en api/admin para agente PMS: {re}")
+
+            os.makedirs(os.path.dirname(config_path), exist_ok=True)
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(existing_config, f, ensure_ascii=False, indent=2)
+
+            return JsonResponse({"success": True, "message": f"Agente PMS '{agent_name}' activado con éxito"})
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=400)
+
+    return HttpResponse(status=405)
+
