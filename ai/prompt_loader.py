@@ -372,7 +372,7 @@ class PromptLoader:
                             # Guardar en Redis para futuras consultas
                             if state.redis_client is not None:
                                 try:
-                                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_data))
+                                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_data), ex=86400)
                                 except Exception as se:
                                     logger.error(f"Error escribiendo en Redis: {se}")
                     except Exception as dbe:

@@ -72,7 +72,11 @@ class AudioSocketServer:
                     logger.info(f"AudioSocket UUID recibido: {call_uuid}")
 
                 elif msg_type == MSG_TYPE_AUDIO:
-                    pcm_16khz = AudioProcessor.asterisk_to_gemini(payload)
+                    # Si el payload tiene 640 bytes o más, asumimos que viene a 16kHz (slin16) nativo
+                    if len(payload) >= 640:
+                        pcm_16khz = payload
+                    else:
+                        pcm_16khz = AudioProcessor.asterisk_to_gemini(payload)
                     if vad.is_speech(pcm_16khz):
                         try:
                             session.audio_queue_in.put_nowait(pcm_16khz)

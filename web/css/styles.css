@@ -299,6 +299,7 @@ body {
     height: 140px;
 }
 
+/* --- Estados del visualizador de anillos --- */
 .voice-visualizer.active .ring-outer {
     border-color: rgba(129, 140, 248, 0.2);
     animation: ringPulse 2s ease-in-out infinite;
@@ -314,9 +315,38 @@ body {
     animation: ringPulse 2s ease-in-out infinite 0.6s;
 }
 
+.voice-visualizer.speaking .ring-outer {
+    border-color: rgba(129, 140, 248, 0.4);
+    animation: ringPulseFast 1s ease-in-out infinite;
+}
+
+.voice-visualizer.speaking .ring-middle {
+    border-color: rgba(192, 132, 252, 0.5);
+    animation: ringPulseFast 1s ease-in-out infinite 0.15s;
+}
+
+.voice-visualizer.speaking .ring-inner {
+    border-color: rgba(103, 232, 249, 0.6);
+    animation: ringPulseFast 1s ease-in-out infinite 0.3s;
+}
+
+.voice-visualizer.connecting .ring {
+    border-color: rgba(251, 191, 36, 0.25);
+    animation: ringRotate 2.5s linear infinite;
+}
+
 @keyframes ringPulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.08); opacity: 0.6; }
+}
+
+@keyframes ringPulseFast {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.12); opacity: 0.8; }
+}
+
+@keyframes ringRotate {
+    100% { transform: rotate(360deg); }
 }
 
 #waveformCanvas {
@@ -335,6 +365,7 @@ body {
     opacity: 1;
 }
 
+/* --- Botón del micrófono --- */
 .mic-button {
     position: relative;
     z-index: 5;
@@ -369,9 +400,34 @@ body {
     animation: recordPulse 1.5s ease-in-out infinite;
 }
 
+.mic-button.connecting {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: var(--warning);
+    color: var(--warning);
+    animation: connectPulse 1.5s ease-in-out infinite;
+    cursor: not-allowed;
+}
+
+.mic-button.speaking {
+    background: rgba(129, 140, 248, 0.25);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    animation: speakPulse 1.2s ease-in-out infinite;
+}
+
 @keyframes recordPulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.3); }
     50% { box-shadow: 0 0 0 15px rgba(248, 113, 113, 0); }
+}
+
+@keyframes connectPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.35); }
+    50% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
+}
+
+@keyframes speakPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.45); }
+    50% { box-shadow: 0 0 0 18px rgba(129, 140, 248, 0); }
 }
 
 .mic-icon, .stop-icon {

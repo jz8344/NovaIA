@@ -8,6 +8,8 @@ ENV PYTHONUNBUFFERED=1
 # Instalar dependencias del sistema mínimas necesarias (como curl)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    gcc \
+    libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Establecer el directorio de trabajo

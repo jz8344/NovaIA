@@ -230,7 +230,7 @@ async def list_call_logs(request):
 async def list_active_sessions(request):
     if request.method == "GET":
         from core.session import TOKEN_LIMIT_PER_SESSION
-        sessions = _session_manager.active_sessions
+        sessions = await _session_manager.get_active_sessions()
         data = [
             {
                 "session_id": s.session_id,
@@ -376,7 +376,7 @@ async def prompt_config_handler(request):
             from django_project import state
             if state.redis_client is not None:
                 try:
-                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_to_save))
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(config_to_save), ex=86400)
                     logger.info(f"Config publicada en Redis para user_id={user_id}")
                 except Exception as re:
                     logger.error(f"Error actualizando Redis en api/admin: {re}")
@@ -825,7 +825,7 @@ async def odoo_agents_handler(request):
             from django_project import state
             if state.redis_client is not None:
                 try:
-                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config))
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config), ex=86400)
                     logger.info(f"Preset Odoo publicado en Redis para user_id={user_id}")
                 except Exception as re:
                     logger.error(f"Error actualizando Redis en api/admin para agente Odoo: {re}")
@@ -911,7 +911,7 @@ async def pms_agents_handler(request):
             from django_project import state
             if state.redis_client is not None:
                 try:
-                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config))
+                    await state.redis_client.set(f"prompt_config:{user_id}", json.dumps(existing_config), ex=86400)
                     logger.info(f"Preset PMS publicado en Redis para user_id={user_id}")
                 except Exception as re:
                     logger.error(f"Error actualizando Redis en api/admin para agente PMS: {re}")

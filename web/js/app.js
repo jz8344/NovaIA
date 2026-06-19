@@ -114,12 +114,35 @@ class NovaVoiceApp {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const agentSel = document.getElementById('agentSelector');
         const agent = agentSel ? agentSel.value : 'nova_default';
-        let wsUrl = `${protocol}//${window.location.host}/ws/voice?agent=${agent}`;
+        let wsHost = window.location.host;
+
+        // En desarrollo local redirigir al microservicio desacoplado en el puerto 8001
+        if (wsHost.includes('localhost') || wsHost.includes('127.0.0.1')) {
+            const hostWithoutPort = window.location.hostname;
+            wsHost = `${hostWithoutPort}:8001`;
+        } else if (window.NOVA_WS_URL) {
+            if (window.NOVA_WS_URL.startsWith('ws:') || window.NOVA_WS_URL.startsWith('wss:')) {
+                let wsUrl = `${window.NOVA_WS_URL}?agent=${agent}`;
+                if (this.adminUserId) {
+                    wsUrl += `&user_id=${this.adminUserId}`;
+                }
+                this.ws = new WebSocket(wsUrl);
+                this._initWebSocketEvents(agentSel, agent);
+                return;
+            }
+            wsHost = window.NOVA_WS_URL;
+        }
+
+        let wsUrl = `${protocol}//${wsHost}/ws/voice?agent=${agent}`;
         if (this.adminUserId) {
             wsUrl += `&user_id=${this.adminUserId}`;
         }
 
         this.ws = new WebSocket(wsUrl);
+        this._initWebSocketEvents(agentSel, agent);
+    }
+
+    _initWebSocketEvents(agentSel, agent) {
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -202,6 +225,7 @@ class NovaVoiceApp {
             this._turnDot.style.boxShadow = '0 0 8px #4f8ef7';
             this._turnText.textContent = `${this.agentName} está hablando…`;
             this.logEvent('ai', `▶ ${this.agentName} está hablando`);
+            this.updateUI('speaking');
         } else {
             this._turnIndicator.style.background = 'rgba(52,211,153,.08)';
             this._turnIndicator.style.borderColor = 'rgba(52,211,153,.35)';
@@ -210,6 +234,7 @@ class NovaVoiceApp {
             this._turnDot.style.boxShadow = '0 0 8px #34d399';
             this._turnText.textContent = '🎤 Tu turno — habla ahora';
             this.logEvent('system', '🎤 Tu turno');
+            this.updateUI('recording');
         }
     }
 
@@ -287,6 +312,10 @@ class NovaVoiceApp {
     updateUI(state) {
         const pill = this.statusPill;
         pill.classList.remove('connected', 'active');
+        this.micButton.classList.remove('recording', 'connecting', 'speaking');
+        this.voiceVisualizer.classList.remove('active', 'connecting', 'speaking');
+        this.waveformBar.classList.remove('active', 'speaking');
+        this.micButton.style.pointerEvents = 'auto'; // Permitir clicks por defecto
 
         switch (state) {
             case 'recording':
@@ -300,25 +329,33 @@ class NovaVoiceApp {
                 this.voiceInstruction.textContent = `Escuchando... Habla con ${this.agentName}`;
                 break;
 
+            case 'speaking':
+                pill.classList.add('active');
+                this.statusText.textContent = 'Nova respondiendo';
+                this.micButton.classList.add('recording', 'speaking');
+                this.micIcon.classList.add('hidden');
+                this.stopIcon.classList.remove('hidden');
+                this.voiceVisualizer.classList.add('active', 'speaking');
+                this.waveformBar.classList.add('active', 'speaking');
+                this.voiceInstruction.textContent = `${this.agentName} está hablando...`;
+                break;
+
             case 'connecting':
                 pill.classList.add('active');
                 this.statusText.textContent = 'Conectando';
-                this.micButton.classList.add('recording');
+                this.micButton.classList.add('connecting');
                 this.micIcon.classList.add('hidden');
                 this.stopIcon.classList.add('hidden');
-                this.voiceVisualizer.classList.remove('active');
-                this.waveformBar.classList.remove('active');
-                this.voiceInstruction.textContent = 'Conectando con el Asistente Virtual...';
+                this.voiceVisualizer.classList.add('connecting');
+                this.voiceInstruction.textContent = `Conectando con ${this.agentName}...`;
+                this.micButton.style.pointerEvents = 'none'; // Evitar doble click
                 break;
 
             case 'idle':
             default:
                 this.statusText.textContent = 'Desconectado';
-                this.micButton.classList.remove('recording');
                 this.micIcon.classList.remove('hidden');
                 this.stopIcon.classList.add('hidden');
-                this.voiceVisualizer.classList.remove('active');
-                this.waveformBar.classList.remove('active');
                 this.voiceInstruction.textContent = `Presiona el micrófono para hablar con ${this.agentName}`;
                 break;
         }

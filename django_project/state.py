@@ -189,6 +189,8 @@ async def init_resources():
             redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
             await asyncio.wait_for(redis_client.ping(), timeout=2.0)
             logger.info("✅ Conectado exitosamente a Redis")
+            from core.events import event_bus
+            event_bus.start_listener()
         except Exception as re:
             redis_client = None
             logger.warning(f"⚠️ No se pudo conectar a Redis: {re}. Continuando sin caché de Redis.")
@@ -258,6 +260,11 @@ async def close_resources():
     except Exception as e:
         logger.error(f"Error desconectando AMI Client: {e}")
     if redis_client:
+        try:
+            from core.events import event_bus
+            await event_bus.stop_listener()
+        except Exception as e:
+            logger.error(f"Error deteniendo listener de eventos: {e}")
         try:
             await redis_client.close()
         except Exception as e:
