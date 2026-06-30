@@ -521,9 +521,21 @@ class PmsWorker:
         )
 
     async def process(self, query: str, session=None) -> str:
+        import re
         q = query.lower()
 
-        if any(kw in q for kw in ["disponible", "libre", "desocupada", "hay habitacion", "tienes cuarto"]):
+        _meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+                  "agosto", "septiembre", "setiembre", "octubre", "noviembre", "diciembre"]
+        # ¿La consulta trae fechas? (ej. "11 al 18 de agosto", "2026-08-11", "11/08")
+        tiene_fecha = bool(re.search(r'\d{1,2}\s*(?:/|-|al|a)\s*\d{1,2}', q)) or any(m in q for m in _meses)
+        intencion_disponibilidad = any(kw in q for kw in [
+            "disponibil", "disponible", "libre", "desocupada", "hay habitacion",
+            "hay cuarto", "tienes cuarto", "tienen habitacion", "que habitacion",
+        ])
+
+        # Disponibilidad (incluye consultas con fechas). Aquí NUNCA se interpreta una
+        # fecha como número de habitación.
+        if intencion_disponibilidad or tiene_fecha:
             room_type = None
             for rtype in ["suite", "doble", "estándar", "estandar", "familiar", "presidencial", "junior"]:
                 if rtype in q:
@@ -531,8 +543,8 @@ class PmsWorker:
                     break
             return await self.get_available_rooms(room_type)
 
-        if any(kw in q for kw in ["estado", "estatus", "habitacion", "cuarto", "número", "numero"]):
-            import re
+        # Estado de UNA habitación específica: solo cuando no hay fechas de por medio.
+        if any(kw in q for kw in ["estado", "estatus", "habitacion", "habitación", "cuarto", "número", "numero"]):
             nums = re.findall(r'\b\d{1,4}\b', query)
             if nums:
                 return await self.check_room_status(nums[0])
@@ -540,7 +552,15 @@ class PmsWorker:
         if any(kw in q for kw in ["reserva", "reservacion", "booking", "reservado"]):
             return await self.get_reservations()
 
-        return await self.get_available_rooms()
+        # Si la consulta es claramente sobre habitaciones, muestra disponibilidad.
+        if any(kw in q for kw in ["habitacion", "habitación", "cuarto", "suite"]):
+            return await self.get_available_rooms()
+
+        # Pregunta general que el PMS NO conoce (estacionamiento, wifi, mascotas, políticas...).
+        # No devolvemos la lista de habitaciones para no dar respuestas incoherentes.
+        return ("No tengo ese dato registrado en el sistema hotelero. Si gustas, puedo ayudarte "
+                "con la disponibilidad de habitaciones, el estado de una habitación o tus reservas, "
+                "y lo demás con gusto lo confirmas en recepción.")
 
     async def test_connection(self) -> dict:
         ok = await self._authenticate()
