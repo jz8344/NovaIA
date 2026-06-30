@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagrama de Gantt — Planeación de Desarrollo Nova IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #FFFFFF;
+    --text-primary: #1a1a2e;
+    --text-secondary: #5a5a7a;
+    --text-tertiary: #8a8aaa;
+    --border: #e2e2f0;
+    --border-light: #f0f0f8;
+
+    --phase-plan: #0d7c5f;
+    --phase-arch: #4a3fb5;
+    --phase-core: #b86e10;
+    --phase-gemini: #c93d6e;
+    --phase-devops: #6b6b6b;
+    --phase-odoo: #2a75cc;
+    --phase-pms: #4d8c1a;
+    --phase-pbx: #c44e20;
+    --phase-qa: #16835e;
+    --phase-doc: #7a6ad4;
+
+    --onsite-bg: rgba(13, 124, 95, 0.04);
+    --remote-bg: rgba(74, 63, 181, 0.04);
+    --onsite-header: rgba(13, 124, 95, 0.08);
+    --remote-header: rgba(74, 63, 181, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    padding: 32px 28px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .doc-header {
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--text-primary);
+    padding-bottom: 16px;
+  }
+
+  .doc-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+
+  .doc-header .subtitle {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .meta-card {
+    background: #f8f8fc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .meta-card .label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+  }
+
+  .meta-card .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .meta-card .role {
+    font-size: 10px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  .legend-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 12px;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+
+  .leg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .mode-legend {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .mode-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+
+  .mode-dot {
+    width: 14px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+
+  table.gantt {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1050px;
+    table-layout: fixed;
+  }
+
+  table.gantt th,
+  table.gantt td {
+    font-size: 10px;
+    padding: 0;
+    border: none;
+  }
+
+  .col-id { width: 28px; }
+  .col-label { width: 248px; }
+  .col-resp { width: 100px; }
+  .wk-col { width: auto; }
+
+  thead th {
+    text-align: center;
+    font-weight: 400;
+    font-size: 9px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+    padding: 5px 2px;
+    border-bottom: 1.5px solid var(--text-primary);
+  }
+
+  thead th.onsite-h { background: var(--onsite-header); }
+  thead th.remote-h { background: var(--remote-header); }
+
+  thead th .wk-num {
+    display: block;
+    font-weight: 600;
+    font-size: 10px;
+    color: var(--text-primary);
+  }
+
+  .tag-p, .tag-r {
+    display: inline-block;
+    font-size: 7.5px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-top: 1px;
+    letter-spacing: 0.02em;
+  }
+
+  .tag-p {
+    background: rgba(13, 124, 95, 0.14);
+    color: #0a5e47;
+  }
+
+  .tag-r {
+    background: rgba(74, 63, 181, 0.12);
+    color: #3c3489;
+  }
+
+  thead th.col-label-h,
+  thead th.col-id-h,
+  thead th.col-resp-h {
+    text-align: left;
+    padding-left: 6px;
+    font-weight: 600;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+  }
+
+  .phase-row td {
+    padding: 7px 6px 3px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    border-top: 1.5px solid var(--border);
+    background: #fafaff;
+  }
+
+  .phase-row td .phase-icon {
+    margin-right: 4px;
+  }
+
+  .task-row {
+    border-bottom: 0.5px solid var(--border-light);
+  }
+
+  .task-row:hover {
+    background: rgba(0,0,0,0.015);
+  }
+
+  .task-id {
+    padding: 4px 4px 4px 6px;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  .task-label {
+    padding: 4px 6px;
+    font-size: 10.5px;
+    color: var(--text-primary);
+    line-height: 1.35;
+    vertical-align: middle;
+  }
+
+  .task-resp {
+    padding: 4px 6px;
+    font-size: 9px;
+    color: var(--text-secondary);
+    vertical-align: middle;
+    line-height: 1.35;
+  }
+
+  .task-resp .lead {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .cell {
+    vertical-align: middle;
+    padding: 3px 1px;
+  }
+
+  .cell.on { background: var(--onsite-bg); }
+  .cell.rm { background: var(--remote-bg); }
+
+  .bar {
+    height: 14px;
+    border-radius: 3px;
+    width: calc(100% - 2px);
+    margin: 0 1px;
+    opacity: 0.92;
+  }
+
+  .b-plan { background: var(--phase-plan); }
+  .b-arch { background: var(--phase-arch); }
+  .b-core { background: var(--phase-core); }
+  .b-gem  { background: var(--phase-gemini); }
+  .b-devops { background: var(--phase-devops); }
+  .b-odoo { background: var(--phase-odoo); }
+  .b-pms  { background: var(--phase-pms); }
+  .b-pbx  { background: var(--phase-pbx); }
+  .b-qa   { background: var(--phase-qa); }
+  .b-doc  { background: var(--phase-doc); }
+
+  .bar.striped {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.25) 3px,
+      rgba(255,255,255,0.25) 6px
+    );
+  }
+
+  .footer-section {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-section h3 {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+
+  .commits-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5px;
+  }
+
+  .commits-table th {
+    text-align: left;
+    font-size: 8.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .commits-table td {
+    padding: 3px 6px;
+    color: var(--text-secondary);
+    border-bottom: 0.5px solid var(--border-light);
+  }
+
+  .commits-table .hash {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: var(--phase-arch);
+  }
+
+  .doc-footer {
+    margin-top: 16px;
+    font-size: 9px;
+    color: var(--text-tertiary);
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  @media print {
+    body { padding: 12px 10px; }
+    .gantt-scroll { overflow: visible; }
+    table.gantt { min-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>Diagrama de Gantt — Planeación de Desarrollo de Software</h1>
+  <p class="subtitle">Proyecto: <strong>Nova IA</strong> — Agente de Voz Inteligente con Integración Empresarial &nbsp;·&nbsp; Período: Lunes 4 de mayo — Viernes 7 de agosto de 2026 (14 semanas)</p>
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="label">Desarrollador Core — Arquitectura</div>
+      <div class="name">José Javier Zanabria</div>
+      <div class="role">Implementación core, Backend (FastAPI/Django), APIs de integración, Frontend Design, Arquitectura del sistema</div>
+    </div>
+    <div class="meta-card">
+      <div class="label">Desarrollador IA — QA Correctivo</div>
+      <div class="name">Iván Alejandro Santana</div>
+      <div class="role">Especialista en IA, QA correctivo, corrección de errores, AI Testing, validación de modelos</div>
+    </div>
+    <div class="meta-card">
+      <div class="label">Desarrollador — QA & Análisis</div>
+      <div class="name">Hiram Baltazar</div>
+      <div class="role">QA Tester, documentación, diseño de BD, análisis funcional, configuración de plataformas</div>
+    </div>
+  </div>
+</div>
+
+<div class="mode-legend">
+  <div class="mode-item">
+    <div class="mode-dot" style="background:rgba(13,124,95,0.12);border-color:#0d7c5f;"></div>
+    Semana presencial (empresa)
+  </div>
+  <div class="mode-item">
+    <div class="mode-dot" style="background:rgba(74,63,181,0.10);border-color:#4a3fb5;"></div>
+    Semana remota (desarrollo)
+  </div>
+  <div class="mode-item" style="margin-left:10px;">
+    <div class="bar" style="width:20px;height:10px;border-radius:2px;background:var(--phase-qa);" class="striped"></div>
+    &nbsp;Barra rayada = tarea continua / paralela
+  </div>
+</div>
+
+<div class="legend-bar">
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-plan);"></span>F1 Planificación</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-arch);"></span>F2 Arquitectura</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-core);"></span>F3 Core VAD+Whisper</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-gemini);"></span>F4 Gemini Live+Workers</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-devops);"></span>F5 DevOps</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-odoo);"></span>F6 Odoo ERP</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-pms);"></span>F7 PMS Hotelero</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-pbx);"></span>F8 PBX Grandstream</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-qa);"></span>F9 Pruebas QA</span>
+  <span class="legend-item"><span class="leg-dot" style="background:var(--phase-doc);"></span>F10 Documentación</span>
+</div>
+
+<div class="gantt-scroll" style="overflow-x:auto;">
+<table class="gantt">
+<thead>
+<tr>
+  <th class="col-id-h col-id">#</th>
+  <th class="col-label-h col-label">Actividad</th>
+  <th class="col-resp-h col-resp">Responsable(s)</th>
+  <th class="wk-col onsite-h"><span class="wk-num">S1</span>4–8 may<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S2</span>11–16 may<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S3</span>18–22 may<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S4</span>25–29 may<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S5</span>1–5 jun<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S6</span>8–13 jun<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S7</span>15–20 jun<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S8</span>22–27 jun<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S9</span>29 jun–4 jul<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S10</span>6–11 jul<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S11</span>13–18 jul<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S12</span>20–25 jul<br><span class="tag-r">REMOTA</span></th>
+  <th class="wk-col onsite-h"><span class="wk-num">S13</span>27 jul–1 ago<br><span class="tag-p">PRESENCIAL</span></th>
+  <th class="wk-col remote-h"><span class="wk-num">S14</span>3–7 ago<br><span class="tag-r">REMOTA</span></th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ══════ FASE 1 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">📋</span> Fase 1 — Planificación y Análisis de Requerimientos</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">1.1</td>
+  <td class="task-label">Reunión inicial con empresa / Introducción</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"><div class="bar b-plan"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">1.2</td>
+  <td class="task-label">Levantamiento de requerimientos del sistema</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"><div class="bar b-plan"></div></td>
+  <td class="cell rm"><div class="bar b-plan"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">1.3</td>
+  <td class="task-label">Especificación de req. funcionales y no funcionales</td>
+  <td class="task-resp"><span class="lead">Hiram</span> · Zanabria</td>
+  <td class="cell on"><div class="bar b-plan"></div></td>
+  <td class="cell rm"><div class="bar b-plan"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">1.4</td>
+  <td class="task-label">Diagrama de casos de uso del sistema</td>
+  <td class="task-resp"><span class="lead">Hiram</span> · Zanabria</td>
+  <td class="cell on"><div class="bar b-plan"></div></td>
+  <td class="cell rm"><div class="bar b-plan"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">1.5</td>
+  <td class="task-label">Plan de proyecto, cronograma y asignación de roles</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"><div class="bar b-plan"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 2 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🏗️</span> Fase 2 — Arquitectura y Diseño del Sistema</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">2.1</td>
+  <td class="task-label">Modelo de arquitectura del sistema (microservicios)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-arch"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">2.2</td>
+  <td class="task-label">Diseño de modelo de datos / BD (SQLite inicial)</td>
+  <td class="task-resp"><span class="lead">Hiram</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-arch"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">2.3</td>
+  <td class="task-label">Definición de APIs, contratos y endpoints</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-arch"></div></td>
+  <td class="cell on"><div class="bar b-arch"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">2.4</td>
+  <td class="task-label">Configuración del entorno de desarrollo</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-arch"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 3 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">⚙️</span> Fase 3 — Desarrollo Core (Silero VAD + Whisper + FastAPI)</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">3.1</td>
+  <td class="task-label">Frontend web HTML (interfaz principal de voz)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-core"></div></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.2</td>
+  <td class="task-label">Backend FastAPI + WebSocket streaming audio</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-core"></div></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.3</td>
+  <td class="task-label">Integración Silero VAD (detección de actividad de voz)</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-core"></div></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.4</td>
+  <td class="task-label">Integración Whisper (transcripción speech-to-text)</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-core"></div></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.5</td>
+  <td class="task-label">BD SQLite: extensiones telefónicas + inventario básico</td>
+  <td class="task-resp"><span class="lead">Hiram</span></td>
+  <td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.6</td>
+  <td class="task-label">Transferencia de llamadas básica por extensión</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-core"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">3.7</td>
+  <td class="task-label">Verificación y análisis de testing de interfaz (demo)</td>
+  <td class="task-resp"><span class="lead">Hiram</span></td>
+  <td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-qa striped"></div></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 4 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🤖</span> Fase 4 — Migración a Gemini Live 2.0 + Sistema de Workers</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">4.1</td>
+  <td class="task-label">Integración Gemini Live Native 001 (agente de voz)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.2</td>
+  <td class="task-label">Gemini Flash Worker (orquestador de consultas)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.3</td>
+  <td class="task-label">Personalización del agente IA (prompt engineering)</td>
+  <td class="task-resp"><span class="lead">Santana</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.4</td>
+  <td class="task-label">Testing latencia modelo voz + worker</td>
+  <td class="task-resp"><span class="lead">Hiram</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-qa striped"></div></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.5</td>
+  <td class="task-label">Corrección de errores IA post-testing</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.6</td>
+  <td class="task-label">Sistema Function Calling dinámico (multi-tool)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.7</td>
+  <td class="task-label">Panel editor de prompts en interfaz web</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.8</td>
+  <td class="task-label">Configuración dinámica de prompt por tipo de agente</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.9</td>
+  <td class="task-label">Análisis de conmutador: permisos, restricciones, protocolos</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">4.10</td>
+  <td class="task-label">Security guard — detección prompt injection</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 5 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🚀</span> Fase 5 — DevOps y Despliegue Continuo</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">5.1</td>
+  <td class="task-label">Dockerización del sistema (contenedores)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-devops"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">5.2</td>
+  <td class="task-label">Despliegue Railway (modo dev) + variables entorno</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-devops"></div></td>
+  <td class="cell on"><div class="bar b-devops"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">5.3</td>
+  <td class="task-label">Migración SQLite → PostgreSQL (Railway)</td>
+  <td class="task-resp"><span class="lead">Hiram</span> · Zanabria</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-devops"></div></td>
+  <td class="cell on"><div class="bar b-devops"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">5.4</td>
+  <td class="task-label">Despliegue producción + monitoreo de logs</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-devops"></div></td>
+  <td class="cell rm"><div class="bar b-devops"></div></td>
+</tr>
+
+<!-- ══════ FASE 6 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🔗</span> Fase 6 — Integración Odoo ERP (JSON-RPC2 / API)</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">6.1</td>
+  <td class="task-label">Investigación API Odoo + conexión JSON-RPC2</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-odoo"></div></td>
+  <td class="cell on"><div class="bar b-odoo"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.2</td>
+  <td class="task-label">Configuración BD Odoo: usuario API + permisos + datos</td>
+  <td class="task-resp"><span class="lead">Hiram</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-odoo"></div></td>
+  <td class="cell rm"><div class="bar b-odoo"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.3</td>
+  <td class="task-label">Odoo Worker: consulta inventario / productos / variantes</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-odoo"></div></td>
+  <td class="cell rm"><div class="bar b-odoo"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.4</td>
+  <td class="task-label">Odoo Worker: crear cotizaciones / órdenes de venta</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-odoo"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.5</td>
+  <td class="task-label">Testing consultas Odoo en modelo de voz</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"><div class="bar b-qa striped"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.6</td>
+  <td class="task-label">Odoo Worker: mailing masivo publicitario desde voz</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-odoo"></div></td>
+  <td class="cell on"><div class="bar b-odoo"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.7</td>
+  <td class="task-label">Testing mailing + verificación de funcionalidad</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.8</td>
+  <td class="task-label">Análisis de escalabilidad (100 llamadas simultáneas)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">6.9</td>
+  <td class="task-label">Metodología flujo adaptativo (SQL / Odoo / PMS router)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-gem"></div></td>
+  <td class="cell rm"><div class="bar b-gem"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 7 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🏨</span> Fase 7 — Integración PMS Hotelero (Grandstream)</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">7.1</td>
+  <td class="task-label">Análisis y mapeado API PMS Hotelería</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.2</td>
+  <td class="task-label">Conexión API PMS + usuario específico de integración</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"><div class="bar b-pms"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.3</td>
+  <td class="task-label">PMS Worker: consulta disponibilidad de habitaciones</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"><div class="bar b-pms"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.4</td>
+  <td class="task-label">PMS Worker: crear / modificar reservas instantáneas</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"><div class="bar b-pms"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.5</td>
+  <td class="task-label">Personalización agente voz para funciones hoteleras</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"><div class="bar b-pms"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.6</td>
+  <td class="task-label">Testing y propuestas de mejora en plataforma PMS</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-qa striped"></div></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">7.7</td>
+  <td class="task-label">Optimización PMS Worker + corrección de latencia</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-pms"></div></td>
+  <td class="cell on"><div class="bar b-pms"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 8 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">📞</span> Fase 8 — Integración PBX Grandstream UCM6302</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">8.1</td>
+  <td class="task-label">Análisis arquitectura PBX + diagrama de red</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">8.2</td>
+  <td class="task-label">AMI Client + AudioSocket Server (Asterisk)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pbx"></div></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">8.3</td>
+  <td class="task-label">Enlace PBX ↔ Django Admin (extensiones, CDRs)</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Hiram</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-pbx"></div></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">8.4</td>
+  <td class="task-label">Enlace PBX ↔ FastAPI voz + Gemini Live</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"><div class="bar b-pbx"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">8.5</td>
+  <td class="task-label">Dial plan UCM6302 → AudioSocket → Nova IA</td>
+  <td class="task-resp"><span class="lead">Zanabria</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"><div class="bar b-pbx"></div></td>
+  <td class="cell rm"><div class="bar b-pbx"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">8.6</td>
+  <td class="task-label">Pruebas llamadas reales PBX extremo a extremo</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"><div class="bar b-qa striped"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 9 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">🧪</span> Fase 9 — Pruebas y Aseguramiento de Calidad</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">9.1</td>
+  <td class="task-label">Pruebas unitarias (auth, BD, workers)</td>
+  <td class="task-resp"><span class="lead">Santana</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa striped"></div></td>
+  <td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa"></div></td>
+  <td class="cell rm"><div class="bar b-qa"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">9.2</td>
+  <td class="task-label">Pruebas de integración multi-worker (SQLite/PG/Odoo/PMS)</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-qa"></div></td>
+  <td class="cell rm"><div class="bar b-qa"></div></td>
+  <td class="cell on"></td><td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">9.3</td>
+  <td class="task-label">Revisión de seguridad y rotación de secretos</td>
+  <td class="task-resp"><span class="lead">Zanabria</span> · Santana</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-qa"></div></td>
+  <td class="cell on"><div class="bar b-qa"></div></td>
+  <td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">9.4</td>
+  <td class="task-label">Bug fixing y correcciones finales</td>
+  <td class="task-resp"><span class="lead">Santana</span> · Zanabria</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-qa"></div></td>
+  <td class="cell on"><div class="bar b-qa"></div></td>
+  <td class="cell rm"></td>
+</tr>
+
+<!-- ══════ FASE 10 ══════ -->
+<tr class="phase-row"><td colspan="18"><span class="phase-icon">📄</span> Fase 10 — Documentación y Entrega Final</td></tr>
+
+<tr class="task-row">
+  <td class="task-id">10.1</td>
+  <td class="task-label">Documentación técnica del sistema (memoria técnica)</td>
+  <td class="task-resp"><span class="lead">Hiram</span> · Zanabria</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-doc"></div></td>
+  <td class="cell on"><div class="bar b-doc"></div></td>
+  <td class="cell rm"></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">10.2</td>
+  <td class="task-label">Manual operativo / guía de configuración</td>
+  <td class="task-resp"><span class="lead">Hiram</span> · Zanabria</td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td>
+  <td class="cell on"><div class="bar b-doc"></div></td>
+  <td class="cell rm"><div class="bar b-doc"></div></td>
+</tr>
+
+<tr class="task-row">
+  <td class="task-id">10.3</td>
+  <td class="task-label">Presentación y entrega final al cliente</td>
+  <td class="task-resp"><span class="lead">Todos</span></td>
+  <td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td><td class="cell rm"></td><td class="cell on"></td>
+  <td class="cell rm"><div class="bar b-doc"></div></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<!-- TRAZABILIDAD CON COMMITS REALES -->
+<div class="footer-section">
+  <h3>📌 Trazabilidad — Commits del Repositorio (verificados con <code>git log</code>)</h3>
+  <table class="commits-table">
+    <thead>
+      <tr>
+        <th>Hash</th>
+        <th>Fecha</th>
+        <th>Semana</th>
+        <th>Descripción del Commit</th>
+        <th>Fase</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="hash">17ac35b</td><td>2026-05-12</td><td>S2</td><td>First commit — Estructura inicial del proyecto</td><td>F3 Core</td></tr>
+      <tr><td class="hash">3600a5e</td><td>2026-05-15</td><td>S2</td><td>Second Commit — Backend FastAPI base</td><td>F3 Core</td></tr>
+      <tr><td class="hash">25aa632</td><td>2026-05-15</td><td>S2</td><td>Tercer Commit Estable — VAD + Whisper funcional</td><td>F3 Core</td></tr>
+      <tr><td class="hash">4aab4b8</td><td>2026-05-15</td><td>S2</td><td>Cuarto commit — Mejoras de transcripción</td><td>F3 Core</td></tr>
+      <tr><td class="hash">cb86db2</td><td>2026-05-18</td><td>S3</td><td>Quinto Commit — Integración SQLite extensiones</td><td>F3 Core</td></tr>
+      <tr><td class="hash">3bff132</td><td>2026-05-18</td><td>S3</td><td>Sexto Commit — Consulta inventario SQLite</td><td>F3 Core</td></tr>
+      <tr><td class="hash">1d7c3a7</td><td>2026-05-18</td><td>S3</td><td>Séptimo Commit — Transferencia de llamadas</td><td>F3 Core</td></tr>
+      <tr><td class="hash">143b54b</td><td>2026-05-20</td><td>S3</td><td>Octavo Commit V2 Estable — Búsquedas largas</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">b86b3bd</td><td>2026-05-20</td><td>S3</td><td>Noveno Commit — Búsqueda Worker Paralelo</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">1c0a6f9</td><td>2026-05-21</td><td>S3</td><td>Décimo Commit — Configuración de prompts</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">1b18eac</td><td>2026-05-21</td><td>S3</td><td>Onceavo Commit — Migración Gemini Live</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">af8003b</td><td>2026-05-22</td><td>S3</td><td>Co-authored: Ivan-Santana908 + tkerk (Hiram)</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">fcbe180</td><td>2026-05-22</td><td>S3</td><td>Doceavo commit — Estabilización Gemini</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">3e0de75</td><td>2026-05-24</td><td>S4</td><td>Terceavo Commit — Refact Plural Search</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">cb4324a</td><td>2026-05-28</td><td>S4</td><td>Odoo Client test — Conexión API Odoo inicial</td><td>F6 Odoo</td></tr>
+      <tr><td class="hash">bb1a6da</td><td>2026-05-29</td><td>S4</td><td>Cotizaciones Odoo Create — Worker cotizaciones</td><td>F6 Odoo</td></tr>
+      <tr><td class="hash">0796c39</td><td>2026-06-02</td><td>S5</td><td>Fix Prompt Loader and Gemini Live</td><td>F4/F5</td></tr>
+      <tr><td class="hash">5f8e35a</td><td>2026-06-03</td><td>S5</td><td>V10 ESTABLE — Cotización + Prompt Loader</td><td>F6 Odoo</td></tr>
+      <tr><td class="hash">3ac936f</td><td>2026-06-03</td><td>S5</td><td>V11 Estable — Sistema consolidado</td><td>F5 DevOps</td></tr>
+      <tr><td class="hash">aac343e</td><td>2026-06-04</td><td>S5</td><td>V11.1 README — Documentación</td><td>F10 Doc</td></tr>
+      <tr><td class="hash">80882a8</td><td>2026-06-05</td><td>S5</td><td>V12 Mailing Worker Odoo — Correo masivo</td><td>F6 Odoo</td></tr>
+      <tr><td class="hash">c034632</td><td>2026-06-12</td><td>S6</td><td>V13 Multiple Fixes UI, Prompt Save, Responsive</td><td>F4 Gemini</td></tr>
+      <tr><td class="hash">f23d33d</td><td>2026-06-16</td><td>S7</td><td>V14 PMS Calling — Integración PMS</td><td>F7 PMS</td></tr>
+      <tr><td class="hash">c5882cb</td><td>2026-06-17</td><td>S7</td><td>V15 API PMS Fixs, Prompt Loader fix</td><td>F7 PMS</td></tr>
+      <tr><td class="hash">6245512</td><td>2026-06-19</td><td>S7</td><td>V16 System Fixs — Correcciones generales</td><td>F7/F9 QA</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="doc-footer">
+  <strong>Nova IA</strong> — Agente de Voz Inteligente con Integración Empresarial &nbsp;·&nbsp; Repositorio: jz8344/NovaIA &nbsp;·&nbsp; Documento generado: 22 de junio de 2026<br>
+  Equipo de desarrollo: José Javier Zanabria · Iván Alejandro Santana · Hiram Baltazar
+</div>
+
+</body>
+</html>

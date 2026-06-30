@@ -5,8 +5,8 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     gemini_api_key: str = Field(default="", description="Google Gemini API Key")
-    gemini_model: str = Field(default="gemini-2.0-flash-live-001", description="Modelo Gemini Live")
-    gemini_worker_model: str = Field(default="gemini-2.0-flash", description="Modelo Gemini para Worker de inventario")
+    gemini_model: str = Field(default="gemini-2.5-flash-native-audio-preview-12-2025", description="Modelo Gemini Live")
+    gemini_worker_model: str = Field(default="gemini-2.5-flash", description="Modelo Gemini para Worker de inventario")
 
     ami_host: str = Field(default="127.0.0.1")
     ami_port: int = Field(default=5038)

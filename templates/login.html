@@ -8,27 +8,28 @@
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
             --bg:           #060812;
-            --card-bg:      rgba(12, 16, 32, 0.82);
-            --border:       rgba(99, 135, 255, 0.15);
+            --panel-bg:     #080a16;
+            --border:       rgba(99, 135, 255, 0.12);
             --border-focus: rgba(99, 135, 255, 0.55);
+            --input-bg:     rgba(255, 255, 255, 0.03);
+            --input-hover:  rgba(255, 255, 255, 0.055);
             --text-1:       #eef2ff;
             --text-2:       #8896b3;
             --text-3:       #3d4a6b;
             --accent:       #5b7fff;
             --accent-2:     #818cf8;
+            --accent-3:     #a5b4fc;
             --accent-glow:  rgba(91, 127, 255, 0.35);
             --danger:       #f87171;
             --success:      #4ade80;
             --font:         'Inter', system-ui, sans-serif;
-            --radius-card:  20px;
-            --radius-input: 10px;
-            --radius-btn:   10px;
+            --font-display: 'Outfit', 'Inter', sans-serif;
             --ease:         cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -41,142 +42,123 @@
             overflow: hidden;
         }
 
-        /* ── CANVAS DE PARTÍCULAS ── */
-        #particleCanvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* ── LAYOUT ── */
-        .page {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
+        .split {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* ── CARD ── */
-        .card {
-            width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-card);
-            padding: 40px 36px 36px;
-            backdrop-filter: blur(24px) saturate(160%);
-            -webkit-backdrop-filter: blur(24px) saturate(160%);
-            box-shadow:
-                0 0 0 1px rgba(255,255,255,0.04) inset,
-                0 24px 64px rgba(0,0,0,0.55),
-                0 0 80px rgba(91,127,255,0.07);
-            animation: cardIn 0.65s var(--ease) both;
-        }
-
-        @keyframes cardIn {
-            from { opacity: 0; transform: translateY(24px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* ── LOGO ── */
-        .logo-area {
+        /* ── LEFT: FORM PANEL ── */
+        .panel-form {
+            flex: 0 0 min(480px, 42vw);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 32px;
-            text-align: center;
-        }
-
-        .logo-icon-wrap {
+            justify-content: center;
+            padding: 56px 52px;
+            background: var(--panel-bg);
             position: relative;
-            width: 58px;
-            height: 58px;
+            z-index: 2;
+            animation: formIn 0.6s var(--ease) both;
         }
 
-        .logo-icon-wrap::before {
+        @keyframes formIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .panel-form::after {
             content: '';
             position: absolute;
-            inset: -8px;
-            border-radius: 20px;
-            background: radial-gradient(circle, rgba(91,127,255,0.2), transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, var(--border), rgba(99, 135, 255, 0.08), transparent);
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.12); opacity: 1; }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 52px;
         }
 
-        .logo-icon-inner {
-            width: 58px;
-            height: 58px;
+        .brand-icon {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .brand-icon::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
             border-radius: 16px;
-            background: linear-gradient(135deg, rgba(91,127,255,0.18), rgba(129,140,248,0.12));
-            border: 1px solid rgba(91,127,255,0.3);
+            background: radial-gradient(circle, rgba(91,127,255,0.15), transparent 70%);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50%      { transform: scale(1.15); opacity: 1; }
+        }
+
+        .brand-icon-inner {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, rgba(91,127,255,0.14), rgba(129,140,248,0.08));
+            border: 1px solid rgba(91,127,255,0.25);
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
-        .logo-icon-inner svg { width: 28px; height: 28px; }
+        .brand-icon-inner svg { width: 22px; height: 22px; }
 
-        .logo-title {
-            font-size: 1.65rem;
+        .brand-name {
+            font-family: var(--font-display);
             font-weight: 700;
+            font-size: 1.5rem;
             letter-spacing: -0.04em;
-            line-height: 1;
             background: linear-gradient(130deg, #c7d2fe 0%, #818cf8 45%, #a5b4fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .logo-sub {
-            font-size: 0.8rem;
-            font-weight: 400;
+        .form-header {
+            margin-bottom: 36px;
+        }
+
+        .form-header h1 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.65rem;
+            letter-spacing: -0.03em;
+            color: var(--text-1);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 0.88rem;
             color: var(--text-2);
-            letter-spacing: 0.01em;
+            line-height: 1.5;
         }
 
-        /* ── DIVIDER ── */
-        .section-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 22px;
-        }
-        .section-label::before,
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-        .section-label span {
-            font-size: 0.73rem;
-            color: var(--text-3);
-            white-space: nowrap;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        /* ── FORM ── */
         .field {
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .field label {
             display: block;
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 600;
             color: var(--text-2);
-            margin-bottom: 6px;
-            letter-spacing: 0.03em;
+            margin-bottom: 7px;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
         }
 
@@ -187,22 +169,26 @@
         .input-wrap input {
             display: block;
             width: 100%;
-            background: rgba(0,0,0,0.28);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: var(--radius-input);
+            background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
             color: var(--text-1);
             font-family: var(--font);
             font-size: 0.92rem;
-            font-weight: 400;
-            padding: 11px 14px;
+            padding: 12px 14px 12px 44px;
             outline: none;
             transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
 
+        .input-wrap input:hover {
+            background: var(--input-hover);
+            border-color: rgba(255,255,255,0.1);
+        }
+
         .input-wrap input:focus {
             border-color: var(--border-focus);
-            background: rgba(0,0,0,0.42);
-            box-shadow: 0 0 0 3px rgba(91,127,255,0.14), 0 0 16px rgba(91,127,255,0.08);
+            background: rgba(91, 127, 255, 0.04);
+            box-shadow: 0 0 0 3px rgba(91,127,255,0.12), 0 0 20px rgba(91,127,255,0.06);
         }
 
         .input-wrap input::placeholder {
@@ -210,18 +196,30 @@
             font-weight: 400;
         }
 
-        .input-wrap.has-eye input {
-            padding-right: 44px;
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-3);
+            pointer-events: none;
+            transition: color 0.2s;
         }
+
+        .input-icon svg { width: 16px; height: 16px; }
+
+        .input-wrap:focus-within .input-icon { color: var(--accent-2); }
+
+        .input-wrap.has-eye input { padding-right: 44px; }
 
         .btn-eye {
             position: absolute;
             top: 50%;
-            right: 11px;
+            right: 10px;
             transform: translateY(-50%);
             background: none;
             border: none;
-            padding: 4px;
+            padding: 5px;
             cursor: pointer;
             color: var(--text-3);
             display: flex;
@@ -230,26 +228,28 @@
             border-radius: 6px;
             transition: color 0.15s, background 0.15s;
         }
+
         .btn-eye:hover { color: var(--text-2); background: rgba(255,255,255,0.06); }
         .btn-eye svg { width: 16px; height: 16px; }
 
-        /* ── ERROR ── */
         .error-box {
             display: none;
             align-items: center;
             gap: 9px;
-            background: rgba(248,113,113,0.08);
-            border: 1px solid rgba(248,113,113,0.2);
+            background: rgba(248,113,113,0.07);
+            border: 1px solid rgba(248,113,113,0.18);
             border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 16px;
+            padding: 10px 13px;
+            margin-bottom: 18px;
             font-size: 0.82rem;
             color: var(--danger);
         }
+
         .error-box.show {
             display: flex;
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
+
         .error-box svg { flex-shrink: 0; }
 
         @keyframes shake {
@@ -259,15 +259,14 @@
             40%,60% { transform: translate3d(3px,0,0); }
         }
 
-        /* ── SUBMIT BUTTON ── */
         .btn-submit {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             width: 100%;
-            padding: 12px 20px;
-            border-radius: var(--radius-btn);
+            padding: 13px 20px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #4f6fe0, #6366f1 50%, #818cf8);
             background-size: 200% 200%;
             color: #fff;
@@ -278,8 +277,8 @@
             border: none;
             cursor: pointer;
             transition: opacity 0.2s, transform 0.15s, box-shadow 0.25s, background-position 0.4s;
-            margin-top: 20px;
-            box-shadow: 0 4px 20px rgba(91,127,255,0.3), 0 1px 0 rgba(255,255,255,0.12) inset;
+            margin-top: 24px;
+            box-shadow: 0 4px 20px rgba(91,127,255,0.25), 0 1px 0 rgba(255,255,255,0.1) inset;
             position: relative;
             overflow: hidden;
         }
@@ -294,17 +293,16 @@
 
         .btn-submit:hover:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 8px 30px rgba(91,127,255,0.45);
+            box-shadow: 0 8px 32px rgba(91,127,255,0.4);
             background-position: 100% 0;
         }
 
         .btn-submit:active:not(:disabled) {
             transform: translateY(1px) scale(0.99);
-            box-shadow: 0 2px 12px rgba(91,127,255,0.3);
         }
 
         .btn-submit:disabled {
-            opacity: 0.6;
+            opacity: 0.55;
             cursor: not-allowed;
         }
 
@@ -314,38 +312,151 @@
             border: 2px solid rgba(255,255,255,0.3);
             border-top-color: #fff;
             border-radius: 50%;
-            animation: spin 0.65s linear infinite;
+            animation: spin 0.6s linear infinite;
             flex-shrink: 0;
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── FOOTER ── */
-        .card-footer {
-            margin-top: 22px;
+        .form-footer {
+            margin-top: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            font-size: 0.73rem;
+            font-size: 0.72rem;
             color: var(--text-3);
         }
-        .card-footer svg { width: 12px; height: 12px; opacity: 0.6; }
+
+        .form-footer svg { width: 12px; height: 12px; opacity: 0.5; }
+
+        /* ── RIGHT: NEURAL CANVAS ── */
+        .panel-visual {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg);
+            animation: visualIn 0.7s var(--ease) 0.1s both;
+        }
+
+        @keyframes visualIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        #neuralCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .visual-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 56px;
+            pointer-events: none;
+            z-index: 2;
+            background: linear-gradient(0deg, rgba(6,8,18,0.7) 0%, rgba(6,8,18,0.2) 35%, transparent 60%);
+        }
+
+        .visual-tagline {
+            font-family: var(--font-display);
+            font-weight: 300;
+            font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+            line-height: 1.25;
+            letter-spacing: -0.03em;
+            color: rgba(238, 242, 255, 0.85);
+            max-width: 440px;
+        }
+
+        .visual-tagline strong {
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #a5b4fc, #5b7fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .visual-sub {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: rgba(136, 150, 179, 0.6);
+            max-width: 360px;
+        }
+
+        .mouse-glow {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(91,127,255,0.12), transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .panel-visual:hover .mouse-glow { opacity: 1; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .split {
+                flex-direction: column-reverse;
+            }
+
+            .panel-form {
+                flex: none;
+                width: 100%;
+                padding: 36px 28px 32px;
+                animation-name: formInMobile;
+            }
+
+            @keyframes formInMobile {
+                from { opacity: 0; transform: translateY(16px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            .panel-form::after { display: none; }
+
+            .panel-visual {
+                flex: none;
+                height: 30vh;
+                min-height: 180px;
+            }
+
+            .visual-overlay {
+                padding: 24px 28px;
+                background: linear-gradient(0deg, rgba(6,8,18,0.75) 0%, transparent 70%);
+            }
+
+            .visual-tagline { font-size: 1.25rem; }
+            .visual-sub { font-size: 0.78rem; margin-top: 6px; }
+
+            .brand { margin-bottom: 32px; }
+            .form-header { margin-bottom: 24px; }
+            .form-header h1 { font-size: 1.35rem; }
+        }
 
         @media (max-width: 480px) {
-            .card { padding: 30px 22px 26px; }
+            .panel-form { padding: 28px 20px 24px; }
+            .panel-visual { height: 25vh; min-height: 140px; }
+            .visual-overlay { padding: 16px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="particleCanvas"></canvas>
+    <div class="split">
 
-    <div class="page">
-        <div class="card">
-
-            <div class="logo-area">
-                <div class="logo-icon-wrap">
-                    <div class="logo-icon-inner">
+        <div class="panel-form">
+            <div class="brand">
+                <div class="brand-icon">
+                    <div class="brand-icon-inner">
                         <svg viewBox="0 0 28 28" fill="none">
                             <circle cx="14" cy="14" r="12" stroke="url(#gLogo)" stroke-width="1.4"/>
                             <path d="M10.5 19V9l9 5-9 5z" fill="url(#gLogo)"/>
@@ -358,13 +469,13 @@
                         </svg>
                     </div>
                 </div>
-                <div>
-                    <div class="logo-title">Nova</div>
-                    <div class="logo-sub">Panel de Administración</div>
-                </div>
+                <span class="brand-name">Nova</span>
             </div>
 
-            <div class="section-label"><span>Acceso seguro</span></div>
+            <div class="form-header">
+                <h1>Iniciar Sesión</h1>
+                <p>Ingresa tus credenciales para continuar</p>
+            </div>
 
             <div class="error-box" id="errorBox" role="alert">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -376,6 +487,12 @@
                 <div class="field">
                     <label for="identifier">Usuario o correo</label>
                     <div class="input-wrap">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </span>
                         <input
                             type="text"
                             id="identifier"
@@ -392,6 +509,12 @@
                 <div class="field">
                     <label for="password">Contraseña</label>
                     <div class="input-wrap has-eye">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </span>
                         <input
                             type="password"
                             id="password"
@@ -415,182 +538,234 @@
 
             </form>
 
-            <div class="card-footer">
+            <div class="form-footer">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Acceso restringido — Solo administradores
             </div>
-
         </div>
+
+        <div class="panel-visual" id="panelVisual">
+            <canvas id="neuralCanvas"></canvas>
+            <div class="mouse-glow" id="mouseGlow"></div>
+            <div class="visual-overlay">
+                <div class="visual-tagline">Inteligencia que impulsa tu <strong>negocio</strong></div>
+                <div class="visual-sub">Plataforma de IA conversacional de siguiente generación</div>
+            </div>
+        </div>
+
     </div>
 
     <script>
     /* ══════════════════════════════════════════════
-       SISTEMA DE PARTÍCULAS (reacciona al mouse)
+       RED NEURONAL INTERACTIVA
     ══════════════════════════════════════════════ */
     (function () {
-        const canvas  = document.getElementById('particleCanvas');
-        const ctx     = canvas.getContext('2d');
-        let W, H, particles, animId;
+        const canvas = document.getElementById('neuralCanvas');
+        const ctx    = canvas.getContext('2d');
+        const panel  = document.getElementById('panelVisual');
+        const glowEl = document.getElementById('mouseGlow');
 
         const CFG = {
-            count:        110,
-            baseRadius:   1.6,
-            speed:        0.38,
-            connectDist:  140,
-            mouseRadius:  160,
-            mouseForce:   0.045,
-            colors:       ['#5b7fff', '#818cf8', '#a5b4fc', '#c7d2fe', '#6366f1'],
-            lineAlpha:    0.18,
+            nodes:       85,
+            maxDist:     150,
+            mouseRadius: 200,
+            mouseForce:  0.055,
+            baseSpeed:   0.32,
+            lineAlpha:   0.22,
+            nodeMinR:    1,
+            nodeMaxR:    2.4,
+            mouseNodeBoost: 3.5,
+            pulseSpeed:  1.1,
+            colors: [
+                [91, 127, 255],
+                [129, 140, 248],
+                [165, 180, 252],
+                [99, 102, 241],
+            ],
+            lineColors: [
+                [91, 127, 255],
+                [129, 140, 248],
+            ],
         };
 
-        const mouse = { x: -9999, y: -9999 };
-
-        window.addEventListener('mousemove', e => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+        let nodes = [];
+        let mouse = { x: -9999, y: -9999, active: false };
+        let W, H, dpr, animId;
 
         function resize() {
-            W = canvas.width  = window.innerWidth;
-            H = canvas.height = window.innerHeight;
+            const rect = panel.getBoundingClientRect();
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = rect.width;
+            H = rect.height;
+            canvas.width  = W * dpr;
+            canvas.height = H * dpr;
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
-        class Particle {
-            constructor() { this.reset(true); }
-
-            reset(init = false) {
-                this.x  = Math.random() * W;
-                this.y  = Math.random() * H;
-                this.vx = (Math.random() - 0.5) * CFG.speed;
-                this.vy = (Math.random() - 0.5) * CFG.speed;
-                this.r  = CFG.baseRadius * (0.5 + Math.random() * 1.1);
-                this.color = CFG.colors[Math.floor(Math.random() * CFG.colors.length)];
-                this.alpha = 0.3 + Math.random() * 0.55;
-                this.baseAlpha = this.alpha;
-                if (init) {
-                    this.x = Math.random() * W;
-                    this.y = Math.random() * H;
-                }
+        function createNodes() {
+            nodes = [];
+            for (let i = 0; i < CFG.nodes; i++) {
+                const c = CFG.colors[Math.floor(Math.random() * CFG.colors.length)];
+                nodes.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    vx: (Math.random() - 0.5) * CFG.baseSpeed,
+                    vy: (Math.random() - 0.5) * CFG.baseSpeed,
+                    r: CFG.nodeMinR + Math.random() * (CFG.nodeMaxR - CFG.nodeMinR),
+                    phase: Math.random() * Math.PI * 2,
+                    color: c,
+                    alpha: 0.35 + Math.random() * 0.4,
+                    baseAlpha: 0,
+                });
+                nodes[i].baseAlpha = nodes[i].alpha;
             }
-
-            update() {
-                const dx    = mouse.x - this.x;
-                const dy    = mouse.y - this.y;
-                const dist  = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < CFG.mouseRadius && dist > 0) {
-                    const force  = (CFG.mouseRadius - dist) / CFG.mouseRadius;
-                    const angle  = Math.atan2(dy, dx);
-                    const push   = force * CFG.mouseForce * (CFG.mouseRadius / Math.max(dist, 1));
-                    this.vx     -= Math.cos(angle) * push;
-                    this.vy     -= Math.sin(angle) * push;
-                    this.alpha   = Math.min(1, this.baseAlpha + force * 0.6);
-                } else {
-                    this.alpha += (this.baseAlpha - this.alpha) * 0.04;
-                }
-
-                // Damping
-                this.vx *= 0.985;
-                this.vy *= 0.985;
-
-                // Drift back to base speed
-                const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (spd < CFG.speed * 0.3) {
-                    this.vx += (Math.random() - 0.5) * 0.03;
-                    this.vy += (Math.random() - 0.5) * 0.03;
-                }
-
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Wrap edges
-                if (this.x < -20) this.x = W + 20;
-                if (this.x > W + 20) this.x = -20;
-                if (this.y < -20) this.y = H + 20;
-                if (this.y > H + 20) this.y = -20;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 6;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        function buildParticles() {
-            particles = Array.from({ length: CFG.count }, () => new Particle());
-        }
-
-        function drawConnections() {
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const a = particles[i];
-                    const b = particles[j];
-                    const dx = a.x - b.x;
-                    const dy = a.y - b.y;
-                    const d  = Math.sqrt(dx * dx + dy * dy);
-                    if (d > CFG.connectDist) continue;
-
-                    const alpha = CFG.lineAlpha * (1 - d / CFG.connectDist);
-
-                    const grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-                    grd.addColorStop(0, a.color);
-                    grd.addColorStop(1, b.color);
-
-                    ctx.save();
-                    ctx.globalAlpha = alpha;
-                    ctx.strokeStyle = grd;
-                    ctx.lineWidth   = 0.65;
-                    ctx.beginPath();
-                    ctx.moveTo(a.x, a.y);
-                    ctx.lineTo(b.x, b.y);
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-        }
-
-        function drawMouseGlow() {
-            if (mouse.x < 0 || mouse.x > W) return;
-            const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, CFG.mouseRadius);
-            grd.addColorStop(0, 'rgba(91,127,255,0.08)');
-            grd.addColorStop(1, 'rgba(91,127,255,0)');
-            ctx.save();
-            ctx.fillStyle = grd;
-            ctx.beginPath();
-            ctx.arc(mouse.x, mouse.y, CFG.mouseRadius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
         }
 
         function loop() {
             ctx.clearRect(0, 0, W, H);
-            drawMouseGlow();
-            drawConnections();
-            particles.forEach(p => { p.update(); p.draw(); });
+            const t = performance.now() * 0.001;
+
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+
+                if (mouse.active) {
+                    const dx = n.x - mouse.x;
+                    const dy = n.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CFG.mouseRadius && dist > 0) {
+                        const force = (CFG.mouseRadius - dist) / CFG.mouseRadius;
+                        const angle = Math.atan2(dy, dx);
+                        const push  = force * CFG.mouseForce * (CFG.mouseRadius / Math.max(dist, 1));
+                        n.vx += Math.cos(angle) * push;
+                        n.vy += Math.sin(angle) * push;
+                        n.alpha = Math.min(1, n.baseAlpha + force * 0.55);
+                    } else {
+                        n.alpha += (n.baseAlpha - n.alpha) * 0.04;
+                    }
+                } else {
+                    n.alpha += (n.baseAlpha - n.alpha) * 0.04;
+                }
+
+                n.vx *= 0.988;
+                n.vy *= 0.988;
+
+                const spd = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+                if (spd < CFG.baseSpeed * 0.25) {
+                    n.vx += (Math.random() - 0.5) * 0.025;
+                    n.vy += (Math.random() - 0.5) * 0.025;
+                }
+
+                n.x += n.vx;
+                n.y += n.vy;
+
+                if (n.x < -20) n.x = W + 20;
+                if (n.x > W + 20) n.x = -20;
+                if (n.y < -20) n.y = H + 20;
+                if (n.y > H + 20) n.y = -20;
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                const a = nodes[i];
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const b = nodes[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const d  = Math.sqrt(dx * dx + dy * dy);
+                    if (d > CFG.maxDist) continue;
+
+                    let alpha = CFG.lineAlpha * (1 - d / CFG.maxDist);
+
+                    if (mouse.active) {
+                        const ma = Math.sqrt((a.x - mouse.x) ** 2 + (a.y - mouse.y) ** 2);
+                        const mb = Math.sqrt((b.x - mouse.x) ** 2 + (b.y - mouse.y) ** 2);
+                        if (ma < CFG.mouseRadius || mb < CFG.mouseRadius) {
+                            alpha *= 2.8;
+                        }
+                    }
+
+                    const lc1 = CFG.lineColors[0];
+                    const lc2 = CFG.lineColors[1];
+                    const grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+                    grd.addColorStop(0, `rgba(${lc1[0]},${lc1[1]},${lc1[2]},${alpha})`);
+                    grd.addColorStop(1, `rgba(${lc2[0]},${lc2[1]},${lc2[2]},${alpha * 0.7})`);
+
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = grd;
+                    ctx.lineWidth = 0.6;
+                    ctx.stroke();
+                }
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                const pulse = Math.sin(t * CFG.pulseSpeed + n.phase) * 0.5 + 0.5;
+                let r = n.r + pulse * 1;
+
+                let near = false;
+                if (mouse.active) {
+                    const md = Math.sqrt((n.x - mouse.x) ** 2 + (n.y - mouse.y) ** 2);
+                    if (md < CFG.mouseRadius) {
+                        near = true;
+                        const prox = 1 - md / CFG.mouseRadius;
+                        r += prox * CFG.mouseNodeBoost;
+                    }
+                }
+
+                const c = n.color;
+                const a = near ? 0.7 + pulse * 0.3 : n.alpha * (0.7 + pulse * 0.3);
+
+                if (near && r > 2.8) {
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, r * 2.8, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.04)`;
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+                ctx.fill();
+            }
+
+            if (mouse.active && mouse.x > 0 && mouse.x < W) {
+                const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, CFG.mouseRadius * 0.7);
+                grd.addColorStop(0, 'rgba(91,127,255,0.06)');
+                grd.addColorStop(1, 'rgba(91,127,255,0)');
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, CFG.mouseRadius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
             animId = requestAnimationFrame(loop);
         }
 
-        function init() {
-            resize();
-            buildParticles();
-            cancelAnimationFrame(animId);
-            loop();
-        }
-
-        window.addEventListener('resize', () => {
-            resize();
-            buildParticles();
+        panel.addEventListener('mousemove', (e) => {
+            const rect = panel.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            mouse.active = true;
+            glowEl.style.left = mouse.x + 'px';
+            glowEl.style.top  = mouse.y + 'px';
         });
 
-        init();
+        panel.addEventListener('mouseleave', () => {
+            mouse.active = false;
+        });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { resize(); createNodes(); }, 180);
+        });
+
+        resize();
+        createNodes();
+        loop();
     })();
 
     /* ══════════════════════════════════════════════

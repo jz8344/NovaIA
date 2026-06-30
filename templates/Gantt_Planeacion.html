@@ -1,0 +1,1389 @@
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--font-sans);
+    }
+
+    .gantt-wrap {
+        padding: 1rem 0;
+        overflow-x: auto;
+    }
+
+    h2.gantt-title {
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--color-text-primary);
+        margin-bottom: 4px;
+    }
+
+    p.gantt-sub {
+        font-size: 13px;
+        color: var(--color-text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 1.25rem;
+        align-items: center;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        color: var(--color-text-secondary);
+    }
+
+    .leg-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+    table.gantt {
+        border-collapse: collapse;
+        min-width: 1100px;
+        width: 100%;
+    }
+
+    table.gantt th,
+    table.gantt td {
+        font-size: 11.5px;
+        padding: 0;
+        border: 0;
+    }
+
+    .col-label {
+        width: 240px;
+        min-width: 200px;
+    }
+
+    .wk-col {
+        width: 62px;
+        min-width: 52px;
+    }
+
+    th.wk-header {
+        text-align: center;
+        padding: 4px 2px;
+        font-weight: 400;
+        font-size: 10.5px;
+        line-height: 1.3;
+        color: var(--color-text-secondary);
+        border-left: 0.5px solid var(--color-border-tertiary);
+    }
+
+    th.wk-header span.wk-num {
+        display: block;
+        font-weight: 500;
+        font-size: 11px;
+        color: var(--color-text-primary);
+    }
+
+    th.wk-header.onsite {
+        background: rgba(29, 158, 117, 0.09);
+    }
+
+    th.wk-header.remote {
+        background: rgba(83, 74, 183, 0.07);
+    }
+
+    .phase-row td {
+        padding: 6px 8px 2px;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        border-bottom: 0.5px solid var(--color-border-tertiary);
+    }
+
+    .task-row {
+        border-bottom: 0.5px solid var(--color-border-tertiary);
+    }
+
+    .task-label {
+        padding: 5px 8px;
+        font-size: 12px;
+        color: var(--color-text-primary);
+        line-height: 1.35;
+        vertical-align: middle;
+    }
+
+    .task-label .persons {
+        display: block;
+        font-size: 10px;
+        color: var(--color-text-tertiary);
+        margin-top: 1px;
+    }
+
+    .cell {
+        border-left: 0.5px solid var(--color-border-tertiary);
+        vertical-align: middle;
+        padding: 3px 2px;
+    }
+
+    .cell.onsite-bg {
+        background: rgba(29, 158, 117, 0.04);
+    }
+
+    .cell.remote-bg {
+        background: rgba(83, 74, 183, 0.04);
+    }
+
+    .bar {
+        height: 16px;
+        border-radius: 3px;
+        width: calc(100% - 2px);
+        margin: 0 1px;
+    }
+
+    .bar.full {
+        width: calc(100% - 2px);
+    }
+
+    .bar.half-start {
+        width: calc(50% - 2px);
+        margin-left: auto;
+    }
+
+    .bar.half-end {
+        width: calc(50% + 0px);
+    }
+
+    .bar.p1 {
+        background: #1D9E75;
+    }
+
+    .bar.p2 {
+        background: #534AB7;
+    }
+
+    .bar.p3 {
+        background: #BA7517;
+    }
+
+    .bar.p4 {
+        background: #D4537E;
+    }
+
+    .bar.p5 {
+        background: #378ADD;
+    }
+
+    .bar.p6 {
+        background: #639922;
+    }
+
+    .bar.p7 {
+        background: #D85A30;
+    }
+
+    .bar.p8 {
+        background: #888780;
+    }
+
+    .bar.p9 {
+        background: #9FE1CB;
+    }
+
+    .bar.p10 {
+        background: #B5D4F4;
+    }
+
+    .tag-onsite {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 500;
+        padding: 1px 5px;
+        border-radius: 3px;
+        background: rgba(29, 158, 117, 0.15);
+        color: #0F6E56;
+        margin-left: 4px;
+        vertical-align: middle;
+    }
+
+    .tag-remote {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 500;
+        padding: 1px 5px;
+        border-radius: 3px;
+        background: rgba(83, 74, 183, 0.13);
+        color: #3C3489;
+        margin-left: 4px;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="gantt-wrap">
+    <h2 class="sr-only">Diagrama Gantt de planeación Nova IA — Mayo a Agosto 2026, 3 integrantes</h2>
+    <h2 class="gantt-title">Planeación de desarrollo — Nova IA</h2>
+    <p class="gantt-sub">Lunes 4 mayo → viernes 7 agosto 2026 &nbsp;·&nbsp; Equipo: Ivan Alejandro · Hiram · Jose Javier
+    </p>
+
+    <div class="legend">
+        <span class="legend-item"><span class="leg-dot"
+                style="background:rgba(29,158,117,0.18);border:1px solid #1D9E75;"></span>Semana presencial</span>
+        <span class="legend-item"><span class="leg-dot"
+                style="background:rgba(83,74,183,0.12);border:1px solid #534AB7;"></span>Semana remota</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#1D9E75;"></span>Planificación</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#534AB7;"></span>Arquitectura</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#BA7517;"></span>Core fase 1
+            (VAD+Whisper)</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#D4537E;"></span>Gemini Live + Workers</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#378ADD;"></span>Odoo ERP</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#639922;"></span>PMS Hotelero</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#D85A30;"></span>PBX Grandstream</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#888780;"></span>DevOps</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#9FD4A3;"></span>Pruebas QA</span>
+        <span class="legend-item"><span class="leg-dot" style="background:#B5D4F4;"></span>Documentación</span>
+    </div>
+
+    <table class="gantt">
+        <thead>
+            <tr>
+                <th class="col-label"
+                    style="text-align:left;padding:4px 8px;font-size:11px;color:var(--color-text-secondary);">Actividad
+                </th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S1</span>4–8 may<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S2</span>11–16 may<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S3</span>18–22 may<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S4</span>25–29 may<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S5</span>1–5 jun<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S6</span>8–13 jun<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S7</span>15–20 jun<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S8</span>22–27 jun<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S9</span>29 jun–4 jul<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S10</span>6–11 jul<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S11</span>13–18 jul<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S12</span>20–25 jul<br><span
+                        class="tag-remote">remota</span></th>
+                <th class="wk-col wk-header onsite"><span class="wk-num">S13</span>27 jul–1 ago<br><span
+                        class="tag-onsite">presencial</span></th>
+                <th class="wk-col wk-header remote"><span class="wk-num">S14</span>3–7 ago<br><span
+                        class="tag-remote">remota</span></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <!-- ───── FASE 1: PLANIFICACIÓN ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">📋 Fase 1 — Planificación y análisis</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Reunión inicial con empresa<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Levantamiento de requerimientos<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Req. funcionales y no funcionales<span class="persons">Ivan · Jose Javier</span>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Diagrama de casos de uso<span class="persons">Jose Javier · Hiram</span></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Plan de proyecto y cronograma<span class="persons">Ivan · Jose Javier</span></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p1"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 2: ARQUITECTURA ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🏗️ Fase 2 — Arquitectura y diseño del sistema</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Modelo de arquitectura del sistema<span class="persons">Ivan · Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p2"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Diseño de modelo de datos / BD<span class="persons">Hiram · Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p2"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Definición de APIs y contratos<span class="persons">Ivan · Jose Javier</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p2"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p2"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Configuración entorno de desarrollo<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p2"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 3: CORE FASE 1 ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">⚙️ Fase 3 — Desarrollo core (Silero VAD + Whisper + FastAPI)
+                </td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Backend FastAPI base + WebSocket audio<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Integración Silero VAD<span class="persons">Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Integración Whisper transcripción<span class="persons">Jose Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Frontend web HTML básico (interfaz voz)<span class="persons">Jose Javier</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">BD SQLite: extensiones + inventario<span class="persons">Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Transferencia de llamadas básica (extensiones)<span class="persons">Ivan ·
+                        Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p3"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 4: GEMINI LIVE ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🤖 Fase 4 — Migración a Gemini Live 2.0 + Workers</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Integración Google Gemini Live 001 (voz nativa)<span class="persons">Ivan</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Gemini Flash como worker / orquestador<span class="persons">Hiram · Ivan</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Sistema de Function Calling dinámico<span class="persons">Ivan · Hiram</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Panel editor de prompts en web HTML<span class="persons">Jose Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Configuración dinámica de prompt por agente<span class="persons">Ivan · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Security guard — prompt injection detection<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p4"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 5: DEVOPS ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🚀 Fase 5 — DevOps y despliegue continuo</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Dockerización del sistema<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Despliegue Railway (modo dev) + env vars<span class="persons">Ivan · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Migración SQLite → PostgreSQL (Railway)<span class="persons">Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Despliegue producción + monitoreo logs<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p8"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p8"></div>
+                </td>
+            </tr>
+
+            <!-- ───── FASE 6: ODOO ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🔗 Fase 6 — Integración Odoo ERP (JSON-RPC2)</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Investigación y pruebas API Odoo<span class="persons">Jose Javier · Hiram</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Odoo Worker: consulta inventario/productos<span class="persons">Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Odoo Worker: crear cotizaciones / órdenes<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Odoo Worker: mailing masivo desde voz<span class="persons">Jose Javier</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Odoo: búsqueda dinámica de variantes/contactos<span class="persons">Hiram ·
+                        Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p5"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 7: PMS ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🏨 Fase 7 — Integración PMS Hotelero</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Análisis y mapeado API PMS Hoteleria<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">PMS Worker: consulta disponibilidad habitaciones<span
+                        class="persons">Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">PMS Worker: crear / modificar reservas<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Optimización PMS Worker + pruebas voz-PMS<span class="persons">Ivan ·
+                        Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p6"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 8: PBX ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">📞 Fase 8 — Integración PBX Grandstream UCM6302</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Análisis arquitectura PBX + diagrama de red<span class="persons">Ivan · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">AMI Client + AudioSocket Server (Asterisk)<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Enlace PBX ↔ Django admin (extensiones, CDRs)<span class="persons">Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Enlace PBX ↔ FastAPI voz + Gemini Live<span class="persons">Ivan · Hiram</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Dial plan UCM6302 → AudioSocket → Nova<span class="persons">Ivan</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Pruebas llamadas reales PBX extremo a extremo<span class="persons">Ivan · Hiram ·
+                        Jose Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p7"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 9: QA ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">🧪 Fase 9 — Pruebas y aseguramiento de calidad</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Pruebas unitarias (auth, BD, workers)<span class="persons">Jose Javier</span>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Pruebas de integración multi-worker<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Revisión de seguridad y rotación de secretos<span class="persons">Ivan · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Bug fixing y correcciones finales<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar" style="background:#9FD4A3;"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <!-- ───── FASE 10: DOC ───── -->
+            <tr class="phase-row">
+                <td colspan="15" style="padding-left:8px;">📄 Fase 10 — Documentación y entrega final</td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Documentación técnica del sistema<span class="persons">Jose Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p10"></div>
+                </td>
+                <td class="cell onsite-bg">
+                    <div class="bar p10"></div>
+                </td>
+                <td class="cell remote-bg"></td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Manual operativo / guía de configuración<span class="persons">Jose Javier ·
+                        Hiram</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg">
+                    <div class="bar p10"></div>
+                </td>
+                <td class="cell remote-bg">
+                    <div class="bar p10"></div>
+                </td>
+            </tr>
+
+            <tr class="task-row">
+                <td class="task-label">Presentación y entrega final al cliente<span class="persons">Ivan · Hiram · Jose
+                        Javier</span></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg"></td>
+                <td class="cell onsite-bg"></td>
+                <td class="cell remote-bg">
+                    <div class="bar p10"></div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <div style="margin-top:1.25rem;display:flex;gap:24px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--color-text-secondary);">
+            <strong style="font-weight:500;color:var(--color-text-primary);">Ivan Alejandro</strong> — Arquitectura,
+            Gemini Live, backend, PBX, devops
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">
+            <strong style="font-weight:500;color:var(--color-text-primary);">Hiram</strong> — Silero VAD, BD, workers
+            Odoo/PMS, integración PBX
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">
+            <strong style="font-weight:500;color:var(--color-text-primary);">Jose Javier</strong> — Whisper, frontend
+            HTML, prompts, mailing, QA, documentación
+        </div>
+    </div>
+</div>

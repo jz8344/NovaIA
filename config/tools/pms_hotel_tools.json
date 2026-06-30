@@ -99,6 +99,20 @@
         },
         "required": ["guest_name", "room_number", "check_in", "check_out", "adults"]
       }
+    },
+    {
+      "name": "pms_query",
+      "description": "Consulta general al sistema hotelero PMS. Úsala cuando el huésped haga una pregunta general sobre el hotel, servicios, políticas u otra información que no encaje en las funciones específicas de habitaciones o reservas.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "La pregunta o consulta del huésped tal como la expresó"
+          }
+        },
+        "required": ["query"]
+      }
     }
   ]
 }

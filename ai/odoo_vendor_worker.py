@@ -178,8 +178,6 @@ class OdooVendorWorker(OdooInventoryWorker):
             if city_filter:
                 p_domain.append(["city", "ilike", city_filter])
 
-            p_domain.append(["email", "!=", False])
-
             partners = await self._search_read("res.partner", p_domain, ["id", "name", "email", "phone", "city", "state_id"], limit=100)
             return {
                 "success": True,

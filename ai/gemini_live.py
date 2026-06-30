@@ -24,6 +24,50 @@ class GeminiLiveClient:
         else:
             logger.warning("GEMINI_API_KEY no configurada. Configúrala en .env para habilitar la IA.")
 
+    async def _resolve_tools_config(self, prompt_name: str, user_id: int | None) -> str:
+        try:
+            from django_project.state import db
+            uid = user_id if user_id else 1
+            ds = await db.get_agent_data_source(uid)
+            if ds:
+                source_type = ds.get("source_type", "")
+
+                if source_type == "pms":
+                    logger.info(f"[tools] user_id={uid} source_type=pms -> pms_hotel_tools")
+                    return "pms_hotel_tools"
+
+                if source_type == "odoo":
+                    odoo_type = self._get_odoo_agent_type(user_id)
+                    if odoo_type == "odoo_vendor_support":
+                        logger.info(f"[tools] user_id={uid} source_type=odoo (vendor) -> odoo_vendor_tools")
+                        return "odoo_vendor_tools"
+                    logger.info(f"[tools] user_id={uid} source_type=odoo (sales) -> odoo_sales_tools")
+                    return "odoo_sales_tools"
+
+        except Exception as e:
+            logger.warning(f"[tools] Error resolviendo tools config para user_id={user_id}: {e}")
+
+        logger.info(f"[tools] user_id={user_id} -> default_tools")
+        return "default_tools"
+
+    def _get_odoo_agent_type(self, user_id: int | None) -> str:
+        config = None
+        if user_id is not None:
+            config = self._prompt_loader.get_prompt_config_cache(user_id)
+
+        if config is None:
+            config_path = self._prompt_loader._get_config_path(user_id)
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                except Exception:
+                    pass
+
+        if isinstance(config, dict) and config.get("odoo_agent_type"):
+            return config["odoo_agent_type"]
+        return "odoo_sales"
+
     async def _build_config(self, prompt_name: str = "nova_default", user_id: int | None = None) -> types.LiveConnectConfig:
         system_prompt = await self._prompt_loader.load(prompt_name, user_id=user_id)
 
@@ -37,38 +81,7 @@ class GeminiLiveClient:
             if not isinstance(system_prompt, str):
                 system_prompt = "Eres un asistente de voz profesional. Responde en español."
 
-        tools_config = "default_tools"
-        if prompt_name != "nova_default":
-            p_lower = prompt_name.lower()
-            if p_lower.startswith("pms_") or "pms" in p_lower:
-                tools_config = "pms_hotel_tools"
-            elif p_lower.startswith("odoo_") or "odoo" in p_lower:
-                if p_lower == "odoo_vendor_support":
-                    tools_config = "odoo_vendor_tools"
-                else:
-                    tools_config = "odoo_sales_tools"
-        else:
-            config = None
-            if user_id is not None:
-                config = self._prompt_loader.get_prompt_config_cache(user_id)
-            
-            if config is None:
-                config_path = self._prompt_loader._get_config_path(user_id)
-                if os.path.exists(config_path):
-                    try:
-                        with open(config_path, "r", encoding="utf-8") as f:
-                            config = json.load(f)
-                    except Exception as e:
-                        logger.error(f"Error cargando tools_config de odoo en _build_config: {e}")
-
-            if isinstance(config, dict) and config.get("odoo_agent_type"):
-                agent_type = config.get("odoo_agent_type")
-                if agent_type == "odoo_vendor_support":
-                    tools_config = "odoo_vendor_tools"
-                else:
-                    tools_config = "odoo_sales_tools"
-            elif isinstance(config, dict) and config.get("pms_agent_type"):
-                tools_config = "pms_hotel_tools"
+        tools_config = await self._resolve_tools_config(prompt_name, user_id)
 
         tools      = self._registry.load_schemas(tools_config)
         voice_name = self._prompt_loader.get_voice(user_id=user_id)
@@ -107,7 +120,7 @@ class GeminiLiveClient:
                 break
             try:
                 self._drain_queue(session.audio_queue_in)
-                logger.info(f"Conectando sesión {session.session_id} a Gemini Live (intento {attempt + 1}/{max_retries})...")
+                logger.info(f"Conectando sesión {session.session_id} a Gemini Live usando modelo '{self._model}' (intento {attempt + 1}/{max_retries})...")
                 async with self._client.aio.live.connect(
                     model=self._model,
                     config=config

@@ -21,19 +21,19 @@ class OdooInventoryWorker:
             "Content-Type": "application/json",
         }
         
+        self.ai_client = None
+        self.ai_model = "desactivado"
+        
         try:
             from config.settings import get_settings
             from google import genai
             settings = get_settings()
             if settings.gemini_api_key:
                 self.ai_client = genai.Client(api_key=settings.gemini_api_key)
-                self.ai_model = settings.gemini_worker_model or "gemini-2.0-flash"
+                self.ai_model = settings.gemini_worker_model or "gemini-2.5-flash"
                 logger.info(f"OdooInventoryWorker: Gemini AI de soporte inicializado ({self.ai_model})")
-            else:
-                self.ai_client = None
         except Exception as e:
             logger.warning(f"OdooInventoryWorker: No se pudo inicializar GeminiClient: {e}")
-            self.ai_client = None
 
     async def _search_read(self, model: str, domain: list, fields: list,
                             limit: int = 30, order: str = "name asc") -> list[dict]:
@@ -236,6 +236,45 @@ Devuelve ÚNICAMENTE el JSON plano estructurado con la clave "search_terms". Sin
         if is_additional and session and "last_inventory_results" in session.metadata:
             return self._paginate_cached(session)
 
+        _general_keywords = [
+            "que vendes", "que venden", "que tienes", "que tienen",
+            "que productos", "que producto", "que ofreces", "que ofrecen",
+            "que manejas", "que manejan", "que hay", "catalogo",
+            "inventario", "listado", "lista de productos",
+            "muestrame", "muestrame todo", "muestrame productos",
+            "que es lo que", "todo lo que", "dame tu catalogo",
+            "en venta", "tienes en venta", "tienen en venta",
+            "productos disponibles", "que hay disponible",
+            "que tienen disponible", "que puedo comprar",
+        ]
+        is_general = any(kw in q_norm for kw in _general_keywords)
+
+        if is_general:
+            logger.info(f"OdooWorker: Detectada consulta general de catálogo: '{q}'")
+            domain = [["sale_ok", "=", True]]
+            results = await self._search_read("product.product", domain, [], limit=80)
+            if not results:
+                return "El inventario de Odoo está vacío actualmente. No hay productos registrados para la venta."
+            results = await self._attach_taxes(results)
+            total = len(results)
+            if session:
+                session.metadata["last_inventory_results"] = {
+                    "query": q, "results": results,
+                    "current_index": min(total, 15),
+                }
+            if total <= 15:
+                catalog = self._build_catalog(results, q)
+            else:
+                catalog = self._build_catalog(results[:15], q)
+                all_categories = sorted(set(
+                    p.get("categ_id")[1] if isinstance(p.get("categ_id"), (list, tuple)) and len(p.get("categ_id")) >= 2 else "General"
+                    for p in results
+                ))
+                catalog += f"\n\nMostrando 15 de {total} productos."
+                catalog += f"\nCategorías disponibles: {', '.join(all_categories)}."
+                catalog += f"\n\nSi deseas ver los demás productos, por favor di 'siguiente' o 'ver más'."
+            return catalog
+
         search_terms = await self._extract_intelligent_terms(q)
         logger.info(f"OdooWorker: Buscando variantes inteligentes para '{q}': {search_terms}")
 
@@ -257,13 +296,7 @@ Devuelve ÚNICAMENTE el JSON plano estructurado con la clave "search_terms". Sin
             for sd in sub_domains:
                 domain.extend(sd)
 
-        fields = [
-            "name", "default_code", "barcode",
-            "list_price", "qty_available",
-            "categ_id", "type", "taxes_id",
-        ]
-
-        results = await self._search_read("product.product", domain, fields, limit=80)
+        results = await self._search_read("product.product", domain, [], limit=80)
 
         if not results:
             return f"No se encontraron productos en Odoo para '{q}'."
@@ -352,6 +385,48 @@ Devuelve ÚNICAMENTE el JSON plano estructurado con la clave "search_terms". Sin
 
         return products
 
+    _SKIP_FIELDS = {
+        "id", "__last_update", "write_date", "write_uid", "create_date",
+        "create_uid", "display_name", "name", "list_price", "qty_available",
+        "default_code", "barcode", "categ_id", "taxes_id", "type",
+        "_taxes_resolved", "sale_ok", "purchase_ok", "active",
+        "message_ids", "message_follower_ids", "message_partner_ids",
+        "activity_ids", "website_message_ids",
+    }
+    _SKIP_PREFIXES = ("image_", "message_", "activity_", "website_", "kanban_")
+
+    _FIELD_LABELS = {
+        "description": "Descripción", "description_sale": "Desc. venta",
+        "weight": "Peso", "volume": "Volumen", "color": "Color",
+        "standard_price": "Costo", "lst_price": "Precio público",
+        "virtual_available": "Disponible virtual",
+        "uom_id": "Unidad", "uom_po_id": "Unidad compra",
+        "seller_ids": "Proveedores", "route_ids": "Rutas",
+        "x_studio_marca": "Marca", "x_studio_color": "Color",
+        "x_studio_peso": "Peso",
+    }
+
+    def _format_field_value(self, key: str, val) -> str | None:
+        if val is None or val is False or val == "" or val == []:
+            return None
+        if isinstance(val, (list, tuple)):
+            if len(val) >= 2 and isinstance(val[0], int):
+                return str(val[1])
+            if all(isinstance(v, int) for v in val):
+                return None
+            return ", ".join(str(v) for v in val)
+        if isinstance(val, float):
+            if val == 0.0:
+                return None
+            if val == int(val):
+                return str(int(val))
+            return f"{val:,.2f}"
+        if isinstance(val, str):
+            if len(val) > 200:
+                return val[:200] + "…"
+            return val
+        return str(val)
+
     def _build_catalog(self, products: list[dict], query: str, continuation: bool = False) -> str:
         grouped = defaultdict(list)
         for p in products:
@@ -384,6 +459,19 @@ Devuelve ÚNICAMENTE el JSON plano estructurado con la clave "search_terms". Sin
                 tax_str = f" | IVA: {', '.join(taxes)}" if taxes else ""
                 line = f"    - {name}{code_str} — ${price:,.2f} ({stock_str}){barcode_str}{tax_str}"
                 lines.append(line)
+
+                extras = []
+                for key, val in p.items():
+                    if key in self._SKIP_FIELDS:
+                        continue
+                    if any(key.startswith(px) for px in self._SKIP_PREFIXES):
+                        continue
+                    formatted = self._format_field_value(key, val)
+                    if formatted:
+                        label = self._FIELD_LABELS.get(key, key.replace("_", " ").replace("x studio ", "").title())
+                        extras.append(f"{label}: {formatted}")
+                if extras:
+                    lines.append(f"      {' | '.join(extras)}")
             lines.append("")
 
         total_p = len(products)

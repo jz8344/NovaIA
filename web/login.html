@@ -1,307 +1,834 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova — Iniciar Sesión</title>
+    <meta name="description" content="Panel de administración Nova AI. Inicia sesión para gestionar tu asistente de voz inteligente.">
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg-base: #000000;
-            --text-1: #e3e3e3;
-            --text-2: #8e959f;
-            --glass-bg: rgba(20, 20, 25, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #a8c7fa;
-            --accent-glow: #669df6;
-            --danger: #f28b82;
-            --radius-card: 28px;
-            --radius-btn: 20px;
-            --radius-input: 16px;
-            --font-display: 'Google Sans', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            --transition: 250ms cubic-bezier(0.2, 0, 0, 1);
+            --bg:           #060812;
+            --panel-bg:     #080a16;
+            --border:       rgba(99, 135, 255, 0.12);
+            --border-focus: rgba(99, 135, 255, 0.55);
+            --input-bg:     rgba(255, 255, 255, 0.03);
+            --input-hover:  rgba(255, 255, 255, 0.055);
+            --text-1:       #eef2ff;
+            --text-2:       #8896b3;
+            --text-3:       #3d4a6b;
+            --accent:       #5b7fff;
+            --accent-2:     #818cf8;
+            --accent-3:     #a5b4fc;
+            --accent-glow:  rgba(91, 127, 255, 0.35);
+            --danger:       #f87171;
+            --success:      #4ade80;
+            --font:         'Inter', system-ui, sans-serif;
+            --font-display: 'Outfit', 'Inter', sans-serif;
+            --ease:         cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        body {
-            font-family: var(--font-body);
-            background: var(--bg-base);
+        html, body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg);
             color: var(--text-1);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
             -webkit-font-smoothing: antialiased;
-            position: relative;
-        }
-
-        /* Anti-gravity animated background */
-        .ambient {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
             overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #1a1a24 0%, #000000 80%);
         }
 
-        .mesh-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: antiGravity 20s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
-        }
-
-        .blob-1 { width: 50vw; height: 50vw; top: -10%; left: -10%; background: #2f2a5c; animation-delay: -5s; }
-        .blob-2 { width: 40vw; height: 40vw; bottom: -20%; right: -10%; background: #1b3d5c; animation-duration: 25s; }
-        .blob-3 { width: 30vw; height: 30vw; top: 40%; left: 60%; background: #3d2247; animation-delay: -12s; animation-duration: 30s; }
-
-        .anti-gravity-particles {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
-                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
-                radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-                radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
-            background-size: 200px 200px;
-            animation: driftUp 40s linear infinite;
-            opacity: 0.3;
-        }
-
-        @keyframes antiGravity {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(5vw, -5vh) scale(1.1) rotate(10deg); }
-            100% { transform: translate(-5vw, 10vh) scale(0.9) rotate(-5deg); }
-        }
-
-        @keyframes driftUp {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-200px); }
-        }
-
-        /* Login Card */
-        .login-container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
+        .split {
             display: flex;
-            justify-content: center;
-            padding: 20px;
-            perspective: 1000px;
+            height: 100vh;
+            width: 100vw;
         }
 
-        .login-card {
-            width: 100%;
-            max-width: 380px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-card);
-            padding: 40px;
-            backdrop-filter: blur(40px) saturate(150%);
-            -webkit-backdrop-filter: blur(40px) saturate(150%);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transform-style: preserve-3d;
-            animation: levitate 6s ease-in-out infinite alternate;
-        }
-
-        @keyframes levitate {
-            0% { transform: translateY(0px); }
-            100% { transform: translateY(-10px); }
-        }
-
-        .logo-header {
+        /* ── LEFT: FORM PANEL ── */
+        .panel-form {
+            flex: 0 0 min(480px, 42vw);
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            padding: 56px 52px;
+            background: var(--panel-bg);
+            position: relative;
+            z-index: 2;
+            animation: formIn 0.6s var(--ease) both;
+        }
+
+        @keyframes formIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .panel-form::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, var(--border), rgba(99, 135, 255, 0.08), transparent);
+        }
+
+        .brand {
+            display: flex;
             align-items: center;
-            margin-bottom: 32px;
-            text-align: center;
+            gap: 14px;
+            margin-bottom: 52px;
         }
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 16px;
+        .brand-icon {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
         }
 
-        .logo-title {
+        .brand-icon::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 16px;
+            background: radial-gradient(circle, rgba(91,127,255,0.15), transparent 70%);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50%      { transform: scale(1.15); opacity: 1; }
+        }
+
+        .brand-icon-inner {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, rgba(91,127,255,0.14), rgba(129,140,248,0.08));
+            border: 1px solid rgba(91,127,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .brand-icon-inner svg { width: 22px; height: 22px; }
+
+        .brand-name {
             font-family: var(--font-display);
-            font-weight: 500;
-            font-size: 1.8rem;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fff, #a8c7fa);
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.04em;
+            background: linear-gradient(130deg, #c7d2fe 0%, #818cf8 45%, #a5b4fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
+        .form-header {
+            margin-bottom: 36px;
         }
 
-        .form-group input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-input);
+        .form-header h1 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.65rem;
+            letter-spacing: -0.03em;
             color: var(--text-1);
-            font-family: var(--font-body);
-            font-size: 1rem;
-            padding: 16px;
-            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 0.88rem;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-2);
+            margin-bottom: 7px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap input {
+            display: block;
             width: 100%;
-            transition: var(--transition);
+            background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            color: var(--text-1);
+            font-family: var(--font);
+            font-size: 0.92rem;
+            padding: 12px 14px 12px 44px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
 
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+        .input-wrap input:hover {
+            background: var(--input-hover);
+            border-color: rgba(255,255,255,0.1);
         }
 
-        .form-group input:focus {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.15);
+        .input-wrap input:focus {
+            border-color: var(--border-focus);
+            background: rgba(91, 127, 255, 0.04);
+            box-shadow: 0 0 0 3px rgba(91,127,255,0.12), 0 0 20px rgba(91,127,255,0.06);
         }
 
-        .btn-primary {
+        .input-wrap input::placeholder {
+            color: var(--text-3);
+            font-weight: 400;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-3);
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .input-icon svg { width: 16px; height: 16px; }
+
+        .input-wrap:focus-within .input-icon { color: var(--accent-2); }
+
+        .input-wrap.has-eye input { padding-right: 44px; }
+
+        .btn-eye {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            color: var(--text-3);
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-btn);
-            background: var(--accent);
-            color: #0b111a;
-            font-family: var(--font-display);
-            font-weight: 500;
-            font-size: 1rem;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 12px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 0 24px rgba(168, 199, 250, 0.4);
-            transform: scale(1.02);
-            background: #d3e2fe;
-        }
+        .btn-eye:hover { color: var(--text-2); background: rgba(255,255,255,0.06); }
+        .btn-eye svg { width: 16px; height: 16px; }
 
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .login-error {
-            color: var(--danger);
-            font-size: 0.85rem;
-            padding: 12px;
+        .error-box {
+            display: none;
+            align-items: center;
+            gap: 9px;
+            background: rgba(248,113,113,0.07);
+            border: 1px solid rgba(248,113,113,0.18);
             border-radius: 8px;
-            background: rgba(242, 139, 130, 0.1);
-            border: 1px solid rgba(242, 139, 130, 0.2);
-            margin-bottom: 20px;
-            text-align: center;
+            padding: 10px 13px;
+            margin-bottom: 18px;
+            font-size: 0.82rem;
+            color: var(--danger);
+        }
+
+        .error-box.show {
+            display: flex;
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
 
+        .error-box svg { flex-shrink: 0; }
+
         @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-            40%, 60% { transform: translate3d(3px, 0, 0); }
+            10%, 90% { transform: translate3d(-1px,0,0); }
+            20%, 80% { transform: translate3d(2px,0,0); }
+            30%,50%,70% { transform: translate3d(-3px,0,0); }
+            40%,60% { transform: translate3d(3px,0,0); }
+        }
+
+        .btn-submit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f6fe0, #6366f1 50%, #818cf8);
+            background-size: 200% 200%;
+            color: #fff;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.01em;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.25s, background-position 0.4s;
+            margin-top: 24px;
+            box-shadow: 0 4px 20px rgba(91,127,255,0.25), 0 1px 0 rgba(255,255,255,0.1) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(91,127,255,0.4);
+            background-position: 100% 0;
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(1px) scale(0.99);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .form-footer {
+            margin-top: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            color: var(--text-3);
+        }
+
+        .form-footer svg { width: 12px; height: 12px; opacity: 0.5; }
+
+        /* ── RIGHT: NEURAL CANVAS ── */
+        .panel-visual {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg);
+            animation: visualIn 0.7s var(--ease) 0.1s both;
+        }
+
+        @keyframes visualIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        #neuralCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .visual-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 56px;
+            pointer-events: none;
+            z-index: 2;
+            background: linear-gradient(0deg, rgba(6,8,18,0.7) 0%, rgba(6,8,18,0.2) 35%, transparent 60%);
+        }
+
+        .visual-tagline {
+            font-family: var(--font-display);
+            font-weight: 300;
+            font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+            line-height: 1.25;
+            letter-spacing: -0.03em;
+            color: rgba(238, 242, 255, 0.85);
+            max-width: 440px;
+        }
+
+        .visual-tagline strong {
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #a5b4fc, #5b7fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .visual-sub {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: rgba(136, 150, 179, 0.6);
+            max-width: 360px;
+        }
+
+        .mouse-glow {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(91,127,255,0.12), transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .panel-visual:hover .mouse-glow { opacity: 1; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .split {
+                flex-direction: column-reverse;
+            }
+
+            .panel-form {
+                flex: none;
+                width: 100%;
+                padding: 36px 28px 32px;
+                animation-name: formInMobile;
+            }
+
+            @keyframes formInMobile {
+                from { opacity: 0; transform: translateY(16px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            .panel-form::after { display: none; }
+
+            .panel-visual {
+                flex: none;
+                height: 30vh;
+                min-height: 180px;
+            }
+
+            .visual-overlay {
+                padding: 24px 28px;
+                background: linear-gradient(0deg, rgba(6,8,18,0.75) 0%, transparent 70%);
+            }
+
+            .visual-tagline { font-size: 1.25rem; }
+            .visual-sub { font-size: 0.78rem; margin-top: 6px; }
+
+            .brand { margin-bottom: 32px; }
+            .form-header { margin-bottom: 24px; }
+            .form-header h1 { font-size: 1.35rem; }
+        }
+
+        @media (max-width: 480px) {
+            .panel-form { padding: 28px 20px 24px; }
+            .panel-visual { height: 25vh; min-height: 140px; }
+            .visual-overlay { padding: 16px 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="ambient">
-        <div class="mesh-blob blob-1"></div>
-        <div class="mesh-blob blob-2"></div>
-        <div class="mesh-blob blob-3"></div>
-        <div class="anti-gravity-particles"></div>
-    </div>
 
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-header">
-                <svg class="logo-icon" viewBox="0 0 34 34" fill="none">
-                    <circle cx="17" cy="17" r="15.5" stroke="url(#g-nova)" stroke-width="2" fill="none"/>
-                    <path d="M12 22V12l10 5-10 5z" fill="url(#g-nova)"/>
-                    <defs>
-                        <linearGradient id="g-nova" x1="0" y1="0" x2="34" y2="34">
-                            <stop offset="0%" stop-color="#a8c7fa"/>
-                            <stop offset="100%" stop-color="#ffffff"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
-                <div class="logo-title">Nova</div>
+    <div class="split">
+
+        <div class="panel-form">
+            <div class="brand">
+                <div class="brand-icon">
+                    <div class="brand-icon-inner">
+                        <svg viewBox="0 0 28 28" fill="none">
+                            <circle cx="14" cy="14" r="12" stroke="url(#gLogo)" stroke-width="1.4"/>
+                            <path d="M10.5 19V9l9 5-9 5z" fill="url(#gLogo)"/>
+                            <defs>
+                                <linearGradient id="gLogo" x1="0" y1="0" x2="28" y2="28">
+                                    <stop offset="0%" stop-color="#818cf8"/>
+                                    <stop offset="100%" stop-color="#c7d2fe"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                <span class="brand-name">Nova</span>
             </div>
 
-            <div id="loginError" class="login-error" style="display: none;"></div>
+            <div class="form-header">
+                <h1>Iniciar Sesión</h1>
+                <p>Ingresa tus credenciales para continuar</p>
+            </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <input type="text" id="username" autocomplete="username" required placeholder="User">
+            <div class="error-box" id="errorBox" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="errorMsg"></span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" novalidate autocomplete="on">
+
+                <div class="field">
+                    <label for="identifier">Usuario o correo</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            id="identifier"
+                            name="identifier"
+                            autocomplete="username"
+                            required
+                            placeholder="admin o correo@empresa.com"
+                            spellcheck="false"
+                            autocapitalize="none"
+                        >
+                    </div>
                 </div>
-                <div class="form-group">
-                    <input type="password" id="password" autocomplete="current-password" required placeholder="Password">
+
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="input-wrap has-eye">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </span>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="current-password"
+                            required
+                            placeholder="••••••••"
+                        >
+                        <button type="button" class="btn-eye" id="btnEye" aria-label="Mostrar contraseña">
+                            <svg id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" id="btnLogin" class="btn-primary">Continue</button>
+
+                <button type="submit" id="btnLogin" class="btn-submit">
+                    <span id="btnLabel">Iniciar sesión</span>
+                </button>
+
             </form>
+
+            <div class="form-footer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Acceso restringido — Solo administradores
+            </div>
         </div>
+
+        <div class="panel-visual" id="panelVisual">
+            <canvas id="neuralCanvas"></canvas>
+            <div class="mouse-glow" id="mouseGlow"></div>
+            <div class="visual-overlay">
+                <div class="visual-tagline">Inteligencia que impulsa tu <strong>negocio</strong></div>
+                <div class="visual-sub">Plataforma de IA conversacional de siguiente generación</div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-            const btn = document.getElementById("btnLogin");
-            const errDiv = document.getElementById("loginError");
-            const uInput = document.getElementById("username");
-            const pInput = document.getElementById("password");
+    /* ══════════════════════════════════════════════
+       RED NEURONAL INTERACTIVA
+    ══════════════════════════════════════════════ */
+    (function () {
+        const canvas = document.getElementById('neuralCanvas');
+        const ctx    = canvas.getContext('2d');
+        const panel  = document.getElementById('panelVisual');
+        const glowEl = document.getElementById('mouseGlow');
 
-            btn.disabled = true;
-            btn.innerText = "Ingresando...";
-            errDiv.style.display = "none";
+        const CFG = {
+            nodes:       85,
+            maxDist:     150,
+            mouseRadius: 200,
+            mouseForce:  0.055,
+            baseSpeed:   0.32,
+            lineAlpha:   0.22,
+            nodeMinR:    1,
+            nodeMaxR:    2.4,
+            mouseNodeBoost: 3.5,
+            pulseSpeed:  1.1,
+            colors: [
+                [91, 127, 255],
+                [129, 140, 248],
+                [165, 180, 252],
+                [99, 102, 241],
+            ],
+            lineColors: [
+                [91, 127, 255],
+                [129, 140, 248],
+            ],
+        };
 
-            try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        username: uInput.value.trim(),
-                        password: pInput.value.trim()
-                    })
+        let nodes = [];
+        let mouse = { x: -9999, y: -9999, active: false };
+        let W, H, dpr, animId;
+
+        function resize() {
+            const rect = panel.getBoundingClientRect();
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = rect.width;
+            H = rect.height;
+            canvas.width  = W * dpr;
+            canvas.height = H * dpr;
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function createNodes() {
+            nodes = [];
+            for (let i = 0; i < CFG.nodes; i++) {
+                const c = CFG.colors[Math.floor(Math.random() * CFG.colors.length)];
+                nodes.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    vx: (Math.random() - 0.5) * CFG.baseSpeed,
+                    vy: (Math.random() - 0.5) * CFG.baseSpeed,
+                    r: CFG.nodeMinR + Math.random() * (CFG.nodeMaxR - CFG.nodeMinR),
+                    phase: Math.random() * Math.PI * 2,
+                    color: c,
+                    alpha: 0.35 + Math.random() * 0.4,
+                    baseAlpha: 0,
                 });
-
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    window.location.reload();
-                } else {
-                    errDiv.innerText = data.detail || "Error al iniciar sesión.";
-                    errDiv.style.display = "block";
-                    errDiv.style.animation = 'none';
-                    errDiv.offsetHeight;
-                    errDiv.style.animation = null;
-                }
-            } catch (e) {
-                errDiv.innerText = "Error de red al conectar con el servidor.";
-                errDiv.style.display = "block";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Continue";
+                nodes[i].baseAlpha = nodes[i].alpha;
             }
         }
+
+        function loop() {
+            ctx.clearRect(0, 0, W, H);
+            const t = performance.now() * 0.001;
+
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+
+                if (mouse.active) {
+                    const dx = n.x - mouse.x;
+                    const dy = n.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CFG.mouseRadius && dist > 0) {
+                        const force = (CFG.mouseRadius - dist) / CFG.mouseRadius;
+                        const angle = Math.atan2(dy, dx);
+                        const push  = force * CFG.mouseForce * (CFG.mouseRadius / Math.max(dist, 1));
+                        n.vx += Math.cos(angle) * push;
+                        n.vy += Math.sin(angle) * push;
+                        n.alpha = Math.min(1, n.baseAlpha + force * 0.55);
+                    } else {
+                        n.alpha += (n.baseAlpha - n.alpha) * 0.04;
+                    }
+                } else {
+                    n.alpha += (n.baseAlpha - n.alpha) * 0.04;
+                }
+
+                n.vx *= 0.988;
+                n.vy *= 0.988;
+
+                const spd = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+                if (spd < CFG.baseSpeed * 0.25) {
+                    n.vx += (Math.random() - 0.5) * 0.025;
+                    n.vy += (Math.random() - 0.5) * 0.025;
+                }
+
+                n.x += n.vx;
+                n.y += n.vy;
+
+                if (n.x < -20) n.x = W + 20;
+                if (n.x > W + 20) n.x = -20;
+                if (n.y < -20) n.y = H + 20;
+                if (n.y > H + 20) n.y = -20;
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                const a = nodes[i];
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const b = nodes[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const d  = Math.sqrt(dx * dx + dy * dy);
+                    if (d > CFG.maxDist) continue;
+
+                    let alpha = CFG.lineAlpha * (1 - d / CFG.maxDist);
+
+                    if (mouse.active) {
+                        const ma = Math.sqrt((a.x - mouse.x) ** 2 + (a.y - mouse.y) ** 2);
+                        const mb = Math.sqrt((b.x - mouse.x) ** 2 + (b.y - mouse.y) ** 2);
+                        if (ma < CFG.mouseRadius || mb < CFG.mouseRadius) {
+                            alpha *= 2.8;
+                        }
+                    }
+
+                    const lc1 = CFG.lineColors[0];
+                    const lc2 = CFG.lineColors[1];
+                    const grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+                    grd.addColorStop(0, `rgba(${lc1[0]},${lc1[1]},${lc1[2]},${alpha})`);
+                    grd.addColorStop(1, `rgba(${lc2[0]},${lc2[1]},${lc2[2]},${alpha * 0.7})`);
+
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = grd;
+                    ctx.lineWidth = 0.6;
+                    ctx.stroke();
+                }
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                const pulse = Math.sin(t * CFG.pulseSpeed + n.phase) * 0.5 + 0.5;
+                let r = n.r + pulse * 1;
+
+                let near = false;
+                if (mouse.active) {
+                    const md = Math.sqrt((n.x - mouse.x) ** 2 + (n.y - mouse.y) ** 2);
+                    if (md < CFG.mouseRadius) {
+                        near = true;
+                        const prox = 1 - md / CFG.mouseRadius;
+                        r += prox * CFG.mouseNodeBoost;
+                    }
+                }
+
+                const c = n.color;
+                const a = near ? 0.7 + pulse * 0.3 : n.alpha * (0.7 + pulse * 0.3);
+
+                if (near && r > 2.8) {
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, r * 2.8, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.04)`;
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+                ctx.fill();
+            }
+
+            if (mouse.active && mouse.x > 0 && mouse.x < W) {
+                const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, CFG.mouseRadius * 0.7);
+                grd.addColorStop(0, 'rgba(91,127,255,0.06)');
+                grd.addColorStop(1, 'rgba(91,127,255,0)');
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, CFG.mouseRadius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            animId = requestAnimationFrame(loop);
+        }
+
+        panel.addEventListener('mousemove', (e) => {
+            const rect = panel.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            mouse.active = true;
+            glowEl.style.left = mouse.x + 'px';
+            glowEl.style.top  = mouse.y + 'px';
+        });
+
+        panel.addEventListener('mouseleave', () => {
+            mouse.active = false;
+        });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { resize(); createNodes(); }, 180);
+        });
+
+        resize();
+        createNodes();
+        loop();
+    })();
+
+    /* ══════════════════════════════════════════════
+       PASSWORD TOGGLE
+    ══════════════════════════════════════════════ */
+    const pwdInput = document.getElementById('password');
+    const eyeBtn   = document.getElementById('btnEye');
+    const eyeSvg   = document.getElementById('eyeSvg');
+
+    const EYE_OPEN  = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    const EYE_SLASH = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+    eyeBtn.addEventListener('click', () => {
+        const show = pwdInput.type === 'password';
+        pwdInput.type = show ? 'text' : 'password';
+        eyeSvg.innerHTML = show ? EYE_SLASH : EYE_OPEN;
+        eyeBtn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        pwdInput.focus();
+    });
+
+    /* ══════════════════════════════════════════════
+       LOGIN HANDLER
+    ══════════════════════════════════════════════ */
+    async function handleLogin(event) {
+        event.preventDefault();
+        const btn        = document.getElementById('btnLogin');
+        const label      = document.getElementById('btnLabel');
+        const errorBox   = document.getElementById('errorBox');
+        const errorMsg   = document.getElementById('errorMsg');
+        const identifier = document.getElementById('identifier').value.trim();
+        const password   = pwdInput.value;
+
+        errorBox.classList.remove('show');
+        btn.disabled = true;
+        label.innerHTML = '<span class="spinner"></span>Ingresando…';
+
+        try {
+            const res  = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: identifier, password })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                label.textContent = '✓ Bienvenido';
+                btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+                setTimeout(() => window.location.reload(), 350);
+            } else {
+                errorMsg.textContent = data.detail || 'Credenciales incorrectas. Intenta de nuevo.';
+                errorBox.classList.remove('show');
+                void errorBox.offsetWidth;
+                errorBox.classList.add('show');
+                btn.disabled = false;
+                label.textContent = 'Iniciar sesión';
+            }
+        } catch {
+            errorMsg.textContent = 'Error de red. Verifica tu conexión.';
+            errorBox.classList.add('show');
+            btn.disabled = false;
+            label.textContent = 'Iniciar sesión';
+        }
+    }
     </script>
 </body>
 </html>
